@@ -56,18 +56,44 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	}
 
 	private void autoSizeColumn(XSSFWorkbook workBook) {
-		XSSFSheet detail = workBook.getSheetAt(1);
-		// XSSFSheet summary = workBook.getSheetAt(0);
+		XSSFSheet summary = workBook.getSheetAt(0);
+		XSSFSheet detailSheet = workBook.getSheetAt(1);
 
-		XSSFRow row1 = detail.getRow(0);
+		XSSFSheet[] sheets = { summary, detailSheet };
+		XSSFRow row1 = null;
+		Iterator<Cell> cells = null;
+		Integer index = null;
 
-		Iterator<Cell> cells = row1.cellIterator();
-		Integer index = 0;
+		for (XSSFSheet sheet : sheets) {
+			Integer maxCol = getMaxCol(sheet);
 
-		while (cells.hasNext()) {
-			cells.next();
-			detail.autoSizeColumn(index++);
+			row1 = sheet.getRow(maxCol);
+
+			cells = row1.cellIterator();
+			index = 0;
+
+			while (cells.hasNext()) {
+				cells.next();
+				sheet.autoSizeColumn(index++);
+			}
 		}
+	}
+
+	private Integer getMaxCol(XSSFSheet sheet) {
+		Integer out = 0;
+		Short cellNum = 0;
+		XSSFRow row = null;
+		for (Integer i = 0; i < 10; i++) {
+			row = sheet.getRow(i);
+			if (row != null) {
+				cellNum = row.getLastCellNum();
+				if ((int) cellNum > out) {
+					out = (int) cellNum;
+				}
+			}
+		}
+
+		return out;
 	}
 
 	private Map<DataInSheet, Integer> inspectSummary(XSSFWorkbook workBook, Map<DataInSheet, Integer> detailResult) {
@@ -95,15 +121,13 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		hlink_style.setFont(hlink_font);
 </code>
 		 */
-		
-		
-		XSSFCellStyle hlink_style =  (XSSFCellStyle)this.bodyStyle.clone();
+
+		XSSFCellStyle hlink_style = (XSSFCellStyle) this.bodyStyle.clone();
 		XSSFFont hlink_font = workBook.createFont();
 		hlink_font.setUnderline(Font.U_SINGLE);
 		hlink_font.setColor(IndexedColors.BLUE.getIndex());
 		hlink_style.setFont(hlink_font);
-		
-		
+
 		while (rowIterator.hasNext()) {
 			if (firstLoop) {
 				row = rowIterator.next();
