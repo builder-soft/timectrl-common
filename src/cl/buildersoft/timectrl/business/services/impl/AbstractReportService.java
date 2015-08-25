@@ -136,7 +136,6 @@ public abstract class AbstractReportService {
 
 	}
 
-	 
 	protected ReportPropertyType getPropertyType(Connection conn, Long id) {
 		BSBeanUtils bu = new BSBeanUtils();
 		ReportPropertyType reportPropertyType = new ReportPropertyType();
@@ -169,7 +168,7 @@ public abstract class AbstractReportService {
 			String dateTimeFormat = BSDateTimeUtil.getFormatDate(conn);
 			Calendar calendar = BSDateTimeUtil.string2Calendar(value, dateTimeFormat);
 			out = BSDateTimeUtil.calendar2Date(calendar);
-		}else if ("STRING".equalsIgnoreCase(javaType)) {
+		} else if ("STRING".equalsIgnoreCase(javaType)) {
 			out = value;
 		}
 		return out;
@@ -235,7 +234,7 @@ public abstract class AbstractReportService {
 		File folder = new File(outputPath);
 		if (!folder.exists()) {
 			if (!folder.mkdirs()) {
-				throw new BSSystemException("109", "Can't create folder [" + outputPath + "]");
+				throw new BSSystemException("Can't create folder [" + outputPath + "]");
 			}
 		}
 
@@ -306,7 +305,7 @@ public abstract class AbstractReportService {
 				data.setCostCenter(rs.getString("DEFAULTDEPTID"));
 				data.setUsername(rs.getString("cUsername"));
 				data.setMail(rs.getString("cMail"));
-				
+
 				// data.add("" + rs.getInt(1));
 				// data.add(rs.getString(2));
 
@@ -318,6 +317,7 @@ public abstract class AbstractReportService {
 		}
 		return out;
 	}
+
 	protected void updateEmployeeId(List<ReportInputParameterBean> reportInputParameterList, Integer id) {
 		for (ReportInputParameterBean reportInputParameter : reportInputParameterList) {
 			if ("EMPLOYEE_LIST".equalsIgnoreCase(reportInputParameter.getTypeKey())) {

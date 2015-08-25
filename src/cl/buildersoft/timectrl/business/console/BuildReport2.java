@@ -30,6 +30,7 @@ import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyType;
 import cl.buildersoft.timectrl.business.beans.ReportType;
 import cl.buildersoft.timectrl.report.FileReport;
+
 @Deprecated
 public class BuildReport2 extends AbstractConsoleService {
 	private String fileName = null;
@@ -84,7 +85,9 @@ public class BuildReport2 extends AbstractConsoleService {
 		report.setId(idReport);
 		bu.search(conn, report);
 
-		List<ReportInputParameterBean> reportParamList = null; //validParams(conn, bu, report, args);
+		List<ReportInputParameterBean> reportParamList = null; // validParams(conn,
+																// bu, report,
+																// args);
 		List<ReportPropertyType> reportOutValue = readReportOutValue(conn, bu, report);
 
 		ReportType reportOutType = getReportType(conn, bu, report);
@@ -117,8 +120,8 @@ public class BuildReport2 extends AbstractConsoleService {
 	private void doPlainExcel(Connection conn, BSBeanUtils bu, Report report, List<ReportInputParameterBean> reportParamList,
 			List<ReportPropertyType> reportOutValue, String[] args) {
 		BSmySQL mysql = new BSmySQL();
-		String sp = null; //getSPName(reportParamList);
-		List<Object> params = null; //paramsToList(args, reportParamList);
+		String sp = null; // getSPName(reportParamList);
+		List<Object> params = null; // paramsToList(args, reportParamList);
 		ResultSet rs = mysql.callSingleSP(conn, sp, params);
 		this.fileName = getFileName(conn, reportOutValue);
 
@@ -208,12 +211,14 @@ public class BuildReport2 extends AbstractConsoleService {
 			BSBeanUtils bu = new BSBeanUtils();
 			for (ReportPropertyType param : reportParamList) {
 				ReportPropertyBean outParam = getParamType(conn, bu, param);
-				/**<code>
+				/**
+				 * <code>
 				if (outParam.getKey().equals("OUTPUT_FILE")) {
 					this.fileName = param.getValue();
 					break;
 				}
-				</code>*/
+				</code>
+				 */
 			}
 
 			String path = config.getString(conn, "OUTPUT_REPORT");
@@ -242,8 +247,8 @@ public class BuildReport2 extends AbstractConsoleService {
 
 	private ReportPropertyBean getParamType(Connection conn, BSBeanUtils bu, ReportPropertyType param) {
 		ReportPropertyBean outParam = new ReportPropertyBean();
-//		outParam.setId(param.getParam());
-//		bu.search(conn, outParam);
+		// outParam.setId(param.getParam());
+		// bu.search(conn, outParam);
 		return outParam;
 	}
 
@@ -269,10 +274,10 @@ public class BuildReport2 extends AbstractConsoleService {
 	private String getSPName(List<ReportInputParameterBean> reportParamList) {
 		String out = null;
 		for (ReportInputParameterBean reportParam : reportParamList) {
-//			if (3L == reportParam.getType()) {
-//				out = reportParam.getValue();
-//				break;
-//			}
+			// if (3L == reportParam.getType()) {
+			// out = reportParam.getValue();
+			// break;
+			// }
 		}
 		return out;
 	}
@@ -281,9 +286,9 @@ public class BuildReport2 extends AbstractConsoleService {
 		List<Object> out = new ArrayList<Object>();
 		Integer i = 0;
 		for (ReportInputParameterBean reportParam : reportParamList) {
-//			if (reportParam.getFromUser()) {
-//				out.add(args[i++]);
-//			}
+			// if (reportParam.getFromUser()) {
+			// out.add(args[i++]);
+			// }
 		}
 		return out;
 	}
@@ -309,15 +314,16 @@ public class BuildReport2 extends AbstractConsoleService {
 				temp = new ReportInputParameterBean();
 				temp.setId(rs.getLong("cId"));
 
-//				bu.search(conn, temp);
+				// bu.search(conn, temp);
 
-//				System.out.println(temp.getName() + " = " + temp.getValue() + (temp.getFromUser() ? " (Input by user)" : ""));
+				// System.out.println(temp.getName() + " = " + temp.getValue() +
+				// (temp.getFromUser() ? " (Input by user)" : ""));
 
-//				if (temp.getFromUser()) {
-//					countFromUserParam++;
-//
-//					temp.setValue(args[i++]);
-//				}
+				// if (temp.getFromUser()) {
+				// countFromUserParam++;
+				//
+				// temp.setValue(args[i++]);
+				// }
 
 				out.add(temp);
 			}
@@ -327,8 +333,7 @@ public class BuildReport2 extends AbstractConsoleService {
 		}
 
 		if (countFromUserParam != args.length) {
-			throw new BSProgrammerException("", "Parameters count are wrong, are " + args.length + ", expected "
-					+ countFromUserParam);
+			throw new BSProgrammerException("Parameters count are wrong, are " + args.length + ", expected " + countFromUserParam);
 		}
 		return out;
 	}

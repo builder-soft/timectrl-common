@@ -165,7 +165,7 @@ public class BuildReport {
 		File folder = new File(out);
 		if (!folder.exists()) {
 			if (!folder.mkdirs()) {
-				throw new BSSystemException("109", "No se pudo crear la carpeta [" + out + "]");
+				throw new BSSystemException("No se pudo crear la carpeta [" + out + "]");
 			}
 		}
 		return fixPath(out);

@@ -112,7 +112,7 @@ public class ReadMarks extends AbstractConsoleService {
 
 	private Boolean deleteMarksAtEnd(String[] args) {
 		if (args.length == 0) {
-			throw new BSUserException("", "No se indico parametro para definir el borrado de marcas al final");
+			throw new BSUserException("No se indico parametro para definir el borrado de marcas al final");
 		}
 		return Boolean.parseBoolean(args[0]);
 	}

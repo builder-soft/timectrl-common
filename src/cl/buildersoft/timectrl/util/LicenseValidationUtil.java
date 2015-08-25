@@ -81,7 +81,7 @@ public class LicenseValidationUtil {
 
 		File file = new File(pathFile);
 		if (!file.exists()) {
-			throw new BSConfigurationException("", "No se encontró el archivo '" + pathFile + "'");
+			throw new BSConfigurationException("No se encontró el archivo '" + pathFile + "'");
 		}
 		try {
 			FileReader reader = new FileReader(file);
