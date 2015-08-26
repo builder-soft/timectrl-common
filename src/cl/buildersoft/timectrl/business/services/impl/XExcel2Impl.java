@@ -112,16 +112,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		Calendar startDate = null;
 		Boolean doContinue = true, firstLoop = true;
 
-		/**
-		 * <code>
-		CellStyle hlink_style = workBook.createCellStyle();
-		Font hlink_font = workBook.createFont();
-		hlink_font.setUnderline(Font.U_SINGLE);
-		hlink_font.setColor(IndexedColors.BLUE.getIndex());
-		hlink_style.setFont(hlink_font);
-</code>
-		 */
-
 		XSSFCellStyle hlink_style = (XSSFCellStyle) this.bodyStyle.clone();
 		XSSFFont hlink_font = workBook.createFont();
 		hlink_font.setUnderline(Font.U_SINGLE);
@@ -141,15 +131,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 					startDateValue = value.substring(position + 1);
 					startDate = BSDateTimeUtil.string2Calendar(startDateValue, "yyyy-MM-dd");
 
-					/**
-					 * <code>
-					value = row.getCell(1).getStringCellValue();
-					position = value.indexOf(":");
-					endDateValue = value.substring(position);
-					endDate = BSDateTimeUtil.string2Calendar("yyyy-MM-dd", endDateValue);
-				</code>
-					 */
-
 					row = rowIterator.next();
 					if (rowIterator.hasNext()) {
 						firstCell = row.getCell(0);
@@ -158,7 +139,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 								row = rowIterator.next();
 								doContinue = true;
 								while (rowIterator.hasNext() && doContinue) {
-									// row = rowIterator.next();
 									cellRut = row.getCell(0);
 
 									if (cellRut.getCellType() == Cell.CELL_TYPE_STRING) {
@@ -180,11 +160,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 												cellRut.setHyperlink(link);
 												cellRut.setCellStyle(hlink_style);
 											}
-											/**
-											 * <code>
-											out.put(dataInSheet, rowIndex);
-</code>
-											 */
 											row = rowIterator.next();
 										} else {
 											doContinue = false;
@@ -246,15 +221,12 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 				dataInSheet.setYear(calendar.get(Calendar.YEAR));
 
 				if (!out.containsKey(dataInSheet)) {
-					// System.out.print(rowIndex + " v/s " + row.getRowNum() +
-					// ", ");
-
 					out.put(dataInSheet, row.getRowNum() + 1);
 				}
 			}
 
 		}
-		// System.out.println(rowIndex);
+
 		return out;
 	}
 
@@ -268,7 +240,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		configOutputPathAndFile();
 		processBossAndEmployeeParameter(conn, reportInputParameterList, idReport);
 
-		// BSmySQL mysql = new BSmySQL();
 		List<Object> params = getReportParams(conn, reportInputParameterList);
 
 		XSSFWorkbook workbook = new XSSFWorkbook();
@@ -281,9 +252,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 		FileOutputStream stream = saveFile(workbook);
 		closeFile(workbook, stream);
-
-		// ResultSet rs = mysql.callSingleSP(conn, this.spNameSummary, params);
-		// resultSetToFile(conn, rs);
 
 		out.add(this.outputFileAndPath);
 
@@ -372,11 +340,32 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		if (bossId == null || startMonth == null || startYear == null || endMonth == null || endYear == null) {
 			out = "Resumen de informe.";
 		} else {
-			out = "Supervisor:" + getEmployeeName(conn, bossId) + ". Desde: " + startMonth + "-" + startYear + " hasta "
-					+ endMonth + "-" + endYear;
+			Calendar startDate = BSDateTimeUtil.string2Calendar("1-" + startMonth + "-" + startYear, "dd-MM-yyyy");
+			String format = BSDateTimeUtil.getFormatDate(conn);
+			String startDateString = BSDateTimeUtil.calendar2String(startDate, format);
+
+			String endDateString = getLastDayOfMonth(endMonth, endYear, format);
+
+			// startMonth
+			// startYear
+			//
+			// endMonth
+			// endYear
+
+			out = "Supervisor:" + getEmployeeName(conn, bossId) + ". Desde: " + startDateString + " hasta " + endDateString;
 		}
 
 		return out;
+	}
+
+	private String getLastDayOfMonth(String endMonth, String endYear, String format) {
+		Calendar calendar = BSDateTimeUtil.string2Calendar("1-" + endMonth + "-" + endYear, "dd-MM-yyyy");
+
+		calendar.add(Calendar.MONTH, 1);
+		// calendar.set(Calendar.DAY_OF_MONTH, 1);
+		calendar.add(Calendar.DATE, -1);
+
+		return BSDateTimeUtil.calendar2String(calendar, format);
 	}
 
 	private String getEmployeeName(Connection conn, String bossId) {
