@@ -39,6 +39,9 @@ import cl.buildersoft.timectrl.business.services.EmployeeService;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
 public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
+	private static final int DETAIL_COL_RUT = 1;
+	private static final int DETAIL_COL_DATE = 2;
+	private static final int DETAIL_COL_INDEX = 0;
 	protected String spNameSummary = null;
 	protected Integer colsAsTitle = null;
 	protected Integer rowOfSheet = 0;
@@ -46,13 +49,10 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	protected Integer currentDepth = 0;
 
 	private void relationPages(XSSFWorkbook workBook) {
-		try {
-			Map<DataInSheet, Integer> detailResult = inspectDetail(workBook);
-			inspectSummary(workBook, detailResult);
-		} catch (Exception e) {
-			System.out.println("We can not make relation between sheets");
-			e.printStackTrace();
-		}
+
+		Map<DataInSheet, Integer> detailResult = inspectDetail(workBook);
+		inspectSummary(workBook, detailResult);
+
 	}
 
 	private void autoSizeColumn(XSSFWorkbook workBook) {
@@ -207,8 +207,8 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 			rowIndex++;
 
-			cellIndex = row.getCell(0);
-			cellDate = row.getCell(2);
+			cellIndex = row.getCell(DETAIL_COL_INDEX);
+			cellDate = row.getCell(DETAIL_COL_DATE);
 
 			if (cellIndex.getCellType() == Cell.CELL_TYPE_NUMERIC
 					&& BSDateTimeUtil.isValidDate(cellDate.toString(), "yyyy-MM-dd")) {
@@ -216,7 +216,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 				Calendar calendar = BSDateTimeUtil.string2Calendar(cellDate.toString(), "yyyy-MM-dd");
 
-				dataInSheet.setRut(row.getCell(1).getStringCellValue());
+				dataInSheet.setRut(row.getCell(DETAIL_COL_RUT).getStringCellValue());
 				dataInSheet.setMonth(calendar.get(Calendar.MONTH));
 				dataInSheet.setYear(calendar.get(Calendar.YEAR));
 
@@ -247,8 +247,18 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		createSummarySheet(conn, workbook, params, getTitleSummary(conn, reportInputParameterList));
 		createDetailSheet(conn, workbook, params);
 
-		relationPages(workbook);
-		autoSizeColumn(workbook);
+		try {
+			relationPages(workbook);
+		} catch (Exception e) {
+			System.out.println("We can not make relation between sheets");
+			e.printStackTrace();
+		}
+		try {
+			autoSizeColumn(workbook);
+		} catch (Exception e) {
+			System.out.println("We can not resize columns of sheets");
+			e.printStackTrace();
+		}
 
 		FileOutputStream stream = saveFile(workbook);
 		closeFile(workbook, stream);
@@ -302,7 +312,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		} catch (SQLException e) {
 			throw new BSDataBaseException(e);
 		}
-		return out.length()>0?  out.substring(0, out.length() - 1):"";
+		return out.length() > 0 ? out.substring(0, out.length() - 1) : "";
 	}
 
 	private boolean haveJunior(Connection conn, Long employee, BSmySQL mysql) {

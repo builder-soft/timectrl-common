@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.util.List;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
+import cl.buildersoft.framework.exception.BSConfigurationException;
+import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.exception.BSUserException;
 import cl.buildersoft.timectrl.api._zkemProxy;
 import cl.buildersoft.timectrl.business.beans.AttendanceLog;
@@ -36,10 +38,13 @@ public class ReadMarks extends AbstractConsoleService {
 
 			_zkemProxy api = null;
 			for (Machine machine : machines) {
-				api = service.connect(conn, machine);
-				if (api == null) {
-					log("NOT FOUND " + machine.toString());
-				} else {
+				try {
+					api = service.connect(conn, machine);
+				} catch (BSConfigurationException e) {
+					log(e.getMessage());
+				}
+
+				if (api != null) {
 					log("Procesing " + machine.toString());
 
 					List<AttendanceLog> attendanceLog = null;
@@ -51,6 +56,8 @@ public class ReadMarks extends AbstractConsoleService {
 					} catch (Exception e) {
 						e.printStackTrace();
 						deleteMarksAtEnd = false;
+					} finally {
+						attendanceLog.clear();
 					}
 					if (deleteMarksAtEnd) {
 						deleteMarks(api);
@@ -103,7 +110,7 @@ public class ReadMarks extends AbstractConsoleService {
 				try {
 					service.saveAttendanceLog(conn, attendance);
 					// bu.save(conn, attendance);
-				} catch (Exception e) {
+				} catch (BSDataBaseException e) {
 					log("Fail to save " + attendance.toString() + " Detail:" + e.toString());
 				}
 			}
