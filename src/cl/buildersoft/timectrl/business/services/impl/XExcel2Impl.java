@@ -302,7 +302,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		} catch (SQLException e) {
 			throw new BSDataBaseException(e);
 		}
-		return out.substring(0, out.length() - 1);
+		return out.length()>0?  out.substring(0, out.length() - 1):"";
 	}
 
 	private boolean haveJunior(Connection conn, Long employee, BSmySQL mysql) {
