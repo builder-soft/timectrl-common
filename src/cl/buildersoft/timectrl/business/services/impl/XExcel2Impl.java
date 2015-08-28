@@ -39,8 +39,11 @@ import cl.buildersoft.timectrl.business.services.EmployeeService;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
 public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
+	private static final String FORMAT_DDMMYYYY = "dd-MM-yyyy";
+	private static final int SUMMARY_COL_FIRST = 0;
+	private static final int SUMMARY_COL_RUT = 0;
 	private static final int DETAIL_COL_RUT = 1;
-	private static final int DETAIL_COL_DATE = 2;
+	private static final int DETAIL_COL_DATE = 4;
 	private static final int DETAIL_COL_INDEX = 0;
 	protected String spNameSummary = null;
 	protected Integer colsAsTitle = null;
@@ -49,7 +52,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	protected Integer currentDepth = 0;
 
 	private void relationPages(XSSFWorkbook workBook) {
-
 		Map<DataInSheet, Integer> detailResult = inspectDetail(workBook);
 		inspectSummary(workBook, detailResult);
 
@@ -122,7 +124,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 			if (firstLoop) {
 				row = rowIterator.next();
 			}
-			firstCell = row.getCell(0);
+			firstCell = row.getCell(SUMMARY_COL_FIRST);
 			if (firstCell.getCellType() == Cell.CELL_TYPE_STRING) {
 				value = firstCell.getStringCellValue();
 				if (value.toLowerCase().startsWith("inicio")) {
@@ -133,13 +135,13 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 					row = rowIterator.next();
 					if (rowIterator.hasNext()) {
-						firstCell = row.getCell(0);
+						firstCell = row.getCell(SUMMARY_COL_FIRST);
 						if (firstCell.getCellType() == Cell.CELL_TYPE_STRING) {
 							if (firstCell.getStringCellValue().toLowerCase().startsWith("rut")) {
 								row = rowIterator.next();
 								doContinue = true;
 								while (rowIterator.hasNext() && doContinue) {
-									cellRut = row.getCell(0);
+									cellRut = row.getCell(SUMMARY_COL_RUT);
 
 									if (cellRut.getCellType() == Cell.CELL_TYPE_STRING) {
 										value = cellRut.getStringCellValue();
@@ -209,12 +211,14 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 			cellIndex = row.getCell(DETAIL_COL_INDEX);
 			cellDate = row.getCell(DETAIL_COL_DATE);
+			
+			String cellDateString = cellDate.toString();
 
 			if (cellIndex.getCellType() == Cell.CELL_TYPE_NUMERIC
-					&& BSDateTimeUtil.isValidDate(cellDate.toString(), "yyyy-MM-dd")) {
+					&& BSDateTimeUtil.isValidDate(cellDateString, FORMAT_DDMMYYYY)) {
 				dataInSheet = new DataInSheet();
 
-				Calendar calendar = BSDateTimeUtil.string2Calendar(cellDate.toString(), "yyyy-MM-dd");
+				Calendar calendar = BSDateTimeUtil.string2Calendar(cellDateString, FORMAT_DDMMYYYY);
 
 				dataInSheet.setRut(row.getCell(DETAIL_COL_RUT).getStringCellValue());
 				dataInSheet.setMonth(calendar.get(Calendar.MONTH));

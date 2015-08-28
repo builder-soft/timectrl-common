@@ -11,6 +11,7 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSDataBaseException;
+import cl.buildersoft.framework.exception.BSException;
 import cl.buildersoft.timectrl.api.ClassFactory;
 import cl.buildersoft.timectrl.api.IZKEMException;
 import cl.buildersoft.timectrl.api._zkemProxy;
@@ -505,14 +506,15 @@ public class MachineServiceImpl2 implements MachineService2 {
 		params.add(attendance.getMinute());
 		params.add(attendance.getSecond());
 
-		ResultSet rs = mysql.callSingleSP(conn, "pSaveAttendanceLog", params);
-
+		ResultSet rs = null;
 		try {
+			rs = mysql.callSingleSP(conn, "pSaveAttendanceLog", params);
 			if (rs.next())
 				attendance.setId(rs.getLong(1));
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			throw new BSDataBaseException(e);
+		} finally {
+			mysql.closeSQL(rs);
 		}
 
 	}
