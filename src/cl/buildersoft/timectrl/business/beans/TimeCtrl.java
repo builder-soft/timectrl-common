@@ -4,6 +4,7 @@ import java.util.Date;
 
 import cl.buildersoft.framework.beans.BSBean;
 
+@Deprecated
 public class TimeCtrl extends BSBean {
 	private static final long serialVersionUID = 2818822310440063689L;
 	@SuppressWarnings("unused")

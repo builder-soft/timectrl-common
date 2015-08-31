@@ -23,7 +23,7 @@ import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.timectrl.business.beans.IdRut;
 import cl.buildersoft.timectrl.business.beans.Report;
-import cl.buildersoft.timectrl.business.beans.ReportInputParameterBean;
+import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
 import cl.buildersoft.timectrl.business.services.ReportService;
@@ -55,43 +55,43 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 		return properties;
 	}
 
-	public List<ReportInputParameterBean> loadInputParameter_(Connection conn, Long idReport) {
+	public List<ReportParameterBean> loadInputParameter_(Connection conn, Long idReport) {
 		return null;
 	}
 
 	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
-			List<ReportPropertyBean> reportPropertyList, List<ReportInputParameterBean> reportInputParameterList) {
+			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportInputParameterList) {
 
 		/**
 		 * <code>
 		 * ******************************************************
 Supuesto:
-Es obligatorio que cada empleado tenga un jefe asignado, así como los grupos que conversamos la semana pasada?
-¿o puede ser que existan empleados sin jefe?
+Es obligatorio que cada empleado tenga un jefe asignado, asï¿½ como los grupos que conversamos la semana pasada?
+ï¿½o puede ser que existan empleados sin jefe?
 lo pregunto, ademas por que cuando se sincronize un reloj que tenga un empleado nuevo, habria que asignarle un "jefe por defecto"
 Tambien pensando en cuando se hega el upgrade de version, hay que asignarles un jefe por defecto a todos los empleados
 O tal vez, se pueda dejar sin jefe asignado
-DEFINICION: El empleado puede tener en el campo jefe el valor NULL, por lo cual, no es necesario que en un inicio se tenga que asignar a todos los empleados un jefe al cual se hará llegar el informe.
+DEFINICION: El empleado puede tener en el campo jefe el valor NULL, por lo cual, no es necesario que en un inicio se tenga que asignar a todos los empleados un jefe al cual se harï¿½ llegar el informe.
 *******************************************************
 
 ----INICIO----------
 obtener propiedad Destiny 
-¿Propiedad.destino = BOSS_ONLY?
+ï¿½Propiedad.destino = BOSS_ONLY?
    obtener lista de empleados
    recorrer lista de empleados
-	   ¿El empleado tiene subalternos?
+	   ï¿½El empleado tiene subalternos?
 		  Generar informe(Properties, parameters, empleado)
 		  Enviar informe generado(empleado)
 	   continuar
    continuar   
-SI NO ¿Propiedad.destino = EACH_ONE?
+SI NO ï¿½Propiedad.destino = EACH_ONE?
    obtener lista de empleados
    recorrer lista de empleados
       Generar informe(Properties, parameters, empleado)
       Enviar informe generado(empleado)
    continuar   
 	
-SI NO ¿Propiedad.destino = MANPOWER? 
+SI NO ï¿½Propiedad.destino = MANPOWER? 
    Generar informe(Properties, parameters, null)
    Enviar informe(s) generado(s)(MANPOWER)
 SI NO 
@@ -120,7 +120,7 @@ ejectuar subReporte(idReport, reportType, Properties, parameters)
 obtener subalternos(empleado)
    OUT = select * from temployee where cBoss = empleado.cid
    recorrer listado de subalternos
-      ¿subalterno tiene subalternos?
+      ï¿½subalterno tiene subalternos?
 	  OUT += obtener subalternos(subalteno)
    continuar
 retornar OUT
@@ -145,7 +145,7 @@ retornar OUT
 
 			break;
 		case EACH_ONE:
-			ReportInputParameterBean employeeParameter = getEmployeeParameter(reportInputParameterList);
+			ReportParameterBean employeeParameter = getEmployeeParameter(reportInputParameterList);
 			List<IdRut> employeeList = null;
 			if (employeeParameter != null) {
 				employeeList = getEmployeeList(conn, employeeParameter.getValue());
@@ -177,22 +177,22 @@ retornar OUT
 		/**
 		 * <code>
 Obtener propiedad Destiny 
-¿Propiedad.destino = BOSS_ONLY?
+ï¿½Propiedad.destino = BOSS_ONLY?
    obtener lista de empleados
    recorrer lista de empleados
-	   ¿El empleado tiene subalternos?
+	   ï¿½El empleado tiene subalternos?
 		  Generar informe(Properties, parameters, empleado)
 		  Enviar informe generado(empleado)
 	   continuar
    continuar   
-SI NO ¿Propiedad.destino = EACH_ONE?
+SI NO ï¿½Propiedad.destino = EACH_ONE?
    obtener lista de empleados
    recorrer lista de empleados
       Generar informe(Properties, parameters, empleado)
       Enviar informe generado(empleado)
    continuar
 	
-SI NO ¿Propiedad.destino = MANPOWER? 
+SI NO ï¿½Propiedad.destino = MANPOWER? 
    Generar informe(Properties, parameters, null)
    Enviar informe(s) generado(s)(MANPOWER)
 SI NO 
@@ -217,14 +217,14 @@ Fin
 	}
 
 	private List<String> executeReport(Connection conn, Long idReport, ReportType reportType,
-			List<ReportPropertyBean> reportPropertyList, List<ReportInputParameterBean> reportInputParameterList) {
+			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportInputParameterList) {
 		List<String> out = null;
 
 		Report subReport = getReportByKey(conn, this.subReport);
 		ReportService subReportService = getInstance(conn, subReport);
 
 		List<ReportPropertyBean> subReportPropertyList = subReportService.loadReportProperties(conn, subReport.getId());
-		List<ReportInputParameterBean> subReportInputParameterList = subReportService.loadInputParameter(conn, subReport.getId());
+		List<ReportParameterBean> subReportInputParameterList = subReportService.loadParameter(conn, subReport.getId());
 
 		ReportPropertyBean outputPath = getOutputPath(subReportPropertyList);
 		String tempPath = getTempPath();
@@ -274,8 +274,8 @@ Fin
 		return out;
 	}
 
-	private void copyParameterValues(List<ReportInputParameterBean> reportInputParameterList,
-			List<ReportInputParameterBean> subReportInputParameterList) {
+	private void copyParameterValues(List<ReportParameterBean> reportInputParameterList,
+			List<ReportParameterBean> subReportInputParameterList) {
 		for (int i = 0; i < reportInputParameterList.size(); i++) {
 			subReportInputParameterList.get(i).setValue(reportInputParameterList.get(i).getValue());
 		}

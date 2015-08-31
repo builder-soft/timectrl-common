@@ -32,7 +32,7 @@ import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.business.beans.Employee;
-import cl.buildersoft.timectrl.business.beans.ReportInputParameterBean;
+import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
 import cl.buildersoft.timectrl.business.services.EmployeeService;
@@ -236,7 +236,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 	@Override
 	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
-			List<ReportPropertyBean> reportPropertyList, List<ReportInputParameterBean> reportInputParameterList) {
+			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportInputParameterList) {
 		List<String> out = new ArrayList<String>();
 
 		readProperties(conn, reportPropertyList);
@@ -272,10 +272,10 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		return out;
 	}
 
-	private void processBossAndEmployeeParameter(Connection conn, List<ReportInputParameterBean> reportInputParameterList,
+	private void processBossAndEmployeeParameter(Connection conn, List<ReportParameterBean> reportInputParameterList,
 			Long idReport) {
 		Integer index = 1;
-		for (ReportInputParameterBean param : reportInputParameterList) {
+		for (ReportParameterBean param : reportInputParameterList) {
 			if ("BOSS_LIST".equals(param.getTypeKey())) {
 				reportInputParameterList.add(index, newParam(conn, param, idReport));
 				break;
@@ -284,8 +284,8 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		}
 	}
 
-	private ReportInputParameterBean newParam(Connection conn, ReportInputParameterBean bossParam, Long idReport) {
-		ReportInputParameterBean out = new ReportInputParameterBean();
+	private ReportParameterBean newParam(Connection conn, ReportParameterBean bossParam, Long idReport) {
+		ReportParameterBean out = new ReportParameterBean();
 		this.currentDepth = 0;
 		out.setJavaType("STRING");
 		out.setName("EmployeesId");
@@ -325,7 +325,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		return Integer.parseInt(count) > 0;
 	}
 
-	private String getTitleSummary(Connection conn, List<ReportInputParameterBean> reportInputParameterList) {
+	private String getTitleSummary(Connection conn, List<ReportParameterBean> reportInputParameterList) {
 		String out = null;
 		Boolean firstLoop = true;
 		String bossId = null;
@@ -333,7 +333,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		String startYear = null;
 		String endMonth = null;
 		String endYear = null;
-		for (ReportInputParameterBean rip : reportInputParameterList) {
+		for (ReportParameterBean rip : reportInputParameterList) {
 			if ("BOSS_LIST".equals(rip.getTypeKey())) {
 				bossId = rip.getValue();
 			} else if ("MONTH".equals(rip.getTypeKey())) {

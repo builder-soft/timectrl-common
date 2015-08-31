@@ -19,16 +19,16 @@ import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.util.BSConfig;
 import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.timectrl.business.beans.Report;
-import cl.buildersoft.timectrl.business.beans.ReportInputParameterBean;
+import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyType;
-import cl.buildersoft.timectrl.business.beans.ReportParamType;
+import cl.buildersoft.timectrl.business.beans.ReportParameterType;
 
 @SuppressWarnings({ "deprecation", "rawtypes" })
 public class FileReport {
 	private String fileName = null;
 
-	public String doBuild(Connection conn, BSBeanUtils bu, Report report, List<ReportInputParameterBean> reportParamList,
+	public String doBuild(Connection conn, BSBeanUtils bu, Report report, List<ReportParameterBean> reportParamList,
 			List<ReportPropertyType> reportOutValues) {
 
 		// String fileName = getFileName();
@@ -48,7 +48,7 @@ public class FileReport {
 		// System.out.println(fileName);
 	}
 
-	private String buildReportFile(Connection conn, String fileName, String folder, List<ReportInputParameterBean> reportParamList,
+	private String buildReportFile(Connection conn, String fileName, String folder, List<ReportParameterBean> reportParamList,
 			Report report) {
 		String outputFileAndPath = (folder == null ? "" : fixPath(folder)) + fileName;
 		String jasperFileAndPath = getJasperFile(conn, report);
@@ -109,11 +109,11 @@ public class FileReport {
 		return out;
 	}
 
-	private Map<String, Object> getParams(Connection conn, List<ReportInputParameterBean> reportParams) {
+	private Map<String, Object> getParams(Connection conn, List<ReportParameterBean> reportParams) {
 		Map<String, Object> out = new HashMap<String, Object>();
 		Object value = null;
 		BSBeanUtils bu = new BSBeanUtils();
-		for (ReportInputParameterBean reportParam : reportParams) {
+		for (ReportParameterBean reportParam : reportParams) {
 //			value = getType(conn, reportParam.getType(), bu, reportParam.getValue());
 //
 //			if (reportParam.getFromUser()) {
@@ -138,7 +138,7 @@ public class FileReport {
 	}
 
 	private Object getType(Connection conn, Long type, BSBeanUtils bu, String value) {
-		ReportParamType paramType = new ReportParamType();
+		ReportParameterType paramType = new ReportParameterType();
 		Object out = null;
 		paramType.setId(type);
 		bu.search(conn, paramType);

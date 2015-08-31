@@ -25,7 +25,7 @@ import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.framework.util.BSConfig;
 import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.timectrl.business.beans.Report;
-import cl.buildersoft.timectrl.business.beans.ReportInputParameterBean;
+import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyType;
 import cl.buildersoft.timectrl.business.beans.ReportType;
@@ -85,7 +85,7 @@ public class BuildReport2 extends AbstractConsoleService {
 		report.setId(idReport);
 		bu.search(conn, report);
 
-		List<ReportInputParameterBean> reportParamList = null; // validParams(conn,
+		List<ReportParameterBean> reportParamList = null; // validParams(conn,
 																// bu, report,
 																// args);
 		List<ReportPropertyType> reportOutValue = readReportOutValue(conn, bu, report);
@@ -117,7 +117,7 @@ public class BuildReport2 extends AbstractConsoleService {
 		return (List<ReportPropertyType>) bu.list(conn, new ReportPropertyType(), "cReport=?", report.getId());
 	}
 
-	private void doPlainExcel(Connection conn, BSBeanUtils bu, Report report, List<ReportInputParameterBean> reportParamList,
+	private void doPlainExcel(Connection conn, BSBeanUtils bu, Report report, List<ReportParameterBean> reportParamList,
 			List<ReportPropertyType> reportOutValue, String[] args) {
 		BSmySQL mysql = new BSmySQL();
 		String sp = null; // getSPName(reportParamList);
@@ -271,9 +271,9 @@ public class BuildReport2 extends AbstractConsoleService {
 		return out;
 	}
 
-	private String getSPName(List<ReportInputParameterBean> reportParamList) {
+	private String getSPName(List<ReportParameterBean> reportParamList) {
 		String out = null;
-		for (ReportInputParameterBean reportParam : reportParamList) {
+		for (ReportParameterBean reportParam : reportParamList) {
 			// if (3L == reportParam.getType()) {
 			// out = reportParam.getValue();
 			// break;
@@ -282,10 +282,10 @@ public class BuildReport2 extends AbstractConsoleService {
 		return out;
 	}
 
-	private List<Object> paramsToList(String[] args, List<ReportInputParameterBean> reportParamList) {
+	private List<Object> paramsToList(String[] args, List<ReportParameterBean> reportParamList) {
 		List<Object> out = new ArrayList<Object>();
 		Integer i = 0;
-		for (ReportInputParameterBean reportParam : reportParamList) {
+		for (ReportParameterBean reportParam : reportParamList) {
 			// if (reportParam.getFromUser()) {
 			// out.add(args[i++]);
 			// }
@@ -301,9 +301,9 @@ public class BuildReport2 extends AbstractConsoleService {
 		return reportType;
 	}
 
-	private List<ReportInputParameterBean> validParams(Connection conn, BSBeanUtils bu, Report report, String[] args) {
-		List<ReportInputParameterBean> out = new ArrayList<ReportInputParameterBean>();
-		ReportInputParameterBean temp = null;
+	private List<ReportParameterBean> validParams(Connection conn, BSBeanUtils bu, Report report, String[] args) {
+		List<ReportParameterBean> out = new ArrayList<ReportParameterBean>();
+		ReportParameterBean temp = null;
 		BSmySQL mysql = new BSmySQL();
 		ResultSet rs = mysql.callSingleSP(conn, "pListReportParams", report.getId());
 		Integer countFromUserParam = 0;
@@ -311,7 +311,7 @@ public class BuildReport2 extends AbstractConsoleService {
 
 		try {
 			while (rs.next()) {
-				temp = new ReportInputParameterBean();
+				temp = new ReportParameterBean();
 				temp.setId(rs.getLong("cId"));
 
 				// bu.search(conn, temp);

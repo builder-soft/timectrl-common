@@ -2,11 +2,11 @@ package cl.buildersoft.timectrl.business.beans;
 
 import cl.buildersoft.framework.beans.BSBean;
 
-public class ReportInputParameter extends BSBean {
+public class ReportParameter extends BSBean {
 	private static final long serialVersionUID = -4771733332204632893L;
 
 	@SuppressWarnings("unused")
-	private String TABLE = "tReportInParam";
+	private String TABLE = "tReportParameter";
 
 	private Long report = null;
 	private String name = null;

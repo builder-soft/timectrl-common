@@ -2,7 +2,6 @@ package cl.buildersoft.timectrl.business.services.impl;
 
 import java.io.File;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,11 +15,9 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
 import net.sf.jasperreports.engine.util.JRLoader;
 import cl.buildersoft.framework.database.BSBeanUtils;
-import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
-import cl.buildersoft.framework.util.BSDataUtils;
 import cl.buildersoft.timectrl.business.beans.IdRut;
-import cl.buildersoft.timectrl.business.beans.ReportInputParameterBean;
+import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
 import cl.buildersoft.timectrl.business.services.ReportService;
@@ -36,13 +33,13 @@ public class FileReportImpl extends AbstractReportService implements ReportServi
 
 	@Override
 	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
-			List<ReportPropertyBean> reportPropertyList, List<ReportInputParameterBean> reportInputParameter) {
+			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportInputParameter) {
 		List<String> out = null;
 
 		// showProperties(conn, reportPropertyList);
 		readProperties(conn, reportPropertyList);
 
-		ReportInputParameterBean employeeParameter = getEmployeeParameter(reportInputParameter);
+		ReportParameterBean employeeParameter = getEmployeeParameter(reportInputParameter);
 		List<IdRut> employeeList = null;
 		if (employeeParameter != null) {
 			employeeList = getEmployeeList(conn, employeeParameter.getValue());
@@ -61,7 +58,7 @@ public class FileReportImpl extends AbstractReportService implements ReportServi
 		return out;
 	}
 
-	private void processJasper(Connection conn, List<ReportInputParameterBean> reportInputParameter, List<String> out) {
+	private void processJasper(Connection conn, List<ReportParameterBean> reportInputParameter, List<String> out) {
 		String outputPath = parsePropertes(this.outputPath, keyValues);
 		createPathIfNotExists(outputPath);
 
@@ -84,11 +81,11 @@ public class FileReportImpl extends AbstractReportService implements ReportServi
 		}
 	}
 
-	private Map<String, Object> getReportParams(Connection conn, List<ReportInputParameterBean> inParamList) {
+	private Map<String, Object> getReportParams(Connection conn, List<ReportParameterBean> inParamList) {
 		Map<String, Object> out = new HashMap<String, Object>();
 		Object value = null;
 		BSBeanUtils bu = new BSBeanUtils();
-		for (ReportInputParameterBean reportParam : inParamList) {
+		for (ReportParameterBean reportParam : inParamList) {
 			value = getParameterType(conn, reportParam.getJavaType(), bu, reportParam.getValue());
 
 			// if (reportParam.getFromUser()) {

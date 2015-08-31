@@ -1,6 +1,6 @@
 package cl.buildersoft.timectrl.business.beans;
 
-public class ReportInputParameterBean {
+public class ReportParameterBean {
 	private Long id = null;
 	private Long report = null;
 	private String name = null;
@@ -104,7 +104,7 @@ public class ReportInputParameterBean {
 
 	@Override
 	public String toString() {
-		return "ReportInputParameterBean [id=" + id + ", report=" + report + ", name=" + name + ", label=" + label + ", order="
+		return "ReportParameterBean [id=" + id + ", report=" + report + ", name=" + name + ", label=" + label + ", order="
 				+ order + ", typeId=" + typeId + ", typeKey=" + typeKey + ", typeName=" + typeName + ", htmlFile=" + htmlFile
 				+ ", typeSource=" + typeSource + ", value=" + value + "]";
 	}

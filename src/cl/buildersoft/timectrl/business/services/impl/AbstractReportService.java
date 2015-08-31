@@ -22,7 +22,7 @@ import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSWeb;
 import cl.buildersoft.timectrl.business.beans.IdRut;
 import cl.buildersoft.timectrl.business.beans.Report;
-import cl.buildersoft.timectrl.business.beans.ReportInputParameterBean;
+import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyType;
 import cl.buildersoft.timectrl.business.beans.ReportType;
@@ -36,36 +36,36 @@ public abstract class AbstractReportService {
 
 	protected abstract String parseCustomVariable(String key);
 
-	public List<ReportInputParameterBean> loadInputParameter(Connection conn, Long idReport) {
-		List<ReportInputParameterBean> out = new ArrayList<ReportInputParameterBean>();
+	public List<ReportParameterBean> loadParameter(Connection conn, Long idReport) {
+		List<ReportParameterBean> out = new ArrayList<ReportParameterBean>();
 		BSmySQL mysql = new BSmySQL();
 
-		ResultSet rs = mysql.callSingleSP(conn, "pListReportInputParameter", idReport);
+		ResultSet rs = mysql.callSingleSP(conn, "pListReportParameter", idReport);
 
 		try {
-			ReportInputParameterBean rip = null;
+			ReportParameterBean rpb = null;
 			while (rs.next()) {
-				rip = new ReportInputParameterBean();
-				rip.setId(rs.getLong("cId"));
-				rip.setReport(rs.getLong("cReport"));
-				rip.setName(rs.getString("cName"));
-				rip.setLabel(rs.getString("cLabel"));
-				rip.setOrder(rs.getInt("cOrder"));
-				rip.setTypeId(rs.getLong("cTypeId"));
-				rip.setTypeKey(rs.getString("cTypeKey"));
-				rip.setTypeName(rs.getString("cTypeName"));
-				rip.setHtmlFile(rs.getString("cTypeHTMLFile"));
-				rip.setTypeSource(rs.getString("cTypeSource"));
-				rip.setJavaType(rs.getString("cJavaType"));
-				out.add(rip);
+				rpb = new ReportParameterBean();
+				rpb.setId(rs.getLong("cId"));
+				rpb.setReport(rs.getLong("cReport"));
+				rpb.setName(rs.getString("cName"));
+				rpb.setLabel(rs.getString("cLabel"));
+				rpb.setOrder(rs.getInt("cOrder"));
+				rpb.setTypeId(rs.getLong("cTypeId"));
+				rpb.setTypeKey(rs.getString("cTypeKey"));
+				rpb.setTypeName(rs.getString("cTypeName"));
+				rpb.setHtmlFile(rs.getString("cTypeHTMLFile"));
+				rpb.setTypeSource(rs.getString("cTypeSource"));
+				rpb.setJavaType(rs.getString("cJavaType"));
+				out.add(rpb);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new BSDataBaseException(e);
+		} finally {
+			mysql.closeSQL(rs);
 		}
-
-		mysql.closeSQL(rs);
-
+		
 		return out;
 	}
 
@@ -125,12 +125,12 @@ public abstract class AbstractReportService {
 	}
 </code>
 	 */
-	public void fillInputParameters(List<ReportInputParameterBean> reportInParamList, List<String> valueList) {
+	public void fillParameters(List<ReportParameterBean> reportInParamList, List<String> valueList) {
 		// String paramName = null;
 		// String value = null;
 		Integer index = 0;
 
-		for (ReportInputParameterBean currentParam : reportInParamList) {
+		for (ReportParameterBean currentParam : reportInParamList) {
 			currentParam.setValue(valueList.get(index++));
 		}
 
@@ -262,9 +262,9 @@ public abstract class AbstractReportService {
 		return instance;
 	}
 
-	protected ReportInputParameterBean getEmployeeParameter(List<ReportInputParameterBean> reportInputParameterList) {
-		ReportInputParameterBean out = null;
-		for (ReportInputParameterBean reportInputParameter : reportInputParameterList) {
+	protected ReportParameterBean getEmployeeParameter(List<ReportParameterBean> reportInputParameterList) {
+		ReportParameterBean out = null;
+		for (ReportParameterBean reportInputParameter : reportInputParameterList) {
 			if ("EMPLOYEE_LIST".equalsIgnoreCase(reportInputParameter.getTypeKey())) {
 				out = reportInputParameter;
 				break;
@@ -318,12 +318,16 @@ public abstract class AbstractReportService {
 		return out;
 	}
 
-	protected void updateEmployeeId(List<ReportInputParameterBean> reportInputParameterList, Integer id) {
-		for (ReportInputParameterBean reportInputParameter : reportInputParameterList) {
+	protected void updateEmployeeId(List<ReportParameterBean> reportInputParameterList, Integer id) {
+		for (ReportParameterBean reportInputParameter : reportInputParameterList) {
 			if ("EMPLOYEE_LIST".equalsIgnoreCase(reportInputParameter.getTypeKey())) {
 				reportInputParameter.setValue(id.toString());
 				break;
 			}
 		}
+	}
+	
+	public Object getParameterData(Connection conn, ReportParameterBean reportParameterBean){
+		return null;
 	}
 }

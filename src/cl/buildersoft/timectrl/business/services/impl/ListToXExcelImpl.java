@@ -23,7 +23,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
-import cl.buildersoft.timectrl.business.beans.ReportInputParameterBean;
+import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
 import cl.buildersoft.timectrl.business.services.ReportService;
@@ -46,7 +46,7 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 
 	@Override
 	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
-			List<ReportPropertyBean> reportPropertyList, List<ReportInputParameterBean> reportInputParameterList) {
+			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportInputParameterList) {
 		List<String> out = new ArrayList<String>();
 
 		readProperties(conn, reportPropertyList);
@@ -175,11 +175,11 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 		return style;
 	}
 
-	protected List<Object> getReportParams(Connection conn, List<ReportInputParameterBean> inParamList) {
+	protected List<Object> getReportParams(Connection conn, List<ReportParameterBean> inParamList) {
 		List<Object> out = new ArrayList<Object>();
 		Object value = null;
 		BSBeanUtils bu = new BSBeanUtils();
-		for (ReportInputParameterBean reportParam : inParamList) {
+		for (ReportParameterBean reportParam : inParamList) {
 			value = getParameterType(conn, reportParam.getJavaType(), bu, reportParam.getValue());
 
 			// if (reportParam.getFromUser()) {

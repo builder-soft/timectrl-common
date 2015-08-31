@@ -10,7 +10,7 @@ import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.framework.exception.BSUserException;
 import cl.buildersoft.timectrl.business.beans.Report;
-import cl.buildersoft.timectrl.business.beans.ReportInputParameterBean;
+import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
 import cl.buildersoft.timectrl.business.services.ReportService;
@@ -86,12 +86,12 @@ public class BuildReport3 extends AbstractConsoleService {
 		List<ReportPropertyBean> reportPropertyList = reportService.loadReportProperties(conn, id);
 		// List<ReportPropertyType> outValues =
 		// reportService.loadOutValues(conn, outParams);
-		List<ReportInputParameterBean> inParams = reportService.loadInputParameter(conn, id);
+		List<ReportParameterBean> inParams = reportService.loadParameter(conn, id);
 
 		if (inParams.size() != target.size()) {
 			throw new BSConfigurationException("Amount of parameters do not match");
 		}
-		reportService.fillInputParameters(inParams, target);
+		reportService.fillParameters(inParams, target);
 
 		List<String> out = reportService.execute(conn, report.getId(), reportType, reportPropertyList, inParams);
 
