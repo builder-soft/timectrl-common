@@ -65,7 +65,7 @@ public abstract class AbstractReportService {
 		} finally {
 			mysql.closeSQL(rs);
 		}
-		
+
 		return out;
 	}
 
@@ -326,8 +326,6 @@ public abstract class AbstractReportService {
 			}
 		}
 	}
+
 	
-	public Object getParameterData(Connection conn, ReportParameterBean reportParameterBean){
-		return null;
-	}
 }

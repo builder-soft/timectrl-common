@@ -19,5 +19,5 @@ public interface ReportService {
 
 	public ReportService getInstance(ReportType reportType);
 
-	public Object getParameterData(Connection conn, ReportParameterBean reportParameterBean);
+	
 }
