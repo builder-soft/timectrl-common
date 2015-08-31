@@ -9,7 +9,14 @@ public class EmployeeParameterImpl implements ParameterService {
 
 	@Override
 	public Object getParameterData(Connection conn, ReportParameterBean reportParameterBean) {
-		// TODO Auto-generated method stub
+	 /**
+	  * Este metodo debe retornara lo siguiente:
+	  * - Lista de empleados.
+	  * - Lista de areas.
+	  * - Lista de empleados que son jefes.
+	  * 
+	  * 
+	  * */
 		return null;
 	}
 
