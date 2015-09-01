@@ -1,6 +1,7 @@
 package cl.buildersoft.timectrl.business.services;
 
 import java.sql.Connection;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -20,4 +21,7 @@ public interface EmployeeService {
 	public Post readPostOfEmployee(Connection conn, Employee employee);
 
 	public Area readAreaOfEmployee(Connection conn, Employee employee);
+
+	public List<Employee> listBoss(Connection conn);
+
 }

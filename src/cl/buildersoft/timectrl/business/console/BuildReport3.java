@@ -13,6 +13,7 @@ import cl.buildersoft.timectrl.business.beans.Report;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
+import cl.buildersoft.timectrl.business.services.ParameterService;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
 public class BuildReport3 extends AbstractConsoleService {
@@ -99,7 +100,7 @@ public class BuildReport3 extends AbstractConsoleService {
 	}
 
 	@SuppressWarnings("unchecked")
-	private ReportService getInstance(ReportType reportType) {
+	public ReportService getInstance(ReportType reportType) {
 		ReportService instance = null;
 		try {
 			Class<ReportService> javaClass = (Class<ReportService>) Class.forName(reportType.getJavaClass());
@@ -109,6 +110,19 @@ public class BuildReport3 extends AbstractConsoleService {
 			throw new BSProgrammerException(e);
 		}
 		return instance;
+	}
+
+	public ParameterService getInstanceOfParameter(ReportParameterBean reportParameter) {
+		ParameterService instance = null;
+		try {
+			Class<ParameterService> javaClass = (Class<ParameterService>) Class.forName(reportParameter.getTypeSource());
+			instance = (ParameterService) javaClass.newInstance();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new BSProgrammerException(e);
+		}
+		return instance;
+
 	}
 
 	private Report getReport(Long reportId, BSBeanUtils bu, Connection conn) {

@@ -1,9 +1,13 @@
 package cl.buildersoft.timectrl.business.services;
 
 import java.sql.Connection;
+import java.util.List;
+import java.util.Map;
 
+import cl.buildersoft.framework.beans.BSBean;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 
 public interface ParameterService {
-	public Object getParameterData(Connection conn, ReportParameterBean reportParameterBean);
+	public Map<String, List<? extends BSBean>> getParameterData(Connection conn, ReportParameterBean reportParameterBean);
+//	public List<List<? extends BSBean>> getParameterData(Connection conn, ReportParameterBean reportParameterBean);
 }

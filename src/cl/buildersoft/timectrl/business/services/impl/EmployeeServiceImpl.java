@@ -1,16 +1,16 @@
 package cl.buildersoft.timectrl.business.services.impl;
 
- 
 import java.sql.Connection;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.framework.util.BSHttpServlet;
+import cl.buildersoft.timectrl.business.beans.Area;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.Post;
-import cl.buildersoft.timectrl.business.beans.Area;
 import cl.buildersoft.timectrl.business.services.EmployeeService;
 
 public class EmployeeServiceImpl extends BSHttpServlet implements EmployeeService {
@@ -79,4 +79,11 @@ public class EmployeeServiceImpl extends BSHttpServlet implements EmployeeServic
 		bu.search(conn, out);
 		return out;
 	}
+
+	@Override
+	public List<Employee> listBoss(Connection conn) {
+		BSBeanUtils bu = new BSBeanUtils();
+		return (List<Employee>)bu.list(conn, new Employee(), "cId IN (SELECT DISTINCT(cBoss) FROM tEmployee WHERE NOT cBoss IS NULL)");
+	}
+
 }
