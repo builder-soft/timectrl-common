@@ -31,9 +31,9 @@ public class ParameterEmployeeImpl implements ParameterService {
 		BSBeanUtils bu = new BSBeanUtils();
 		EmployeeService es = new EmployeeServiceImpl();
 
-		out.put("EMPLOYEE_LIST", bu.listAll(conn, new Employee()));
-		out.put("AREA_LIST", bu.listAll(conn, new Area()));
-		out.put("BOSS_LIST", es.listBoss(conn));
+		out.put("EMPLOYEE_LIST", bu.listAll(conn, new Employee() ));
+		out.put("AREA_LIST", bu.listAll(conn, new Area() ));
+		out.put("BOSS_LIST", es.listBoss(conn ));
 
 		return out;
 	}
