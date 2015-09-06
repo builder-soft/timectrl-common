@@ -1,6 +1,8 @@
 package cl.buildersoft.timectrl.business.services.impl;
 
 import java.sql.Connection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -83,7 +85,29 @@ public class EmployeeServiceImpl extends BSHttpServlet implements EmployeeServic
 	@Override
 	public List<Employee> listBoss(Connection conn) {
 		BSBeanUtils bu = new BSBeanUtils();
-		return (List<Employee>)bu.list(conn, new Employee(), "cId IN (SELECT DISTINCT(cBoss) FROM tEmployee WHERE NOT cBoss IS NULL)");
+		return (List<Employee>) bu.list(conn, new Employee(),
+				"cId IN (SELECT DISTINCT(cBoss) FROM tEmployee WHERE NOT cBoss IS NULL)");
 	}
 
+	@Override
+	public void sortByName(List<Employee> employeeList) {
+		Collections.sort(employeeList, new Comparator<Employee>() {
+			@Override
+			public int compare(final Employee object1, final Employee object2) {
+				return object1.getName().compareTo(object2.getName());
+			}
+		});
+
+	}
+
+	@Override
+	public void sortByRut(List<Employee> employeeList) {
+		Collections.sort(employeeList, new Comparator<Employee>() {
+			@Override
+			public int compare(final Employee object1, final Employee object2) {
+				return object1.getRut().compareTo(object2.getRut());
+			}
+		});
+
+	}
 }
