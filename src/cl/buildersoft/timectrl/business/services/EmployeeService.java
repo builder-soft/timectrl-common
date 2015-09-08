@@ -24,6 +24,8 @@ public interface EmployeeService {
 
 	public List<Employee> listBoss(Connection conn);
 
+	public List<Employee> listEmployeeByBoss(Connection conn, Long bossId);
+
 	public void sortByName(List<Employee> employeeList);
 
 	public void sortByRut(List<Employee> employeeList);
