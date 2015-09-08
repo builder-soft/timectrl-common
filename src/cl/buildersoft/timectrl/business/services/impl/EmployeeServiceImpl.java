@@ -16,6 +16,7 @@ import cl.buildersoft.timectrl.business.beans.Post;
 import cl.buildersoft.timectrl.business.services.EmployeeService;
 
 public class EmployeeServiceImpl extends BSHttpServlet implements EmployeeService {
+	private static final String IS_BOSS = "cId IN (SELECT DISTINCT(cBoss) FROM tEmployee WHERE NOT cBoss IS NULL)";
 	private static final long serialVersionUID = 9126047546816667626L;
 
 	@Override
@@ -84,15 +85,14 @@ public class EmployeeServiceImpl extends BSHttpServlet implements EmployeeServic
 
 	@Override
 	public List<Employee> listEmployeeByBoss(Connection conn, Long bossId) {
-		 
-		return null;
+		BSBeanUtils bu = new BSBeanUtils();
+		return (List<Employee>) bu.list(conn, new Employee(), "cBoss = ?)", bossId);
 	}
 
 	@Override
 	public List<Employee> listBoss(Connection conn) {
 		BSBeanUtils bu = new BSBeanUtils();
-		return (List<Employee>) bu.list(conn, new Employee(),
-				"cId IN (SELECT DISTINCT(cBoss) FROM tEmployee WHERE NOT cBoss IS NULL)");
+		return (List<Employee>) bu.list(conn, new Employee(), IS_BOSS);
 	}
 
 	@Override
