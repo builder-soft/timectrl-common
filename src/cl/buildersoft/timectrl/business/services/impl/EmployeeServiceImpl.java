@@ -86,7 +86,7 @@ public class EmployeeServiceImpl extends BSHttpServlet implements EmployeeServic
 	@Override
 	public List<Employee> listEmployeeByBoss(Connection conn, Long bossId) {
 		BSBeanUtils bu = new BSBeanUtils();
-		return (List<Employee>) bu.list(conn, new Employee(), "cBoss = ?)", bossId);
+		return (List<Employee>) bu.list(conn, new Employee(), "cBoss = ?", bossId);
 	}
 
 	@Override
