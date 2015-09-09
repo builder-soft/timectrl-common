@@ -283,12 +283,16 @@ public abstract class AbstractReportService {
 		sql = "SELECT tEmployee.cId AS UserId, tEmployee.cKey AS cKey, tEmployee.cRut AS SSN, tEmployee.cName AS Name, tArea.cCostCenter AS DEFAULTDEPTID, tEmployee.cUsername AS cUsername, cMail ";
 		sql += "FROM tEmployee ";
 		sql += "LEFT JOIN tArea ON tEmployee.cArea = tArea.cId ";
-		sql += allEmployee ? "" : "WHERE tEmployee.cId=? ";
+		sql += allEmployee ? "" : "WHERE tEmployee.cId IN (?) ";
 		// sql += getOrderSQL(conn);
 
 		if (!allEmployee) {
+			String[] employeeIdArray = idEmploye.split("[,]");
+
 			param = new ArrayList<Object>();
-			param.add(idEmploye);
+			for (String employeeId : employeeIdArray) {
+				param.add(employeeId);
+			}
 		}
 
 		// System.out.println(sql);
@@ -327,5 +331,4 @@ public abstract class AbstractReportService {
 		}
 	}
 
-	
 }
