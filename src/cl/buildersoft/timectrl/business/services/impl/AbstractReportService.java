@@ -19,6 +19,7 @@ import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.framework.exception.BSSystemException;
 import cl.buildersoft.framework.util.BSDataUtils;
 import cl.buildersoft.framework.util.BSDateTimeUtil;
+import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.framework.util.BSWeb;
 import cl.buildersoft.timectrl.business.beans.IdRut;
 import cl.buildersoft.timectrl.business.beans.Report;
@@ -280,15 +281,15 @@ public abstract class AbstractReportService {
 		String sql = null;
 		List<Object> param = null;
 
+		String[] employeeIdArray = idEmploye.split("[,]");
+
 		sql = "SELECT tEmployee.cId AS UserId, tEmployee.cKey AS cKey, tEmployee.cRut AS SSN, tEmployee.cName AS Name, tArea.cCostCenter AS DEFAULTDEPTID, tEmployee.cUsername AS cUsername, cMail ";
 		sql += "FROM tEmployee ";
 		sql += "LEFT JOIN tArea ON tEmployee.cArea = tArea.cId ";
-		sql += allEmployee ? "" : "WHERE tEmployee.cId IN (?) ";
+		sql += allEmployee ? "" : "WHERE tEmployee.cId IN (" + BSUtils.getCommas(employeeIdArray) + ") ";
 		// sql += getOrderSQL(conn);
 
 		if (!allEmployee) {
-			String[] employeeIdArray = idEmploye.split("[,]");
-
 			param = new ArrayList<Object>();
 			for (String employeeId : employeeIdArray) {
 				param.add(employeeId);
