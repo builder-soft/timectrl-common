@@ -39,6 +39,7 @@ import cl.buildersoft.timectrl.business.services.EmployeeService;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
 public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
+	private static final int ROWS_VERIFY_WIDTH = 10;
 	private static final String FORMAT_DDMMYYYY = "dd-MM-yyyy";
 	private static final int SUMMARY_COL_FIRST = 0;
 	private static final int SUMMARY_COL_RUT = 0;
@@ -62,22 +63,26 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		XSSFSheet detailSheet = workBook.getSheetAt(1);
 
 		XSSFSheet[] sheets = { summary, detailSheet };
-		XSSFRow row1 = null;
+		XSSFRow row = null;
 		Iterator<Cell> cells = null;
 		Integer index = null;
+		Integer tryCount = 0;
 
 		for (XSSFSheet sheet : sheets) {
 			Integer maxCol = getMaxCol(sheet);
 
-			row1 = sheet.getRow(maxCol);
-
-			cells = row1.cellIterator();
+			while (row == null && tryCount < ROWS_VERIFY_WIDTH) {
+				tryCount++;
+				row = sheet.getRow(maxCol--);
+			}
+			cells = row.cellIterator();
 			index = 0;
 
 			while (cells.hasNext()) {
 				cells.next();
 				sheet.autoSizeColumn(index++);
 			}
+
 		}
 	}
 
@@ -85,7 +90,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		Integer out = 0;
 		Short cellNum = 0;
 		XSSFRow row = null;
-		for (Integer i = 0; i < 10; i++) {
+		for (Integer i = 0; i < ROWS_VERIFY_WIDTH; i++) {
 			row = sheet.getRow(i);
 			if (row != null) {
 				cellNum = row.getLastCellNum();
@@ -211,11 +216,10 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 			cellIndex = row.getCell(DETAIL_COL_INDEX);
 			cellDate = row.getCell(DETAIL_COL_DATE);
-			
+
 			String cellDateString = cellDate.toString();
 
-			if (cellIndex.getCellType() == Cell.CELL_TYPE_NUMERIC
-					&& BSDateTimeUtil.isValidDate(cellDateString, FORMAT_DDMMYYYY)) {
+			if (cellIndex.getCellType() == Cell.CELL_TYPE_NUMERIC && BSDateTimeUtil.isValidDate(cellDateString, FORMAT_DDMMYYYY)) {
 				dataInSheet = new DataInSheet();
 
 				Calendar calendar = BSDateTimeUtil.string2Calendar(cellDateString, FORMAT_DDMMYYYY);
