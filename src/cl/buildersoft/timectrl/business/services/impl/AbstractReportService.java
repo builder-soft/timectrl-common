@@ -225,9 +225,13 @@ public abstract class AbstractReportService {
 		out = out.replaceAll("\\x7BRandom\\x7D", BSWeb.randomString());
 
 		for (String keyValue : keyValues) {
-			String newValue = parseCustomVariable(keyValue);
-			out = out.replaceAll("\\x7B" + keyValue + "\\x7D", newValue);
+			String newValue = null;
+
+			newValue = parseCustomVariable(keyValue);
+			out = out.replaceAll("\\x7B" + keyValue + "\\x7D", newValue == null ? "" : newValue);
+
 		}
+
 		return out;
 	}
 
