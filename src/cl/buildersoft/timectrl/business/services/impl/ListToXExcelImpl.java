@@ -46,7 +46,7 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 
 	@Override
 	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
-			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportInputParameterList) {
+			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportParameterList) {
 		List<String> out = new ArrayList<String>();
 
 		readProperties(conn, reportPropertyList);
@@ -55,7 +55,8 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 
 		BSmySQL mysql = new BSmySQL();
 
-		List<Object> params = getReportParams(conn, reportInputParameterList);
+		List<Object> params = getReportParams(conn, reportParameterList);
+		processEmployeeParameter(conn, reportParameterList);
 		ResultSet rs = mysql.callSingleSP(conn, this.spName, params);
 
 		resultSetToFile(conn, rs);

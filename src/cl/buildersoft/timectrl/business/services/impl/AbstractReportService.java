@@ -21,6 +21,7 @@ import cl.buildersoft.framework.util.BSDataUtils;
 import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.framework.util.BSWeb;
+import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.IdRut;
 import cl.buildersoft.timectrl.business.beans.Report;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
@@ -335,5 +336,27 @@ public abstract class AbstractReportService {
 			}
 		}
 	}
+	protected void processEmployeeParameter(Connection conn, List<ReportParameterBean> reportParameterList) {
+		for (ReportParameterBean parameter : reportParameterList) {
+			//System.out.println(parameter.toString());
+			if (parameter.getTypeKey().equalsIgnoreCase("EMPLOYEE_LIST") && parameter.getValue().equals("0")) {
+				replaceZeroWithAllIds(conn, parameter);
+			}
+		}
 
+	}
+
+	private void replaceZeroWithAllIds(Connection conn, ReportParameterBean parameter) {
+		BSBeanUtils bu = new BSBeanUtils();
+		String newValue = "";
+
+		List<Employee> employeeList = (List<Employee>) bu.listAll(conn, new Employee());
+		String[] idsArray = new String[employeeList.size()];
+		Integer index = 0;
+		for (Employee employee : employeeList) {
+			idsArray[index++] = employee.getId().toString();
+		}
+		newValue = BSUtils.unSplitString(idsArray, ",");
+		parameter.setValue(newValue);
+	}
 }
