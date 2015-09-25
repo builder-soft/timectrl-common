@@ -54,9 +54,10 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 		configOutputPathAndFile();
 
 		BSmySQL mysql = new BSmySQL();
-
-		List<Object> params = getReportParams(conn, reportParameterList);
+		
 		processEmployeeParameter(conn, reportParameterList);
+		List<Object> params = getReportParams(conn, reportParameterList);
+		
 		ResultSet rs = mysql.callSingleSP(conn, this.spName, params);
 
 		resultSetToFile(conn, rs);
@@ -176,11 +177,11 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 		return style;
 	}
 
-	protected List<Object> getReportParams(Connection conn, List<ReportParameterBean> inParamList) {
+	protected List<Object> getReportParams(Connection conn, List<ReportParameterBean> parameterList) {
 		List<Object> out = new ArrayList<Object>();
 		Object value = null;
 		BSBeanUtils bu = new BSBeanUtils();
-		for (ReportParameterBean reportParam : inParamList) {
+		for (ReportParameterBean reportParam : parameterList) {
 			value = getParameterType(conn, reportParam.getJavaType(), bu, reportParam.getValue());
 
 			// if (reportParam.getFromUser()) {

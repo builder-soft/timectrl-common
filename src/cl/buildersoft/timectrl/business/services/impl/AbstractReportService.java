@@ -341,6 +341,7 @@ public abstract class AbstractReportService {
 			//System.out.println(parameter.toString());
 			if (parameter.getTypeKey().equalsIgnoreCase("EMPLOYEE_LIST") && parameter.getValue().equals("0")) {
 				replaceZeroWithAllIds(conn, parameter);
+				parameter.setJavaType("STRING");
 			}
 		}
 
