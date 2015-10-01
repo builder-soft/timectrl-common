@@ -10,6 +10,7 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.util.BSConfig;
 import cl.buildersoft.timectrl.business.beans.Employee;
+import cl.buildersoft.timectrl.business.beans.TurnDay;
 import cl.buildersoft.timectrl.business.console.AbstractConsoleService;
 
 public class AbstractTestReport extends AbstractConsoleService {
@@ -157,5 +158,28 @@ public class AbstractTestReport extends AbstractConsoleService {
 		// Integer out = config.getInteger(conn, "TOLERANCE_INFERENCE");
 
 	}
-	
+
+	protected TurnDay getTurnDay(Long turn, Integer day) {
+		TurnDay out = new TurnDay();
+
+		BSBeanUtils bu = new BSBeanUtils();
+		bu.search(conn, out, "cTurn=? AND cDay=?", turn, day);
+
+		return out;
+	}
+
+	protected void saveTurn(TurnDay turnDay) {
+		BSBeanUtils bu = new BSBeanUtils();
+		bu.save(conn, turnDay);
+
+	}
+
+	protected void setToleranceRange(TurnDay turnDay, Integer prevIn, Integer postIn, Integer prevOut, Integer postOut) {
+		turnDay.setEdgePrevIn(prevIn);
+		turnDay.setEdgePostIn(postIn);
+		turnDay.setEdgePrevOut(prevOut);
+		turnDay.setEdgePostOut(postOut);
+
+	}
+
 }

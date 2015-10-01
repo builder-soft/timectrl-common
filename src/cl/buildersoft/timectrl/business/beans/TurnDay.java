@@ -91,4 +91,11 @@ public class TurnDay extends BSBean {
 		this.edgePostOut = edgePostOut;
 	}
 
+	@Override
+	public String toString() {
+		return "TurnDay [id=" + this.getId() + " turn=" + turn + ", day=" + day + ", businessDay=" + businessDay
+				+ ", edgePrevIn=" + edgePrevIn + ", startTime=" + startTime + ", edgePostIn=" + edgePostIn + ", edgePrevOut="
+				+ edgePrevOut + ", endTime=" + endTime + ", edgePostOut=" + edgePostOut + "]";
+	}
+
 }

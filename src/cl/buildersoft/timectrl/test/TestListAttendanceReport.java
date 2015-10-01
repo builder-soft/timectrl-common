@@ -12,9 +12,17 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import cl.buildersoft.framework.database.BSmySQL;
+import cl.buildersoft.timectrl.business.beans.TurnDay;
 
 public class TestListAttendanceReport extends AbstractTestReport {
 
+	private static final int JUEVES = 4;
+	private static final int MARTES = 2;
+	private static final int MIERCOLES = 3;
+	private static final int LUNES = 1;
+	private static final int VIERNES = 5;
+
+	private static final long SOPORTE_TURN = 5L;
 	private static final String SIN_MARCA = "";
 
 	@BeforeClass
@@ -367,7 +375,7 @@ public class TestListAttendanceReport extends AbstractTestReport {
 
 	@Test
 	public void test27() {
-//		flagTest(27);
+		// flagTest(27);
 		List<Object> prm = getParameters("8796638-0", "2015-03-23");
 
 		ResultSet rs = execute(mysql, prm);
@@ -376,4 +384,61 @@ public class TestListAttendanceReport extends AbstractTestReport {
 		mysql.closeSQL(rs);
 		assertTrue(success, success.length() == 0);
 	}
+
+	@Test
+	public void test28() {
+		List<Object> prm = getParameters("16912006-4", "2015-03-03");
+
+		TurnDay turnDayBackup = getTurnDay(SOPORTE_TURN, MARTES);
+		TurnDay turnDay = getTurnDay(SOPORTE_TURN, MARTES);
+		turnDay.setEdgePostOut(10);
+		saveTurn(turnDay);
+
+		ResultSet rs = execute(mysql, prm);
+		String success = validate(rs, prm, "08:59:24", "14:45:54", "1", "106");
+
+		saveTurn(turnDayBackup);
+
+		mysql.closeSQL(rs);
+		assertTrue(success, success.length() == 0);
+	}
+
+	@Test
+	public void test29() {
+		List<Object> prm = getParameters("16912006-4", "2015-03-04");
+
+		TurnDay turnDayBackup = getTurnDay(SOPORTE_TURN, MIERCOLES);
+		TurnDay turnDay = getTurnDay(SOPORTE_TURN, MIERCOLES);
+		setToleranceRange(turnDay, 0, 10, 0, 0);
+
+		saveTurn(turnDay);
+
+		ResultSet rs = execute(mysql, prm);
+		String success = validate(rs, prm, "09:07:28", "", "(0)", "");
+
+		saveTurn(turnDayBackup);
+
+		mysql.closeSQL(rs);
+		assertTrue(success, success.length() == 0);
+	}
+
+	@Test
+	public void test30() {
+		List<Object> prm = getParameters("16912006-4", "2015-03-05");
+
+		TurnDay turnDayBackup = getTurnDay(SOPORTE_TURN, JUEVES);
+		TurnDay turnDay = getTurnDay(SOPORTE_TURN, JUEVES);
+		setToleranceRange(turnDay, 0, 5, 0, 150);
+
+		saveTurn(turnDay);
+
+		ResultSet rs = execute(mysql, prm);
+		String success = validate(rs, prm, "09:07:43", "15:11:46", "-8", "0");
+
+		saveTurn(turnDayBackup);
+
+		mysql.closeSQL(rs);
+		assertTrue(success, success.length() == 0);
+	}
+
 }
