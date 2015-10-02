@@ -49,18 +49,18 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 
 	// private IdRut idRut = null;
 
-	public List<ReportPropertyBean> loadReportProperties_(Connection conn, Long idReport) {
+	private List<ReportPropertyBean> loadReportProperties_(Connection conn, Long idReport) {
 		List<ReportPropertyBean> properties = super.loadReportProperties(conn, idReport);
 
 		return properties;
 	}
 
-	public List<ReportParameterBean> loadInputParameter_(Connection conn, Long idReport) {
+	private List<ReportParameterBean> loadInputParameter_(Connection conn, Long idReport) {
 		return null;
 	}
 
 	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
-			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportInputParameterList) {
+			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportParameterList) {
 
 		/**
 		 * <code>
@@ -131,21 +131,36 @@ retornar OUT
 
 		DestinyEnum destiny = getDestiny(reportPropertyList);
 		if (destiny == null) {
-			throw new BSConfigurationException("No set destination. It can be '" + DestinyEnum.EACH_ONE.name() + "' or '"
-					+ DestinyEnum.MANPOWER.name() + "'. This was '" + this.destiny + "'");
+			throw new BSConfigurationException("No set destination. It can be '" + DestinyEnum.EACH_ONE.name() + "', '"
+					+ DestinyEnum.MANPOWER.name() + "' or '" + DestinyEnum.BOSS_ONLY.name() + "'. This was '" + this.destiny
+					+ "'");
 		}
 		List<String> out = null;
 		List<String> fileList = null;
 		switch (destiny) {
+		case BOSS_ONLY:
+			/**
+			 * <code>
+ 
+ 	Busca Id de Jefe usando el parametro Jefe (BOSS_LIST);
+ 	Generar informe(Properties, parameters )
+ 	Enviar informe generado(Jefe)
+ 
+    delete file temp
+</code>
+			 */
+			ReportParameterBean bossParameter = getBossParameter(reportParameterList);
+
+			break;
 		case MANPOWER:
-			fileList = executeReport(conn, idReport, reportType, reportPropertyList, reportInputParameterList);
+			fileList = executeReport(conn, idReport, reportType, reportPropertyList, reportParameterList);
 			out = sendMail(fileList, manpowerMail);
 
 			deleteTempFiles(fileList);
 
 			break;
 		case EACH_ONE:
-			ReportParameterBean employeeParameter = getEmployeeParameter(reportInputParameterList);
+			ReportParameterBean employeeParameter = getEmployeeParameter(reportParameterList);
 			List<IdRut> employeeList = null;
 			if (employeeParameter != null) {
 				employeeList = getEmployeeList(conn, employeeParameter.getValue());
@@ -159,9 +174,9 @@ retornar OUT
 				// this.idRut = idRut;
 				mail = idRut.getMail();
 				if (mail != null && mail.trim().length() > 0) {
-					updateEmployeeId(reportInputParameterList, idRut.getId());
+					updateEmployeeId(reportParameterList, idRut.getId());
 
-					fileList = executeReport(conn, idReport, reportType, reportPropertyList, reportInputParameterList);
+					fileList = executeReport(conn, idReport, reportType, reportPropertyList, reportParameterList);
 					List<String> outTemp = sendMail(fileList, mail);
 
 					for (String oneOutTemp : outTemp) {
@@ -177,22 +192,22 @@ retornar OUT
 		/**
 		 * <code>
 Obtener propiedad Destiny 
-�Propiedad.destino = BOSS_ONLY?
+¿Propiedad.destino = BOSS_ONLY?
    obtener lista de empleados
    recorrer lista de empleados
-	   �El empleado tiene subalternos?
+	   ¿El empleado tiene subalternos?
 		  Generar informe(Properties, parameters, empleado)
 		  Enviar informe generado(empleado)
 	   continuar
    continuar   
-SI NO �Propiedad.destino = EACH_ONE?
+SI NO ¿Propiedad.destino = EACH_ONE?
    obtener lista de empleados
    recorrer lista de empleados
       Generar informe(Properties, parameters, empleado)
       Enviar informe generado(empleado)
    continuar
 	
-SI NO �Propiedad.destino = MANPOWER? 
+SI NO ¿Propiedad.destino = MANPOWER? 
    Generar informe(Properties, parameters, null)
    Enviar informe(s) generado(s)(MANPOWER)
 SI NO 
@@ -204,6 +219,17 @@ Fin
 		 */
 
 		return out;
+	}
+
+	private ReportParameterBean getBossParameter(List<ReportParameterBean> reportParameterList) {
+		ReportParameterBean out = null;
+		for (ReportParameterBean reportParameter : reportParameterList) {
+			if (reportParameter.getTypeKey().equalsIgnoreCase("BOSS_LIST")) {
+				out = reportParameter;
+				break;
+			}
+		}
+		return null;
 	}
 
 	private void deleteTempFiles(List<String> fileList) {
@@ -341,6 +367,8 @@ Fin
 			out = DestinyEnum.EACH_ONE;
 		} else if ("MANPOWER".equalsIgnoreCase(this.destiny)) {
 			out = DestinyEnum.MANPOWER;
+		} else if ("BOSS_ONLY".equalsIgnoreCase(this.destiny)) {
+			out = DestinyEnum.BOSS_ONLY;
 		}
 		return out;
 	}
