@@ -22,19 +22,19 @@ public class AbstractTestReport extends AbstractConsoleService {
 	BSmySQL mysql = null;
 	Integer testNumber = null;
 
-	protected String validate(ResultSet rs, List<Object> prm, String startMark, String endMark, String startDiffI,
-			String endDiffI, String comment) {
-		return validate(rs, prm, startMark, endMark, startDiffI, endDiffI);
+	protected String validate(ResultSet rs, List<Object> prm, String startMark, String endMark, String startDiffI, String endDiffI) {
+		return validate(rs, prm, startMark, endMark, startDiffI, endDiffI, "");
 	}
 
-	protected String validate(ResultSet rs, List<Object> prm, String startMark, String endMark, String startDiffI, String endDiffI) {
+	protected String validate(ResultSet rs, List<Object> prm, String startMark, String endMark, String startDiffI,
+			String endDiffI, String comment) {
 		String out = "";
 		String startMarkRS = null;
 		String endMarkRS = null;
 		String startDiffIRS = null;
 		String endDiffIRS = null;
 		String commentRS = null;
-		String comment = "";
+		// String comment = "";
 
 		try {
 			if (rs.next()) {
@@ -61,7 +61,9 @@ public class AbstractTestReport extends AbstractConsoleService {
 		}
 
 		if (out.length() == 0) {
-			if (!startMarkRS.equals(startMark)) {
+			if (!commentRS.equals(comment)) {
+				out = "Comment='" + commentRS + EXPECTED_MESSAGE + comment + APOSTROPHE;
+			} else if (!startMarkRS.equals(startMark)) {
 				out = "Start Mark='" + startMarkRS + EXPECTED_MESSAGE + startMark + APOSTROPHE;
 			} else if (!endMarkRS.equals(endMark)) {
 				out = "End Mark='" + endMarkRS + EXPECTED_MESSAGE + endMark + APOSTROPHE;
@@ -71,6 +73,7 @@ public class AbstractTestReport extends AbstractConsoleService {
 				out = "End Diff Out='" + endDiffIRS + EXPECTED_MESSAGE + endDiffI + APOSTROPHE;
 			}
 			// if (comment.length() > 0) {
+			/*
 			if (startMark.length() == 0 && endMark.length() == 0) {
 				comment = "Sin marcas";
 			} else if (startMark.length() == 0) {
@@ -78,7 +81,7 @@ public class AbstractTestReport extends AbstractConsoleService {
 			} else if (endMark.length() == 0) {
 				comment = "Sin salida";
 			}
-
+			*/
 			Integer indexOf = commentRS.indexOf(comment);
 			if (indexOf == -1) {
 				out = "Comment='" + commentRS + EXPECTED_MESSAGE + comment + APOSTROPHE;
@@ -123,8 +126,13 @@ public class AbstractTestReport extends AbstractConsoleService {
 		return employee.getKey();
 	}
 
+	protected ResultSet execute(BSmySQL mysql, List<Object> prm, String spName) {
+		return mysql.callSingleSP(conn, spName, prm);
+	}
+
 	protected ResultSet execute(BSmySQL mysql, List<Object> prm) {
-		return mysql.callSingleSP(conn, "pListAttendance3", prm);
+		return execute(mysql, prm, "pListAttendance3");
+		// return mysql.callSingleSP(conn, "pListAttendance3", prm);
 	}
 
 	protected void flagTest(int testNumber) {

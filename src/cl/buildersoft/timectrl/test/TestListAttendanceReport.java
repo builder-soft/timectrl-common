@@ -115,7 +115,7 @@ public class TestListAttendanceReport extends AbstractTestReport {
 		// flagTest(6);
 		List<Object> prm = getParameters("9569677-5", "2014-12-19");
 		ResultSet rs = execute(mysql, prm);
-		String success = validate(rs, prm, "07:55:01", "", "(5)", SIN_MARCA, "No marca salida");
+		String success = validate(rs, prm, "07:55:01", "", "(5)", SIN_MARCA, "Sin salida");
 
 		mysql.closeSQL(rs);
 		assertTrue(success, success.length() == 0);
@@ -136,7 +136,7 @@ public class TestListAttendanceReport extends AbstractTestReport {
 		// flagTest(8);
 		List<Object> prm = getParameters("12927407-7", "2015-02-23");
 		ResultSet rs = execute(mysql, prm);
-		String success = validate(rs, prm, "", "18:23:47", SIN_MARCA, "(24)", "No marca entrada");
+		String success = validate(rs, prm, "", "18:23:47", SIN_MARCA, "(24)", "Sin entrada");
 
 		mysql.closeSQL(rs);
 		assertTrue(success, success.length() == 0);
@@ -236,7 +236,7 @@ public class TestListAttendanceReport extends AbstractTestReport {
 		// flagTest(16);
 		List<Object> prm = getParameters("13038862-0", "2015-02-16");
 		ResultSet rs = execute(mysql, prm);
-		String success = validate(rs, prm, "", "20:51:59", SIN_MARCA, "(127)", "");
+		String success = validate(rs, prm, "", "20:51:59", SIN_MARCA, "(127)", "Sin entrada");
 		mysql.closeSQL(rs);
 		assertTrue(success, success.length() == 0);
 	}
@@ -266,7 +266,7 @@ public class TestListAttendanceReport extends AbstractTestReport {
 		// setToleranceTime(300);
 
 		ResultSet rs = execute(mysql, prm);
-		String success = validate(rs, prm, "07:54:28", "", "(0)", "");
+		String success = validate(rs, prm, "07:54:28", "", "(0)", "", "Sin salida");
 		// setToleranceTime(tolerance);
 
 		mysql.closeSQL(rs);
@@ -318,7 +318,7 @@ public class TestListAttendanceReport extends AbstractTestReport {
 		// setHoursWorkday(17);
 
 		ResultSet rs = execute(mysql, prm);
-		String success = validate(rs, prm, "07:47:26", "", "(13)", "");
+		String success = validate(rs, prm, "07:47:26", "", "(13)", "", "Sin salida");
 		// setHoursWorkday(hoursWorkday);
 
 		mysql.closeSQL(rs);
@@ -379,7 +379,7 @@ public class TestListAttendanceReport extends AbstractTestReport {
 		List<Object> prm = getParameters("8796638-0", "2015-03-23");
 
 		ResultSet rs = execute(mysql, prm);
-		String success = validate(rs, prm, "", "", "", "");
+		String success = validate(rs, prm, "", "", "", "", "");
 
 		mysql.closeSQL(rs);
 		assertTrue(success, success.length() == 0);
@@ -414,7 +414,7 @@ public class TestListAttendanceReport extends AbstractTestReport {
 		saveTurn(turnDay);
 
 		ResultSet rs = execute(mysql, prm);
-		String success = validate(rs, prm, "09:07:28", "", "(0)", "");
+		String success = validate(rs, prm, "09:07:28", "", "(0)", "", "Sin salida");
 
 		saveTurn(turnDayBackup);
 
@@ -433,7 +433,7 @@ public class TestListAttendanceReport extends AbstractTestReport {
 		saveTurn(turnDay);
 
 		ResultSet rs = execute(mysql, prm);
-		String success = validate(rs, prm, "09:07:43", "15:11:46", "-8", "0");
+		String success = validate(rs, prm, "09:07:43", "15:11:46", "-8", "0", "");
 
 		saveTurn(turnDayBackup);
 
@@ -441,4 +441,22 @@ public class TestListAttendanceReport extends AbstractTestReport {
 		assertTrue(success, success.length() == 0);
 	}
 
+	@Test
+	public void test31() {
+		List<Object> prm = getParameters("16912006-4", "2015-03-07");
+
+		// TurnDay turnDayBackup = getTurnDay(SOPORTE_TURN, JUEVES);
+		// TurnDay turnDay = getTurnDay(SOPORTE_TURN, JUEVES);
+		// setToleranceRange(turnDay, 0, 5, 0, 150);
+
+		// saveTurn(turnDay);
+
+		ResultSet rs = execute(mysql, prm, "pListAttendance3");
+		String success = validate(rs, prm, "", "", "", "", "");
+
+		// saveTurn(turnDayBackup);
+
+		mysql.closeSQL(rs);
+		assertTrue(success, success.length() == 0);
+	}
 }
