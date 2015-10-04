@@ -21,6 +21,7 @@ public class Employee extends BSBean {
 	private Integer fingerIndex = null;
 	private String cardNumber = null;
 	private Long group = null;
+	private String mail = null;
 
 	/**
 	 * <code>
@@ -32,7 +33,6 @@ public class Employee extends BSBean {
 	private String phone = null;
 	private Long maritalStatus = null;
 	private String movil = null;
-	private String email = null;
 	</code>
 	 */
 	public String getKey() {
@@ -136,6 +136,14 @@ public class Employee extends BSBean {
 		return "Employee [key=" + key + ", rut=" + rut + ", name=" + name + ", post=" + post + ", area=" + area + ", privilege="
 				+ privilege + ", enabled=" + enabled + ", fingerPrint=" + fingerPrint + ", flag=" + flag + ", fingerIndex="
 				+ fingerIndex + ", cardNumber=" + cardNumber + ", group=" + group + ", getId()=" + getId() + "]";
+	}
+
+	public String getMail() {
+		return mail;
+	}
+
+	public void setMail(String mail) {
+		this.mail = mail;
 	}
 
 }

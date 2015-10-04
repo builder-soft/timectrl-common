@@ -63,17 +63,27 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		XSSFSheet detailSheet = workBook.getSheetAt(1);
 
 		XSSFSheet[] sheets = { summary, detailSheet };
-		XSSFRow row = null;
 		Iterator<Cell> cells = null;
 		Integer index = null;
-		Integer tryCount = 0;
+		Integer lastCellNum = 0;
 
 		for (XSSFSheet sheet : sheets) {
+			Integer tryCount = 0;
+			XSSFRow row = null;
+
 			Integer maxCol = getMaxCol(sheet);
+			Integer currentCol = maxCol;
 
 			while (row == null && tryCount < ROWS_VERIFY_WIDTH) {
 				tryCount++;
-				row = sheet.getRow(maxCol--);
+				row = sheet.getRow(currentCol);
+				if (row != null) {
+					lastCellNum = (int) row.getLastCellNum();
+					if (lastCellNum != maxCol) {
+						row = null;
+					}
+				}
+				currentCol--;
 			}
 			cells = row.cellIterator();
 			index = 0;
@@ -82,7 +92,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 				cells.next();
 				sheet.autoSizeColumn(index++);
 			}
-
 		}
 	}
 
@@ -108,6 +117,8 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		// XSSFSheet detail = workBook.getSheetAt(1);
 		Iterator<Row> rowIterator = sheet.iterator();
 		Row row = null;
+		Integer lastRowNumber = sheet.getLastRowNum();
+
 		Map<DataInSheet, Integer> out = new HashMap<DataInSheet, Integer>();
 
 		Cell firstCell = null, cellRut = null;
@@ -129,6 +140,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 			if (firstLoop) {
 				row = rowIterator.next();
 			}
+
 			firstCell = row.getCell(SUMMARY_COL_FIRST);
 			if (firstCell.getCellType() == Cell.CELL_TYPE_STRING) {
 				value = firstCell.getStringCellValue();
@@ -145,7 +157,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 							if (firstCell.getStringCellValue().toLowerCase().startsWith("rut")) {
 								row = rowIterator.next();
 								doContinue = true;
-								while (rowIterator.hasNext() && doContinue) {
+								while (doContinue && row.getRowNum() <= lastRowNumber) {
 									cellRut = row.getCell(SUMMARY_COL_RUT);
 
 									if (cellRut.getCellType() == Cell.CELL_TYPE_STRING) {
@@ -160,14 +172,20 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 											CreationHelper createHelper = workBook.getCreationHelper();
 											Hyperlink link = createHelper.createHyperlink(Hyperlink.LINK_DOCUMENT);
 
-											Integer x = detailResult.get(dataInSheet);
-											if (x != null) {
-												String address = "'Detalle'!B" + x;
+											Integer rowNumber = detailResult.get(dataInSheet);
+											if (rowNumber != null) {
+												String address = "'Detalle'!B" + rowNumber;
 												link.setAddress(address);
 												cellRut.setHyperlink(link);
 												cellRut.setCellStyle(hlink_style);
 											}
-											row = rowIterator.next();
+
+											if (rowIterator.hasNext()) {
+												row = rowIterator.next();
+											} else {
+												doContinue = false;
+											}
+
 										} else {
 											doContinue = false;
 										}

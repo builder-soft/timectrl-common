@@ -87,14 +87,14 @@ public class BuildReport3 extends AbstractConsoleService {
 		List<ReportPropertyBean> reportPropertyList = reportService.loadReportProperties(conn, id);
 		// List<ReportPropertyType> outValues =
 		// reportService.loadOutValues(conn, outParams);
-		List<ReportParameterBean> inParams = reportService.loadParameter(conn, id);
+		List<ReportParameterBean> parameters = reportService.loadParameter(conn, id);
 
-		if (inParams.size() != target.size()) {
+		if (parameters.size() != target.size()) {
 			throw new BSConfigurationException("Amount of parameters do not match");
 		}
-		reportService.fillParameters(inParams, target);
+		reportService.fillParameters(parameters, target);
 
-		List<String> out = reportService.execute(conn, report.getId(), reportType, reportPropertyList, inParams);
+		List<String> out = reportService.execute(conn, report.getId(), reportType, reportPropertyList, parameters);
 
 		return out;
 	}

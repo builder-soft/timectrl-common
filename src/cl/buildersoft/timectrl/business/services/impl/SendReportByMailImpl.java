@@ -21,6 +21,7 @@ import javax.mail.internet.MimeMultipart;
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
+import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.IdRut;
 import cl.buildersoft.timectrl.business.beans.Report;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
@@ -61,72 +62,6 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 
 	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
 			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportParameterList) {
-
-		/**
-		 * <code>
-		 * ******************************************************
-Supuesto:
-Es obligatorio que cada empleado tenga un jefe asignado, as� como los grupos que conversamos la semana pasada?
-�o puede ser que existan empleados sin jefe?
-lo pregunto, ademas por que cuando se sincronize un reloj que tenga un empleado nuevo, habria que asignarle un "jefe por defecto"
-Tambien pensando en cuando se hega el upgrade de version, hay que asignarles un jefe por defecto a todos los empleados
-O tal vez, se pueda dejar sin jefe asignado
-DEFINICION: El empleado puede tener en el campo jefe el valor NULL, por lo cual, no es necesario que en un inicio se tenga que asignar a todos los empleados un jefe al cual se har� llegar el informe.
-*******************************************************
-
-----INICIO----------
-obtener propiedad Destiny 
-�Propiedad.destino = BOSS_ONLY?
-   obtener lista de empleados
-   recorrer lista de empleados
-	   �El empleado tiene subalternos?
-		  Generar informe(Properties, parameters, empleado)
-		  Enviar informe generado(empleado)
-	   continuar
-   continuar   
-SI NO �Propiedad.destino = EACH_ONE?
-   obtener lista de empleados
-   recorrer lista de empleados
-      Generar informe(Properties, parameters, empleado)
-      Enviar informe generado(empleado)
-   continuar   
-	
-SI NO �Propiedad.destino = MANPOWER? 
-   Generar informe(Properties, parameters, null)
-   Enviar informe(s) generado(s)(MANPOWER)
-SI NO 
-   lanzar error de configuracion "Propiedad.destino no configurada"
-continuar
-
-Fin
--------------------------------------------------------
-Generar informe(idReport, reportType, Properties, parameters, empleado)
-buscar subReporte a partir del Key
-generar instancia del sub-reporte 
-Obtener Parametros y propiedades del subReporte
-
-buscar propiedad outputPath de subReporte
-buscar variable de entorno TEMP
-establecer valor de propiedad outputPath con el valor de TEMP
-buscar outputFile de subReporte
-rescatar extencion del subreporte
-setear nombre de archivo como {Random} + extencion.
-
-Preparar las propiedades con las 2 recien cambiadas.
-filePath = ejecutar subReporte con parametros y nuevas propiedades.
-ejectuar subReporte(idReport, reportType, Properties, parameters)
-
----------APLICA DENTRO DEL INFORME PARA EL CASO EN QUE HAY SUBALTERNOS--------------------
-obtener subalternos(empleado)
-   OUT = select * from temployee where cBoss = empleado.cid
-   recorrer listado de subalternos
-      �subalterno tiene subalternos?
-	  OUT += obtener subalternos(subalteno)
-   continuar
-retornar OUT
-
- * </code>
-		 */
 		readProperties(conn, reportPropertyList);
 
 		DestinyEnum destiny = getDestiny(reportPropertyList);
@@ -150,6 +85,16 @@ retornar OUT
 </code>
 			 */
 			ReportParameterBean bossParameter = getBossParameter(reportParameterList);
+			if(bossParameter == null){
+				throw new BSConfigurationException("Report was configured as 'BOSS_ONLY' but 'Boss' parameter not exists.");
+			}
+			
+			Employee boss = getEmployee(conn, Long.parseLong(bossParameter.getValue()));
+
+			fileList = executeReport(conn, idReport, reportType, reportPropertyList, reportParameterList);
+			out = sendMail(fileList, boss.getMail());
+
+			deleteTempFiles(fileList);
 
 			break;
 		case MANPOWER:
@@ -189,34 +134,15 @@ retornar OUT
 			break;
 		}
 
-		/**
-		 * <code>
-Obtener propiedad Destiny 
-¿Propiedad.destino = BOSS_ONLY?
-   obtener lista de empleados
-   recorrer lista de empleados
-	   ¿El empleado tiene subalternos?
-		  Generar informe(Properties, parameters, empleado)
-		  Enviar informe generado(empleado)
-	   continuar
-   continuar   
-SI NO ¿Propiedad.destino = EACH_ONE?
-   obtener lista de empleados
-   recorrer lista de empleados
-      Generar informe(Properties, parameters, empleado)
-      Enviar informe generado(empleado)
-   continuar
-	
-SI NO ¿Propiedad.destino = MANPOWER? 
-   Generar informe(Properties, parameters, null)
-   Enviar informe(s) generado(s)(MANPOWER)
-SI NO 
-   lanzar error de configuracion "Propiedad.destino no configurada"
-continuar
+		return out;
+	}
 
-Fin
-</code>
-		 */
+	private Employee getEmployee(Connection conn, Long id) {
+		BSBeanUtils bu = new BSBeanUtils();
+		Employee out = new Employee();
+		out.setId(id);
+
+		bu.search(conn, out);
 
 		return out;
 	}
@@ -229,7 +155,7 @@ Fin
 				break;
 			}
 		}
-		return null;
+		return out;
 	}
 
 	private void deleteTempFiles(List<String> fileList) {
@@ -255,47 +181,10 @@ Fin
 		ReportPropertyBean outputPath = getOutputPath(subReportPropertyList);
 		String tempPath = getTempPath();
 		outputPath.setPropertyValue(tempPath);
-		/**
-		 * <code>
-		ReportPropertyBean outputFile = getOutputFile(subReportPropertyList);
-		String extension = getExtension(outputFile);
-
-		String outputFileName = getOutputFileName(extension);
-		outputFile.setPropertyValue(outputFileName);
-</code>
-		 */
 		copyParameterValues(reportInputParameterList, subReportInputParameterList);
-		/**
-		 * <code>
-		if (inParams.size() != target.size()) {
-			throw new BSConfigurationException("Amount of parameters do not match");
-		}
-		reportService.fillInputParameters(subReportInputParameterList, target);
-</code>
-		 */
+
 		out = subReportService.execute(conn, subReport.getId(), getReportType(conn, subReport), subReportPropertyList,
 				subReportInputParameterList);
-
-		/**
-		 * <code>
-		buscar subReporte a partir del Key
-		generar instancia del sub-reporte 
-		Obtener Parametros y propiedades del subReporte
-		
-		buscar propiedad outputPath de subReporte
-		buscar variable de entorno TEMP
-		establecer valor de propiedad outputPath con el valor de TEMP
-		buscar outputFile de subReporte
-		rescatar extencion del subreporte
-		setear nombre de archivo como {Random} + extencion.
-		actualizar propiedad outputFile
-		
-		Preparar las propiedades con las 2 recien cambiadas.
-		filePath = ejecutar subReporte con parametros y nuevas propiedades.
-		ejectuar subReporte(idReport, reportType, Properties, parameters)
-
-</code>
-		 */
 
 		return out;
 	}
