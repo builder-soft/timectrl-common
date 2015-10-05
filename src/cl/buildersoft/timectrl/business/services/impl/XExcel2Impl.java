@@ -38,6 +38,7 @@ import cl.buildersoft.timectrl.business.beans.ReportType;
 import cl.buildersoft.timectrl.business.services.EmployeeService;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
+/** Este es el reporte a Excel que enlaza dos hojas en la misma planilla */
 public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	private static final int ROWS_VERIFY_WIDTH = 10;
 	private static final String FORMAT_DDMMYYYY = "dd-MM-yyyy";
