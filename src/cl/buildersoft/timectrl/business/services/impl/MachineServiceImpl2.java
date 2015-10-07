@@ -49,6 +49,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 	public List<AttendanceLog> listAttendence(Connection conn, _zkemProxy api, Machine machine) throws IZKEMException {
 		List<AttendanceLog> out = new ArrayList<AttendanceLog>();
 		AttendanceLog attendance = null;
+		Boolean found = null;
 
 		Integer dwMachineNumber = 1;
 		Holder<String> dwEnrollNumber = new Holder<String>("");
@@ -89,9 +90,11 @@ public class MachineServiceImpl2 implements MachineService2 {
 				attendance.setMachine(machine.getId());
 				attendance.setMarkType(readMarkType(conn, dwInOutMode));
 
-				out.add(attendance);
-
-				writeToConsole(attendance);
+				found = existsAttendanceLog(conn, attendance);
+				if (!found) {
+					out.add(attendance);
+				}
+				writeToConsole(attendance, found);
 
 			}
 		} else {
@@ -104,8 +107,8 @@ public class MachineServiceImpl2 implements MachineService2 {
 		return out;
 	}
 
-	private void writeToConsole(AttendanceLog attendance) {
-		System.out.println(attendance.toString());
+	private void writeToConsole(AttendanceLog attendance, Boolean found) {
+		System.out.println((found ? "Exists: " : "Absent: ") + attendance.toString());
 	}
 
 	private long readMarkType(Connection conn, Holder<Integer> dwInOutMode) {
