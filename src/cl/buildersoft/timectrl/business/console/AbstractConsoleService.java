@@ -42,7 +42,8 @@ public abstract class AbstractConsoleService {
 		if (path == null) {
 			throw new BSConfigurationException("Undefined enviroment variable BS_PATH");
 		}
-		String propertyFileName = config.fixPath(path) + FILE_NAME;
+		String propertyFileName = config.fixPath(path) + BSConfig.getFileSeparator() + "lib" + BSConfig.getFileSeparator()
+				+ FILE_NAME;
 
 		Properties prop = new Properties();
 		InputStream inputStream;

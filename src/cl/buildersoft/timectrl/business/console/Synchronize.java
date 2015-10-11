@@ -35,7 +35,7 @@ Recorrer listado maquinas
    buscar listado de empleados para el grupo leido
    Cargar listado de empleados en un Map<key, employee>DB
    
-   conectar a la máquina
+   conectar a la maquina
    Cargar listado de empleados en un Map<key, employee>MACHINE
    
    Cargar solo los key desde map->DB en un arreglo
@@ -55,7 +55,7 @@ Recorrer listado maquinas
    continuar
    
    Recorrer lista map->MACHINE
-   	  Si empleado Está en Base de datos
+   	  Si empleado Esta en Base de datos
          borrar empleado del reloj
       en caso contrario
          grabar empleado en base de datos.
@@ -121,7 +121,7 @@ siguiente maquina
 			/**
 			 * <code>			
   Recorrer lista map->MACHINE
-   	  Si empleado Está en Base de datos
+   	  Si empleado Estï¿½ en Base de datos
          borrar empleado del reloj
       en caso contrario
          grabar empleado en base de datos.
