@@ -1,9 +1,15 @@
 package cl.buildersoft.timectrl.business.process.impl;
 
+/**  
+ * Este programa toma los registros de la tabla tAttendanceLog y los clasifica para volcarlos en la tabla tCrewProcess para obtener posteriormente el reporte de Dotaciones.
+ Los registros que son procesados, quedan manrcados en la tabla tCrewLog.
+ */
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -13,12 +19,13 @@ import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.business.beans.Employee;
+import cl.buildersoft.timectrl.business.beans.TurnDay;
 import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.process.ExecuteProcess;
+import cl.buildersoft.timectrl.business.services.TurnDayService;
+import cl.buildersoft.timectrl.business.services.impl.TurnDayServiceImpl;
 
 public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
-	private String[] validArguments = { "DOMAIN" };
-
 	/**
 	 * <code>
 	SET vTolerance = fGetTolerance();
@@ -70,10 +77,12 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 			
 		FIN FOR
 	FIN FOR
-	
+
 	cerrar la coneccion a la base de datos
-</code>
+	</code>
 	 */
+
+	private String[] validArguments = { "DOMAIN" };
 
 	@Override
 	protected String[] getArguments() {
@@ -92,6 +101,11 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 		System.out.println("Begin Process!!!");
 		Boolean flexible = null;
+		Boolean hiredDay = null;
+		Integer workedTime = null;
+		Boolean attend = null;
+		Calendar startMark = null;
+		TurnDay turnDay = null;
 
 		BSmySQL mysql = new BSmySQL();
 		Integer tolerance = Integer.parseInt(mysql.callFunction(conn, "fGetTolerance", null));
@@ -104,10 +118,35 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 			List<Employee> employeeList = listEmployeeByDate(conn, date);
 			for (Employee employee : employeeList) {
-
 				flexible = isFlexible(conn, mysql, date, employee);
 
-				System.out.println(employee.getName() + " " + flexible);
+//				System.out.println(employee.getName() + " " + flexible);
+
+				if (flexible == null) {
+					hiredDay = false;
+					workedTime = 0;
+					attend = false;
+				} else {
+					if (flexible) {
+						startMark = BSDateTimeUtil.string2Calendar(
+								mysql.callFunction(conn, "fStartMark",
+										BSUtils.array2List(employee.getKey(), tolerance, date, null, true, null)),
+								"yyyy-MM-dd hh:mm:ss.S");
+						turnDay = getTurnDay(conn, BSDateTimeUtil.date2Calendar(date), employee.getId(), tolerance, true);
+						if (turnDay != null) {
+							System.out.println(turnDay.toString());
+						}else{
+							System.out.println("turnDay is NULL");
+						}
+						// SET vTurnDayId = fMarkAndUserToTurnDayId4(vStartMark,
+						// vEmployeeId, vTolerance, TRUE);
+						// SET vBusinessDay = (SELECT cBusinessDay FROM tTurnDay
+						// WHERE cId = vTurnDayId);
+
+						// DIA_CONTRATADO = "SI";´{
+					}
+
+				}
 
 			}
 		}
@@ -121,7 +160,9 @@ FOR(date : dates)
 		SET vFlexible = fIsFlexible(vCurrent, vEmployeeId);
 		
 		IF(vFlexible IS NULL) THEN
-			// Sin Turno
+			DIA_CONTRATADO = "NO";
+			workedTime = 0;
+			Presente = "NO";
 		ELSE
 			IF(vFlexible) THEN
 				SET vStartMark = fStartMark(vEmployeeKey, vTolerance, vCurrent, NULL, TRUE, NULL);
@@ -166,6 +207,13 @@ FIN FOR
 
 	}
 
+	private TurnDay getTurnDay(Connection conn, Calendar date, Long id, Integer tolerance, Boolean flexible) {
+		TurnDayService tds = new TurnDayServiceImpl();
+		TurnDay out = tds.markAndUserToTurnDayId(conn, date, id, tolerance, flexible);
+
+		return out;
+	}
+
 	private Boolean isFlexible(Connection conn, BSmySQL mysql, Date date, Employee employee) {
 		Boolean out = null;
 		String flexible = mysql.callFunction(conn, "fIsFlexible", BSUtils.array2List(date, employee.getId()));
@@ -174,8 +222,6 @@ FIN FOR
 		} else if ("0".equalsIgnoreCase(flexible)) {
 			out = false;
 		}
-
-		System.out.println(flexible);
 		return out;
 	}
 
