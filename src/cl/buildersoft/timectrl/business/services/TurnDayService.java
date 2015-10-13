@@ -13,5 +13,5 @@ public interface TurnDayService {
 </code>
 	 */
 	public TurnDay markAndUserToTurnDayId(Connection conn, Calendar markTime, Long employeeId, Integer tolerance, Boolean flexible);
-
+public Boolean isBusinessDay(TurnDay turnDay);
 }

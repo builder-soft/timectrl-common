@@ -2,6 +2,9 @@ package cl.buildersoft.timectrl.business.services.impl;
 
 import java.sql.Connection;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
@@ -10,6 +13,16 @@ import cl.buildersoft.timectrl.business.beans.TurnDay;
 import cl.buildersoft.timectrl.business.services.TurnDayService;
 
 public class TurnDayServiceImpl implements TurnDayService {
+	Map<Long, TurnDay> turnDayList = new HashMap<Long, TurnDay>();
+
+	public TurnDayServiceImpl(Connection conn) {
+		BSBeanUtils bu = new BSBeanUtils();
+		@SuppressWarnings("unchecked")
+		List<TurnDay> turnDayList = (List<TurnDay>) bu.listAll(conn, new TurnDay());
+		for (TurnDay td : turnDayList) {
+			this.turnDayList.put(td.getId(), td);
+		}
+	}
 
 	@Override
 	public TurnDay markAndUserToTurnDayId(Connection conn, Calendar markTime, Long employeeId, Integer tolerance, Boolean flexible) {
@@ -30,8 +43,12 @@ public class TurnDayServiceImpl implements TurnDayService {
 				out = null;
 			}
 		}
-
 		return out;
+	}
+
+	@Override
+	public Boolean isBusinessDay(TurnDay turnDay) {
+		return this.turnDayList.get(turnDay.getId()).getBusinessDay();
 	}
 
 }

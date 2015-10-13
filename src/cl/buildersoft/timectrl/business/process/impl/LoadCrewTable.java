@@ -105,7 +105,10 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		Integer workedTime = null;
 		Boolean attend = null;
 		Calendar startMark = null;
+		Calendar calendar = null;
 		TurnDay turnDay = null;
+		Boolean businessDay = null;
+		TurnDayService tds = new TurnDayServiceImpl(conn);
 
 		BSmySQL mysql = new BSmySQL();
 		Integer tolerance = Integer.parseInt(mysql.callFunction(conn, "fGetTolerance", null));
@@ -114,13 +117,14 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		List<Date> dateList = listDateUnprocessed(conn);
 
 		for (Date date : dateList) {
+			calendar = BSDateTimeUtil.date2Calendar(date);
 			System.out.println("----------" + BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
 
 			List<Employee> employeeList = listEmployeeByDate(conn, date);
 			for (Employee employee : employeeList) {
 				flexible = isFlexible(conn, mysql, date, employee);
 
-//				System.out.println(employee.getName() + " " + flexible);
+				// System.out.println(employee.getName() + " " + flexible);
 
 				if (flexible == null) {
 					hiredDay = false;
@@ -128,22 +132,25 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 					attend = false;
 				} else {
 					if (flexible) {
-						startMark = BSDateTimeUtil.string2Calendar(
-								mysql.callFunction(conn, "fStartMark",
-										BSUtils.array2List(employee.getKey(), tolerance, date, null, true, null)),
-								"yyyy-MM-dd hh:mm:ss.S");
-						turnDay = getTurnDay(conn, BSDateTimeUtil.date2Calendar(date), employee.getId(), tolerance, true);
-						if (turnDay != null) {
-							System.out.println(turnDay.toString());
-						}else{
-							System.out.println("turnDay is NULL");
-						}
-						// SET vTurnDayId = fMarkAndUserToTurnDayId4(vStartMark,
-						// vEmployeeId, vTolerance, TRUE);
-						// SET vBusinessDay = (SELECT cBusinessDay FROM tTurnDay
-						// WHERE cId = vTurnDayId);
 
-						// DIA_CONTRATADO = "SI";´{
+						startMark = getStartMark(conn,tds, employee,tolerance, date, businessDay, flexible, turnDay);
+
+						turnDay = getTurnDay(conn, tds, calendar, employee.getId(), tolerance, true);
+//						if (turnDay != null) {
+//							System.out.println(turnDay.toString());
+//						} else {
+//							System.out.println("turnDay is NULL");
+//						}
+
+						businessDay = tds.isBusinessDay(turnDay);
+						hiredDay = true;
+					}else{
+						turnDay = getTurnDay(conn, tds, calendar, employee.getId(), tolerance, false);
+						businessDay = tds.isBusinessDay(turnDay);
+						
+						startMark = getStartMark(conn, tds , employee, tolerance, date, businessDay, false, turnDay);
+//						SET vStartMark = fStartMark(vEmployeeKey, vTolerance, vCurrent, vBusinessDay, FALSE, vTurnDayId);
+						
 					}
 
 				}
@@ -207,10 +214,29 @@ FIN FOR
 
 	}
 
-	private TurnDay getTurnDay(Connection conn, Calendar date, Long id, Integer tolerance, Boolean flexible) {
-		TurnDayService tds = new TurnDayServiceImpl();
-		TurnDay out = tds.markAndUserToTurnDayId(conn, date, id, tolerance, flexible);
+	private Boolean isBusinessDay(TurnDayService tds, TurnDay turnDay) {
+		return tds.isBusinessDay(turnDay);
+	}
 
+	private Calendar getStartMark(Connection conn, TurnDayService tds, Employee employee, Integer tolerance, Date date, Boolean businessDay, Boolean flexible, TurnDay turnDay) {
+		/**
+		  CREATE FUNCTION fStartMark(vEmployeeKey VARCHAR(20), vTolerance INTEGER, vCurrent DATE,
+							vBusinessDay BOOLEAN, vFlexible BOOLEAN, vTurnDayId BIGINT(20)) RETURNS TIMESTAMP
+		   */
+		
+		BSmySQL mysql = new BSmySQL();
+		Calendar out = null;
+
+		String startMarkFromDB = mysql.callFunction(conn, "fStartMark",
+				BSUtils.array2List(employee.getKey(), tolerance, date, businessDay, true, null));
+		if (startMarkFromDB != null) {
+			out = BSDateTimeUtil.string2Calendar(startMarkFromDB, "yyyy-MM-dd hh:mm:ss.S");
+		}
+		return out;
+	}
+
+	private TurnDay getTurnDay(Connection conn, TurnDayService tds, Calendar date, Long employeeId, Integer tolerance, Boolean flexible) {
+		TurnDay out = tds.markAndUserToTurnDayId(conn, date, employeeId, tolerance, flexible);
 		return out;
 	}
 
