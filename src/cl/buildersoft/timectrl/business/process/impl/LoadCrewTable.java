@@ -18,6 +18,7 @@ import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSUtils;
+import cl.buildersoft.timectrl.business.beans.CrewProcess;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.TurnDay;
 import cl.buildersoft.timectrl.business.process.AbstractProcess;
@@ -105,6 +106,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		Integer workedTime = null;
 		Boolean attend = null;
 		Calendar startMark = null;
+		Calendar endMark = null;
 		Calendar calendar = null;
 		TurnDay turnDay = null;
 		Boolean businessDay = null;
@@ -132,28 +134,49 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 					attend = false;
 				} else {
 					if (flexible) {
-
-						startMark = getStartMark(conn,tds, employee,tolerance, date, businessDay, flexible, turnDay);
+						startMark = getStartMark(conn, tds, employee, tolerance, date, businessDay, flexible, turnDay);
 
 						turnDay = getTurnDay(conn, tds, calendar, employee.getId(), tolerance, true);
-//						if (turnDay != null) {
-//							System.out.println(turnDay.toString());
-//						} else {
-//							System.out.println("turnDay is NULL");
-//						}
+						// if (turnDay != null) {
+						// System.out.println(turnDay.toString());
+						// } else {
+						// System.out.println("turnDay is NULL");
+						// }
 
 						businessDay = tds.isBusinessDay(turnDay);
 						hiredDay = true;
-					}else{
+					} else {
 						turnDay = getTurnDay(conn, tds, calendar, employee.getId(), tolerance, false);
 						businessDay = tds.isBusinessDay(turnDay);
-						
-						startMark = getStartMark(conn, tds , employee, tolerance, date, businessDay, false, turnDay);
-//						SET vStartMark = fStartMark(vEmployeeKey, vTolerance, vCurrent, vBusinessDay, FALSE, vTurnDayId);
-						
+
+						startMark = getStartMark(conn, tds, employee, tolerance, date, businessDay, false, turnDay);
+						// SET vStartMark = fStartMark(vEmployeeKey, vTolerance,
+						// vCurrent, vBusinessDay, FALSE, vTurnDayId);
+
 					}
+					hiredDay = turnDay != null;
 
 				}
+				endMark = getEndMark(conn, employee, startMark, hoursWorkday, date, tolerance, businessDay, turnDay);
+
+				if (startMark != null && endMark != null) {
+					// Calcula la diferencia entre ambos horarios
+					workedTime = Horas_trabajadas(startMark, endMark);
+					attend = true;
+				} else {
+					workedTime = 0;
+					attend = false;
+				}
+
+				// Iniciar Transaccion:
+				saveToCrewProcess(conn, date, employee, workedTime, attend, hiredDay);
+				// Grabar en tCrewProcess(La informacion recopilada, validando
+				// que exista previamente para la fecha/empleado)
+				// Grabar en tCrewLog (Considerar todos los ID's para la
+				// fecha/empleado)
+				// Fin Transacción
+				// Limpiar las variables que se utilizaron(vFlexible,
+				// vStartMark, vTurnDayId, etc)
 
 			}
 		}
@@ -214,28 +237,80 @@ FIN FOR
 
 	}
 
+	private void saveToCrewProcess(Connection conn, Date date, Employee employee, Integer workedTime, Boolean attend,
+			Boolean hiredDay) {
+		BSBeanUtils bu = new BSBeanUtils();
+
+		CrewProcess crewProcess = new CrewProcess();
+		if (bu.search(conn, crewProcess, "cDate=? AND cEmployee=?", date, employee.getId())) {
+			crewProcess.setHoursWorked(crewProcess.getHoursWorked() + workedTime);
+			// crewProcess.setWorked(attend);
+			// crewProcess.setHired(hiredDay);
+		} else {
+			crewProcess.setDate(date);
+			crewProcess.setEmployee(employee.getId());
+			crewProcess.setHoursWorked(workedTime);
+			crewProcess.setWorked(attend);
+			crewProcess.setHired(hiredDay);
+		}
+
+		bu.save(conn, crewProcess);
+
+	}
+
+	private Integer Horas_trabajadas(Calendar startMark, Calendar endMark) {
+		return 2;
+	}
+
+	private Calendar getEndMark(Connection conn, Employee employee, Calendar startMark, Integer hoursWorkday, Date date,
+			Integer tolerance, Boolean businessDay, TurnDay turnDay) {
+
+		// SET vEndMark = fEndMark(vEmployeeKey, vStartMark, vHoursWorkday,
+		// vCurrent, vTolerance, vBusinessDay, vTurnDayId);
+
+		BSmySQL mysql = new BSmySQL();
+		Calendar out = null;
+
+		String endMarkFromDB = null;
+
+		if (startMark != null && businessDay != null && turnDay != null) {
+			List<Object> parameters = BSUtils.array2List(employee.getKey(), startMark, hoursWorkday, date, tolerance,
+					businessDay, turnDay.getId());
+			endMarkFromDB = mysql.callFunction(conn, "fEndMark", parameters);
+		}
+
+		if (endMarkFromDB != null) {
+			out = BSDateTimeUtil.string2Calendar(endMarkFromDB, "yyyy-MM-dd hh:mm:ss.S");
+		}
+		return out;
+
+	}
+
 	private Boolean isBusinessDay(TurnDayService tds, TurnDay turnDay) {
 		return tds.isBusinessDay(turnDay);
 	}
 
-	private Calendar getStartMark(Connection conn, TurnDayService tds, Employee employee, Integer tolerance, Date date, Boolean businessDay, Boolean flexible, TurnDay turnDay) {
+	private Calendar getStartMark(Connection conn, TurnDayService tds, Employee employee, Integer tolerance, Date date,
+			Boolean businessDay, Boolean flexible, TurnDay turnDay) {
 		/**
-		  CREATE FUNCTION fStartMark(vEmployeeKey VARCHAR(20), vTolerance INTEGER, vCurrent DATE,
-							vBusinessDay BOOLEAN, vFlexible BOOLEAN, vTurnDayId BIGINT(20)) RETURNS TIMESTAMP
-		   */
-		
+		 * CREATE FUNCTION fStartMark(vEmployeeKey VARCHAR(20), vTolerance
+		 * INTEGER, vCurrent DATE, vBusinessDay BOOLEAN, vFlexible BOOLEAN,
+		 * vTurnDayId BIGINT(20)) RETURNS TIMESTAMP
+		 */
+
 		BSmySQL mysql = new BSmySQL();
 		Calendar out = null;
 
 		String startMarkFromDB = mysql.callFunction(conn, "fStartMark",
-				BSUtils.array2List(employee.getKey(), tolerance, date, businessDay, true, null));
+				BSUtils.array2List(employee.getKey(), tolerance, date, businessDay, flexible, turnDay));
 		if (startMarkFromDB != null) {
 			out = BSDateTimeUtil.string2Calendar(startMarkFromDB, "yyyy-MM-dd hh:mm:ss.S");
 		}
 		return out;
 	}
 
-	private TurnDay getTurnDay(Connection conn, TurnDayService tds, Calendar date, Long employeeId, Integer tolerance, Boolean flexible) {
+	private TurnDay getTurnDay(Connection conn, TurnDayService tds, Calendar date, Long employeeId, Integer tolerance,
+			Boolean flexible) {
 		TurnDay out = tds.markAndUserToTurnDayId(conn, date, employeeId, tolerance, flexible);
 		return out;
 	}
@@ -259,7 +334,7 @@ FIN FOR
 		sql += "FROM tAttendanceLog AS a ";
 		sql += "LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog ";
 		sql += "LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey ";
-		sql += "WHERE DATE(cDate) = ? AND b.cid IS NULL;";
+		sql += "WHERE DATE(cDate) = ? AND b.cid IS NULL AND NOT c.cId IS NULL;";
 
 		BSmySQL mysql = new BSmySQL();
 
@@ -273,9 +348,9 @@ FIN FOR
 				employee = new Employee();
 				employee.setId(employeeId);
 
-				bu.search(conn, employee);
-
-				out.add(employee);
+				if (bu.search(conn, employee)) {
+					out.add(employee);
+				}
 			}
 		} catch (SQLException e) {
 			throw new BSDataBaseException(e);
@@ -286,9 +361,17 @@ FIN FOR
 
 	private List<Date> listDateUnprocessed(Connection conn) {
 		BSmySQL mysql = new BSmySQL();
-		String sql = "SELECT DISTINCT DATE(cDate) AS cDate FROM tAttendanceLog AS a ";
+		// String sql =
+		// "SELECT DISTINCT DATE(cDate) AS cDate FROM tAttendanceLog AS a ";
+		// sql += "LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog ";
+		// sql += "WHERE b.cid IS NULL ORDER BY cDate;";
+
+		String sql = "SELECT DISTINCT DATE(cDate) AS cDate ";
+		sql += "FROM tAttendanceLog AS a ";
 		sql += "LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog ";
-		sql += "WHERE b.cid IS NULL ORDER BY cDate;";
+		sql += "LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey ";
+		sql += "WHERE b.cid IS NULL AND c.cId IS NOT NULL ";
+		sql += "ORDER BY cDate";
 
 		List<Date> out = new ArrayList<Date>();
 
@@ -304,5 +387,4 @@ FIN FOR
 
 		return out;
 	}
-
 }
