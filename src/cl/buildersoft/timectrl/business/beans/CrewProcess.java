@@ -44,5 +44,10 @@ public class CrewProcess extends BSBean {
 	public void setHired(Boolean hired) {
 		this.hired = hired;
 	}
+	@Override
+	public String toString() {
+		return "CrewProcess [date=" + date + ", employee=" + employee + ", hoursWorked=" + hoursWorked + ", worked=" + worked
+				+ ", hired=" + hired + ", Id=" + getId() + "]";
+	}
 
 }

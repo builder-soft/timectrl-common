@@ -8,6 +8,7 @@ import java.util.Map;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
+import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.business.beans.TurnDay;
 import cl.buildersoft.timectrl.business.services.TurnDayService;
@@ -31,9 +32,11 @@ public class TurnDayServiceImpl implements TurnDayService {
 		// vEmployeeId BIGINT(20),
 		// vTolerance INTEGER, vFlexible BOOLEAN) RETURNS BIGINT(20)
 		TurnDay out = null;
-
+		// System.out.println(BSDateTimeUtil.calendar2String(markTime,
+		// "yyyy-MM-dd HH:mm:ss.S"));
 		String id = mysql.callFunction(conn, "fMarkAndUserToTurnDayId4",
 				BSUtils.array2List(markTime, employeeId, tolerance, flexible));
+		mysql.closeSQL();
 		if (id != null) {
 			out = new TurnDay();
 			BSBeanUtils bu = new BSBeanUtils();
