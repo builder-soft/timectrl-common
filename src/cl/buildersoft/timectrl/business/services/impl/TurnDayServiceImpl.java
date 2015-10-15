@@ -51,7 +51,13 @@ public class TurnDayServiceImpl implements TurnDayService {
 
 	@Override
 	public Boolean isBusinessDay(TurnDay turnDay) {
-		return this.turnDayList.get(turnDay.getId()).getBusinessDay();
+		Boolean out = null;
+		if (turnDay == null) {
+			out = false;
+		} else {
+			out = this.turnDayList.get(turnDay.getId()).getBusinessDay();
+		}
+		return out;
 	}
 
 }

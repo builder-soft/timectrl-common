@@ -178,7 +178,8 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 				// Limpiar las variables que se utilizaron(vFlexible,
 				// vStartMark, vTurnDayId, etc)
 
-				/**<code>
+				/**
+				 * <code>
 				flexible = null;
 				hiredDay = null;
 				workedTime = null;
@@ -187,7 +188,8 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 				endMark = null;
 				turnDay = null;
 				businessDay = null;
-</code>*/
+</code>
+				 */
 			}
 		}
 
@@ -248,8 +250,14 @@ FIN FOR
 	}
 
 	private void saveToCrewLog(Connection conn, Date date, Employee employee) {
-		// TODO Auto-generated method stub
-		
+		BSmySQL mysql = new BSmySQL();
+		String sql = "INSERT INTO tCrewLog(cAttendanceLog, cWhen) ";
+		sql += "SELECT cId,NOW() FROM tAttendanceLog WHERE DATE(cDate)=? AND cEmployeeKey=?";
+
+		List<Object> params = BSUtils.array2List(date, employee.getKey());
+
+		mysql.update(conn, sql, params);
+		mysql.closeSQL();
 	}
 
 	private void saveToCrewProcess(Connection conn, Date date, Employee employee, Integer workedTime, Boolean attend,
@@ -372,7 +380,7 @@ FIN FOR
 			}
 		} catch (SQLException e) {
 			throw new BSDataBaseException(e);
-		}finally{
+		} finally {
 			mysql.closeSQL(rs);
 			mysql.closeSQL();
 		}
@@ -392,7 +400,7 @@ FIN FOR
 		sql += "LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog ";
 		sql += "LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey ";
 		sql += "WHERE b.cid IS NULL AND c.cId IS NOT NULL ";
-		  sql += " and year(cdate)>2014 ";
+		// sql += " and year(cdate)>2014 ";
 		sql += "ORDER BY cDate";
 
 		List<Date> out = new ArrayList<Date>();
@@ -405,7 +413,7 @@ FIN FOR
 			}
 		} catch (SQLException e) {
 			throw new BSDataBaseException(e);
-		}finally{
+		} finally {
 			mysql.closeSQL(rs);
 			mysql.closeSQL();
 		}
