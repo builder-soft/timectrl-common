@@ -5,6 +5,8 @@ package cl.buildersoft.timectrl.business.process.impl;
  Los registros que son procesados, quedan manrcados en la tabla tCrewLog.
  */
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -27,6 +29,7 @@ import cl.buildersoft.timectrl.business.services.TurnDayService;
 import cl.buildersoft.timectrl.business.services.impl.TurnDayServiceImpl;
 
 public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
+	private static final String DATE_TIME_FORMAT_CONST = "yyyy-MM-dd HH:mm:ss.S";
 	/**
 	 * <code>
 	SET vTolerance = fGetTolerance();
@@ -282,12 +285,52 @@ FIN FOR
 	}
 
 	private Double getWorkedTime(Calendar startMark, Calendar endMark) {
+//		System.out.println(BSDateTimeUtil.calendar2String(startMark, DATE_TIME_FORMAT_CONST));
+//		System.out.println(BSDateTimeUtil.calendar2String(endMark, DATE_TIME_FORMAT_CONST));
+		Double out = 0D;
 		long diff = endMark.getTimeInMillis() - startMark.getTimeInMillis();
 
-		// Calendar calendar = Calendar.getInstance( );
-		// calendar.setTimeInMillis(diff);
+		BigDecimal secs = new BigDecimal((diff) / 1000);
+		BigDecimal number3600 = new BigDecimal("3600");
+		BigDecimal hours = secs.divide(number3600, 2, RoundingMode.HALF_UP);
+		out = hours.doubleValue();
 
-		return (double) ((diff / 1000) / 3600);
+		// long secs = (diff) / 1000;
+
+		/**
+		 * <code>
+		BigDecimal secs = new BigDecimal((diff) / 1000);		
+		BigDecimal hours = new BigDecimal(secs ); // / 3600
+		
+		secs = secs % 3600;
+		int mins = (int) secs / 60;
+		secs = secs % 60;
+		
+		
+		
+//		out = (double) (hours + (mins / 60));
+		System.out.println("Diferencia: " + diff);
+		System.out.println("Segundos: " + secs);
+		System.out.println("Minutos: " + mins);
+		System.out.println("Horas: " + hours);
+		System.out.println("Total: " + out);
+</code>
+		 */
+
+		/**
+		 * <code>
+		long segs = 0 ;
+ 		System.out.println("Diferencia: " + diff);
+		segs = diff / 1000;
+		System.out.println("Segundos: " + segs);
+		long mins = segs / 60;
+		System.out.println("Minutos: " + mins);
+		
+		double hours =   segs / 60;
+		System.out.println("Horas: " + hours);
+</code>
+		 */
+		return out;
 	}
 
 	private Calendar getEndMark(Connection conn, Employee employee, Calendar startMark, Integer hoursWorkday, Date date,
@@ -309,7 +352,7 @@ FIN FOR
 		}
 
 		if (endMarkFromDB != null) {
-			out = BSDateTimeUtil.string2Calendar(endMarkFromDB, "yyyy-MM-dd HH:mm:ss.S");
+			out = BSDateTimeUtil.string2Calendar(endMarkFromDB, DATE_TIME_FORMAT_CONST);
 		}
 		return out;
 
