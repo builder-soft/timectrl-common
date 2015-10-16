@@ -10,7 +10,7 @@ public class CrewProcess extends BSBean {
 	private String TABLE = "tCrewProcess";
 	private Date date = null;
 	private Long employee = null;
-	private Integer hoursWorked = null;
+	private Double hoursWorked = null;
 	private Boolean worked = null;
 	private Boolean hired = null;
 	
@@ -26,11 +26,11 @@ public class CrewProcess extends BSBean {
 	public void setEmployee(Long employee) {
 		this.employee = employee;
 	}
-	public Integer getHoursWorked() {
+	public Double getHoursWorked() {
 		return hoursWorked;
 	}
-	public void setHoursWorked(Integer cHoursWorked) {
-		this.hoursWorked = cHoursWorked;
+	public void setHoursWorked(Double hoursWorked) {
+		this.hoursWorked = hoursWorked;
 	}
 	public Boolean getWorked() {
 		return worked;

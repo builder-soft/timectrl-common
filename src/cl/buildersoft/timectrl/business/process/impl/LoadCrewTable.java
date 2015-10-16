@@ -103,7 +103,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		System.out.println("Begin Process!!!");
 		Boolean flexible = null;
 		Boolean hiredDay = null;
-		Integer workedTime = null;
+		Double workedTime = null;
 		Boolean attend = null;
 		Calendar startMark = null;
 		Calendar endMark = null;
@@ -131,7 +131,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 				if (flexible == null) {
 					hiredDay = false;
-					workedTime = 0;
+					workedTime = 0D;
 					attend = false;
 				} else {
 					if (flexible) {
@@ -160,10 +160,10 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 				if (startMark != null && endMark != null) {
 					// Calcula la diferencia entre ambos horarios
-					workedTime = Horas_trabajadas(startMark, endMark);
+					workedTime = getWorkedTime(startMark, endMark);
 					attend = true;
 				} else {
-					workedTime = 0;
+					workedTime = 0D;
 					attend = false;
 				}
 
@@ -260,7 +260,7 @@ FIN FOR
 		mysql.closeSQL();
 	}
 
-	private void saveToCrewProcess(Connection conn, Date date, Employee employee, Integer workedTime, Boolean attend,
+	private void saveToCrewProcess(Connection conn, Date date, Employee employee, Double workedTime, Boolean attend,
 			Boolean hiredDay) {
 		BSBeanUtils bu = new BSBeanUtils();
 
@@ -281,8 +281,13 @@ FIN FOR
 		bu.closeSQL();
 	}
 
-	private Integer Horas_trabajadas(Calendar startMark, Calendar endMark) {
-		return 2;
+	private Double getWorkedTime(Calendar startMark, Calendar endMark) {
+		long diff = endMark.getTimeInMillis() - startMark.getTimeInMillis();
+
+		// Calendar calendar = Calendar.getInstance( );
+		// calendar.setTimeInMillis(diff);
+
+		return (double) ((diff / 1000) / 3600);
 	}
 
 	private Calendar getEndMark(Connection conn, Employee employee, Calendar startMark, Integer hoursWorkday, Date date,
@@ -377,6 +382,8 @@ FIN FOR
 				if (bu.search(conn, employee)) {
 					out.add(employee);
 				}
+				bu.closeSQL();
+
 			}
 		} catch (SQLException e) {
 			throw new BSDataBaseException(e);
