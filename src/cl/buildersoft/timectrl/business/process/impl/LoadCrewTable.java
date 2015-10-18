@@ -451,7 +451,7 @@ FIN FOR
 		sql += "LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey ";
 		sql += "WHERE b.cid IS NULL AND c.cId IS NOT NULL ";
 		// sql += " and year(cdate)>2014 ";
-		sql += "ORDER BY cDate";
+		sql += "ORDER BY cDate DESC";
 
 		List<Date> out = new ArrayList<Date>();
 
