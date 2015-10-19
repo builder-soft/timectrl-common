@@ -103,7 +103,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		validateArguments(args);
 		Connection conn = getConnection(getDomainByBatabase(args[0]));
 
-		System.out.println("Begin Process!!!");
+		log("Begin Process...");
 		Boolean flexible = null;
 		Boolean hiredDay = null;
 		Double workedTime = null;
@@ -123,11 +123,11 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 		for (Date date : dateList) {
 			calendar = BSDateTimeUtil.date2Calendar(date);
-			System.out.println("----------" + BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
+			log("----------" + BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
 
 			List<Employee> employeeList = listEmployeeByDate(conn, date);
 			for (Employee employee : employeeList) {
-				System.out.println(employee.toString());
+				log(employee.toString());
 				flexible = isFlexible(conn, mysql, date, employee);
 
 				// System.out.println(employee.getName() + " " + flexible);
@@ -194,9 +194,11 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 </code>
 				 */
 			}
+
 		}
 
 		mysql.closeConnection(conn);
+		log("End Process");
 		/**
 		 * <code>
 FOR(date : dates)
@@ -285,8 +287,10 @@ FIN FOR
 	}
 
 	private Double getWorkedTime(Calendar startMark, Calendar endMark) {
-//		System.out.println(BSDateTimeUtil.calendar2String(startMark, DATE_TIME_FORMAT_CONST));
-//		System.out.println(BSDateTimeUtil.calendar2String(endMark, DATE_TIME_FORMAT_CONST));
+		// System.out.println(BSDateTimeUtil.calendar2String(startMark,
+		// DATE_TIME_FORMAT_CONST));
+		// System.out.println(BSDateTimeUtil.calendar2String(endMark,
+		// DATE_TIME_FORMAT_CONST));
 		Double out = 0D;
 		long diff = endMark.getTimeInMillis() - startMark.getTimeInMillis();
 

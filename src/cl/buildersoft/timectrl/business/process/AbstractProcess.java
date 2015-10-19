@@ -1,22 +1,25 @@
 package cl.buildersoft.timectrl.business.process;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import cl.buildersoft.framework.beans.Domain;
 import cl.buildersoft.framework.beans.DomainAttribute;
 import cl.buildersoft.framework.database.BSBeanUtils;
-import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.util.BSConfig;
 import cl.buildersoft.framework.util.BSDataUtils;
+import cl.buildersoft.framework.util.BSDateTimeUtil;
 
 public abstract class AbstractProcess {
 	private final static String FILE_NAME = "Process.properties";
@@ -36,8 +39,9 @@ public abstract class AbstractProcess {
 		this.conn = conn;
 	}
 
-	public AbstractProcess() {
+	public AbstractProcess() { 
 		init();
+		 
 		this.conn = getConnection();
 	}
 
@@ -78,12 +82,12 @@ public abstract class AbstractProcess {
 	private void init() {
 		BSConfig config = new BSConfig();
 		String path = System.getenv("BS_PATH");
+		System.out.println("Value of 'BS_PATH' is '" + path + "'");
 
 		if (path == null) {
 			throw new BSConfigurationException("Undefined enviroment variable BS_PATH");
 		}
 		String propertyFileName = config.fixPath(path) + FILE_NAME;
-
 		Properties prop = new Properties();
 		InputStream inputStream;
 		try {
@@ -160,5 +164,32 @@ public abstract class AbstractProcess {
 		Domain domain = getDomainByBatabase(databaseName);
 
 		return domain != null;
+	}
+
+	protected void log(String message) {
+		System.out.println(message);
+
+		translateDateField();
+		File file = new File(this.logPath);
+		try {
+			FileWriter fileWritter = new FileWriter(file.getAbsoluteFile(), true);
+			BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
+			bufferWritter.write(concatenateMessage(message) + "\n");
+			bufferWritter.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println(this.logPath);
+			System.exit(1);
+		}
+	}
+
+	private void translateDateField() {
+		this.logPath = this.logPath.replaceAll("\\x7BDate\\x7D",
+				BSDateTimeUtil.calendar2String(Calendar.getInstance(), "yyyy-MM-dd"));
+
+	}
+
+	private String concatenateMessage(String message) {
+		return BSDateTimeUtil.calendar2String(Calendar.getInstance(), "yyyy-M-dd hh:mm:ss") + " : " + message;
 	}
 }
