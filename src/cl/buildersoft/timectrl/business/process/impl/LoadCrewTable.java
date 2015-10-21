@@ -13,7 +13,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
@@ -21,7 +23,6 @@ import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.business.beans.CrewProcess;
-import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.IdRut;
 import cl.buildersoft.timectrl.business.beans.TurnDay;
 import cl.buildersoft.timectrl.business.process.AbstractProcess;
@@ -31,6 +32,7 @@ import cl.buildersoft.timectrl.business.services.impl.TurnDayServiceImpl;
 
 public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 	private static final String DATE_TIME_FORMAT_CONST = "yyyy-MM-dd HH:mm:ss.S";
+	private Map<Long, IdRut> idRutMap = new HashMap<Long, IdRut>();
 	/**
 	 * <code>
 	SET vTolerance = fGetTolerance();
@@ -424,12 +426,17 @@ FIN FOR
 			sql = "SELECT cKey FROM tEmployee WHERE cId=?";
 			while (rs.next()) {
 				employeeId = rs.getLong(1);
+//				employeeId=1L;
 
-				key = mysql.queryField(conn, sql, employeeId);
+				idRut = idRutMap.get(employeeId);
+				if(idRut==null){
+					key = mysql.queryField(conn, sql, employeeId);
 
-				idRut = new IdRut();
-				idRut.setId(employeeId.intValue());
-				idRut.setKey(key);
+					idRut = new IdRut();
+					idRut.setId(employeeId.intValue());
+					idRut.setKey(key);
+					idRutMap.put(employeeId, idRut);
+				}
 
 				out.add(idRut);
 			}

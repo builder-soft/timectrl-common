@@ -34,8 +34,11 @@ public class TurnDayServiceImpl implements TurnDayService {
 		TurnDay out = null;
 		// System.out.println(BSDateTimeUtil.calendar2String(markTime,
 		// "yyyy-MM-dd HH:mm:ss.S"));
-		String id = mysql.callFunction(conn, "fMarkAndUserToTurnDayId4",
-				BSUtils.array2List(markTime, employeeId, tolerance, flexible));
+
+		List<Object> params = BSUtils.array2List(markTime, employeeId, tolerance, flexible);
+//		System.out.println(BSDateTimeUtil.calendar2String(markTime, "yyyy-MM-dd HH:mm:ss.SSS"));
+		String id = mysql.callFunction(conn, "fMarkAndUserToTurnDayId4", params);
+
 		mysql.closeSQL();
 		if (id != null) {
 			out = new TurnDay();
