@@ -54,4 +54,10 @@ public class EmployeeTurn extends BSBean {
 		this.turnName = turnName;
 	}
 
+	@Override
+	public String toString() {
+		return "EmployeeTurn [employee=" + employee + ", turn=" + turn + ", turnName=" + turnName + ", startDate=" + startDate
+				+ ", endDate=" + endDate + ", Id=" + getId() + "]";
+	}
+
 }
