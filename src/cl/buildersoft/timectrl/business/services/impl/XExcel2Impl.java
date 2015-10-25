@@ -250,8 +250,8 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 				if (!out.containsKey(dataInSheet)) {
 					out.put(dataInSheet, row.getRowNum() + 1);
 				}
-			}
 
+			}
 		}
 
 		return out;
