@@ -8,8 +8,7 @@ import cl.buildersoft.timectrl.business.beans.EmployeeTurn;
 
 public interface EmployeeTurnService {
 	public List<EmployeeTurn> listAllEmployeeTurns(Connection conn, Long employeeId);
-
 	public void appendNew(Connection conn, EmployeeTurn employeeTurn);
-
+	public void update(Connection conn, EmployeeTurn employeeTurn);
 	public void delete(Connection conn, Long employeeTurn);
 }

@@ -40,6 +40,8 @@ public class EmployeeTurnServiceImpl implements EmployeeTurnService {
 			}
 		} catch (SQLException e) {
 			throw new BSDataBaseException(e);
+		} finally {
+			du.closeSQL(turnsRS);
 		}
 
 		return out;
@@ -60,12 +62,30 @@ public class EmployeeTurnServiceImpl implements EmployeeTurnService {
 
 		BSDataUtils du = new BSDataUtils();
 		du.update(conn, sql, params);
+		du.closeSQL();
 
 	}
 
 	@Override
 	public void delete(Connection conn, Long employeeTurn) {
 		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void update(Connection conn, EmployeeTurn employeeTurn) {
+		String sql = "UPDATE tR_EmployeeTurn SET cTurn=?, cStartDate=?, cEndDate=? ";
+		sql += "WHERE cId=?;";
+
+		List<Object> params = new ArrayList<Object>();
+		params.add(employeeTurn.getTurn());
+		params.add(employeeTurn.getStartDate());
+		params.add(employeeTurn.getEndDate());
+		params.add(employeeTurn.getId());
+
+		BSDataUtils du = new BSDataUtils();
+		du.update(conn, sql, params);
+		du.closeSQL();
 
 	}
 
