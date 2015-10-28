@@ -51,7 +51,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	protected Integer colsAsTitle = null;
 	protected Integer rowOfSheet = 0;
 	protected Integer employeeDepth = 0;
-	protected Integer currentDepth = 0;
+	protected Integer currentDepth = null;
 
 	private void relationPages(XSSFWorkbook workBook) {
 		Map<DataInSheet, Integer> detailResult = inspectDetail(workBook);
@@ -309,12 +309,14 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 	private ReportParameterBean newParam(Connection conn, ReportParameterBean bossParam, Long idReport) {
 		ReportParameterBean out = new ReportParameterBean();
-		this.currentDepth = 0;
+
+		this.currentDepth = 1;
+		String employeeIds = getEmployeeIds(conn, Long.parseLong(bossParam.getValue()));
 		out.setJavaType("STRING");
 		out.setName("EmployeesId");
 		out.setReport(idReport);
 		out.setTypeKey("EMPLOYEE_LIST");
-		out.setValue(getEmployeeIds(conn, Long.parseLong(bossParam.getValue())));
+		out.setValue(employeeIds);
 		return out;
 	}
 
@@ -328,10 +330,18 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		try {
 			while (rs.next()) {
 				Long employee = rs.getLong(1);
-				if (haveJunior(conn, employee, mysql) && boss != employee && this.currentDepth <= this.employeeDepth) {
-					this.currentDepth++;
-					out += getEmployeeIds(conn, employee) + ",";
-					this.currentDepth--;
+
+				if (haveJunior(conn, employee, mysql) && boss != employee) {
+					if (this.employeeDepth == 0) {
+						out += getEmployeeIds(conn, employee) + ",";
+					} else {
+						if (this.currentDepth < this.employeeDepth) {
+							this.currentDepth++;
+							out += getEmployeeIds(conn, employee) + ",";
+							this.currentDepth--;
+
+						}
+					}
 				}
 				out += employee.toString() + ",";
 			}
