@@ -14,15 +14,50 @@ public class AreaServiceImpl implements AreaService {
 	public BSTreeNode getAsTree(Connection conn) {
 		BSTreeNode out = new BSTreeNode();
 
-		BSBeanUtils bu = new BSBeanUtils();
-		List<Area> areaList = (List<Area>) bu.list(conn, new Area(), "cParent=null");
+		List<Area> areaList = listChilds(conn, null);
 		BSTreeNode node = null;
 		for (Area area : areaList) {
 			node = new BSTreeNode();
 			node.setValue(area);
 			out.addChildren(node);
+			addChils(conn, node, area.getId());
 		}
+
 		return out;
+	}
+
+	private void addChils(Connection conn, BSTreeNode node, Long id) {
+		BSTreeNode temp = null;
+		List<Area> areaList = listChilds(conn, id);
+		for (Area area : areaList) {
+			temp = new BSTreeNode();
+			temp.setValue(area);
+			node.addChildren(temp);
+			addChils(conn, node, area.getId());
+		}
+	}
+
+	private List<Area> listChilds(Connection conn, Object object) {
+		BSBeanUtils bu = new BSBeanUtils();
+		Object[] prms = null;
+
+		String where = null;
+		if (object == null) {
+			where = "cParent IS NULL";
+		} else {
+			where = "cParent=?";
+			prms = new Object[1];
+			prms[0] = object;
+		}
+		List<Area> areaList = (List<Area>) bu.list(conn, new Area(), where, prms);
+
+		// BSTreeNode node = null;
+		// for (Area area : areaList) {
+		// node = new BSTreeNode();
+		// node.setValue(area);
+		// out.addChildren(node);
+		// }
+		return areaList;
 	}
 
 }

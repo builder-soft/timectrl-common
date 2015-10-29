@@ -9,6 +9,7 @@ public class Area extends BSBean {
 	private String key = null;
 	private String name = null;
 	private String costCenter = null;
+	private Long parent = null;
 
 	public String getKey() {
 		return key;
@@ -32,5 +33,19 @@ public class Area extends BSBean {
 
 	public void setCostCenter(String costCenter) {
 		this.costCenter = costCenter;
+	}
+
+	public Long getParent() {
+		return parent;
+	}
+
+	public void setParent(Long parent) {
+		this.parent = parent;
+	}
+
+	@Override
+	public String toString() {
+		return "Area [key=" + key + ", name=" + name + ", costCenter=" + costCenter + ", parent=" + parent + ",  Id=" + getId()
+				+ "]";
 	}
 }
