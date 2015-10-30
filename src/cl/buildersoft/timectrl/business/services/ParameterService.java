@@ -8,6 +8,6 @@ import cl.buildersoft.framework.beans.BSBean;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 
 public interface ParameterService {
-	public Map<String, List<? extends BSBean>> getParameterData(Connection conn, ReportParameterBean reportParameterBean);
+	public Map<String, Object> getParameterData(Connection conn, ReportParameterBean reportParameterBean);
 //	public List<List<? extends BSBean>> getParameterData(Connection conn, ReportParameterBean reportParameterBean);
 }

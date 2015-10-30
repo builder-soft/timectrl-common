@@ -10,13 +10,14 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.timectrl.business.beans.Area;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
+import cl.buildersoft.timectrl.business.services.AreaService;
 import cl.buildersoft.timectrl.business.services.EmployeeService;
 import cl.buildersoft.timectrl.business.services.ParameterService;
 
 public class ParameterEmployeeImpl implements ParameterService {
 
 	@Override
-	public Map<String, List<? extends BSBean>> getParameterData(Connection conn, ReportParameterBean reportParameterBean) {
+	public Map<String, Object> getParameterData(Connection conn, ReportParameterBean reportParameterBean) {
 		/**
 		 * <code>
 		   Este metodo debe retornara lo siguiente: 
@@ -27,13 +28,15 @@ public class ParameterEmployeeImpl implements ParameterService {
 		   
 		   </code>
 		 */
-		Map<String, List<? extends BSBean>> out = new HashMap<String, List<? extends BSBean>>();
-		BSBeanUtils bu = new BSBeanUtils();
-		EmployeeService es = new EmployeeServiceImpl();
+		Map<String, Object> out = new HashMap<String, Object>();
+//		BSBeanUtils bu = new BSBeanUtils();
+//		EmployeeService es = new EmployeeServiceImpl();
+		AreaService as = new AreaServiceImpl();
 
-		out.put("EMPLOYEE_LIST", bu.listAll(conn, new Employee() ));
-		out.put("AREA_LIST", bu.listAll(conn, new Area() ));
-		out.put("BOSS_LIST", es.listBoss(conn ));
+//		out.put("EMPLOYEE_LIST", bu.listAll(conn, new Employee()));
+//		out.put("AREA_LIST", bu.listAll(conn, new Area()));
+//		out.put("BOSS_LIST", es.listBoss(conn));
+		out.put("BOSS_TREE", as.getAsTree(conn));
 
 		return out;
 	}
