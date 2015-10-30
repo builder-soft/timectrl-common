@@ -45,7 +45,6 @@ public class Area extends BSBean {
 
 	@Override
 	public String toString() {
-		return "Area [key=" + key + ", name=" + name + ", costCenter=" + costCenter + ", parent=" + parent + ",  Id=" + getId()
-				+ "]";
+		return "{Id=" + getId() + ", name=" + name + ", key=" + key + ", costCenter=" + costCenter + ", parent=" + parent + "}";
 	}
 }

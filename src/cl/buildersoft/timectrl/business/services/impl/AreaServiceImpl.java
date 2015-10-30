@@ -19,7 +19,7 @@ public class AreaServiceImpl implements AreaService {
 		for (Area area : areaList) {
 			node = new BSTreeNode();
 			node.setValue(area);
-//			out.addChildren(node);
+			out.addChildren(node);
 			addChils(conn, node, area.getId());
 		}
 
@@ -31,9 +31,9 @@ public class AreaServiceImpl implements AreaService {
 		List<Area> areaList = listChilds(conn, id);
 		for (Area area : areaList) {
 			temp = new BSTreeNode();
-//			temp.setValue(area);
-			node.addChildren(temp);
+			temp.setValue(area);
 			addChils(conn, temp, area.getId());
+			node.addChildren(temp);
 		}
 	}
 
