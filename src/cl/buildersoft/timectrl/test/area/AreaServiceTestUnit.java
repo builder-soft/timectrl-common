@@ -1,6 +1,7 @@
 package cl.buildersoft.timectrl.test.area;
 
 import java.sql.Connection;
+import java.util.List;
 
 import junit.framework.Assert;
 
@@ -30,7 +31,7 @@ public class AreaServiceTestUnit extends AbstractConsoleService {
 	public void testGetAsTree() {
 		AreaService as = new AreaServiceImpl();
 
-		BSTreeNode tree = as.getAsTree(conn);
+		List<BSTreeNode> tree = as.getAsTree(conn);
 		System.out.println(tree);
 		Assert.assertTrue(true);
 	}

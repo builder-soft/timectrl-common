@@ -1,6 +1,7 @@
 package cl.buildersoft.timectrl.business.services.impl;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
@@ -11,43 +12,45 @@ import cl.buildersoft.timectrl.business.services.AreaService;
 public class AreaServiceImpl implements AreaService {
 
 	@Override
-	public BSTreeNode getAsTree(Connection conn) {
-		BSTreeNode out = new BSTreeNode();
+	public List<BSTreeNode> getAsTree(Connection conn) {
+		List<BSTreeNode> out = new ArrayList<BSTreeNode>();
 
 		List<Area> areaList = listChilds(conn, null);
 		BSTreeNode node = null;
 		for (Area area : areaList) {
 			node = new BSTreeNode();
 			node.setValue(area);
-			out.addChildren(node);
-			addChils(conn, node, area.getId());
+			// out.addChildren(node);
+			addChils(conn, node);
+			out.add(node);
 		}
 
 		return out;
 	}
 
-	private void addChils(Connection conn, BSTreeNode node, Long id) {
+	private void addChils(Connection conn, BSTreeNode node) {
 		BSTreeNode temp = null;
-		List<Area> areaList = listChilds(conn, id);
+		Area currentArea = (Area) node.getValue();
+		List<Area> areaList = listChilds(conn, currentArea);
 		for (Area area : areaList) {
 			temp = new BSTreeNode();
 			temp.setValue(area);
-			addChils(conn, temp, area.getId());
+			addChils(conn, temp);
 			node.addChildren(temp);
 		}
 	}
 
-	private List<Area> listChilds(Connection conn, Object object) {
+	private List<Area> listChilds(Connection conn, Area area) {
 		BSBeanUtils bu = new BSBeanUtils();
 		Object[] prms = null;
 
 		String where = null;
-		if (object == null) {
+		if (area == null) {
 			where = "cParent IS NULL";
 		} else {
 			where = "cParent=?";
 			prms = new Object[1];
-			prms[0] = object;
+			prms[0] = area.getId();
 		}
 		List<Area> areaList = (List<Area>) bu.list(conn, new Area(), where, prms);
 
