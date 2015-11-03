@@ -117,4 +117,10 @@ public class EmployeeServiceImpl extends BSHttpServlet implements EmployeeServic
 
 	}
 
+	@Override
+	public List<Employee> listEmployeeByArea(Connection conn, Long areaId) {
+		BSBeanUtils bu = new BSBeanUtils();
+		return (List<Employee>) bu.list(conn, new Employee(), "cArea = ?", areaId);
+	}
+
 }
