@@ -12,6 +12,9 @@ import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
 
 import cl.buildersoft.framework.beans.Domain;
 import cl.buildersoft.framework.beans.DomainAttribute;
@@ -33,15 +36,30 @@ public abstract class AbstractProcess {
 	private String validateLicense = null;
 	private Connection conn = null;
 
+	private final static Logger LOGGER = Logger.getLogger(AbstractProcess.class.getName());
+	private final Logger log = Logger.getLogger(AbstractProcess.class.getName());
+
+	{
+		try {
+			LogManager.getLogManager().readConfiguration(new FileInputStream(System.getenv("BS_PATH") + "\\log.properties"));
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	abstract protected String[] getArguments();
 
 	public AbstractProcess(Connection conn) {
 		this.conn = conn;
 	}
 
-	public AbstractProcess() { 
+	public AbstractProcess() {
 		init();
-		 
+
 		this.conn = getConnection();
 	}
 
@@ -82,7 +100,8 @@ public abstract class AbstractProcess {
 	private void init() {
 		BSConfig config = new BSConfig();
 		String path = System.getenv("BS_PATH");
-		System.out.println("Value of 'BS_PATH' is '" + path + "'");
+		LOGGER.info("Value of 'BS_PATH' is '" + path + "'");
+		// System.out.println("Value of 'BS_PATH' is '" + path + "'");
 
 		if (path == null) {
 			throw new BSConfigurationException("Undefined enviroment variable BS_PATH");
@@ -107,9 +126,16 @@ public abstract class AbstractProcess {
 		readProperties(prop);
 
 		Enumeration<Object> propList = prop.keys();
+
+		String msg = null;
 		while (propList.hasMoreElements()) {
 			Object o = propList.nextElement();
-			System.out.println(o.toString() + " = " + prop.getProperty(o.toString()));
+			msg = o.toString() + " = " + prop.getProperty(o.toString());
+			Logger.getLogger(getClass().getName()).log(Level.INFO, msg);
+
+			// log.info(o.toString() + " = " + prop.getProperty(o.toString())) ;
+			// System.out.println(o.toString() + " = " +
+			// prop.getProperty(o.toString()));
 		}
 		try {
 			Thread.sleep(100);
