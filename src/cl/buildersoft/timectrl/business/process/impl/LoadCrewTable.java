@@ -206,7 +206,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		}
 
 		mysql.closeConnection(conn);
-		log("End Process");
+//		log("End Process");
 		/**
 		 * <code>
 FOR(date : dates)
