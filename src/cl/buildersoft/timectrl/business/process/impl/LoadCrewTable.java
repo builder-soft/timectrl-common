@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
@@ -31,6 +32,7 @@ import cl.buildersoft.timectrl.business.services.TurnDayService;
 import cl.buildersoft.timectrl.business.services.impl.TurnDayServiceImpl;
 
 public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
+	private static final Logger log = Logger.getLogger(LoadCrewTable.class.getName());
 	private static final String DATE_TIME_FORMAT_CONST = "yyyy-MM-dd HH:mm:ss.S";
 	private Map<Long, IdRut> idRutMap = new HashMap<Long, IdRut>();
 	/**
@@ -103,10 +105,13 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 	@Override
 	public void doExecute(String[] args) {
+		log.entering(this.getClass().getName(), "doExecute");
 		validateArguments(args);
 		Connection conn = getConnection(getDomainByBatabase(args[0]));
 
-		log("Begin Process...");
+//		log("Begin Process...");
+		log.fine("Begin Process...");
+		
 		Boolean flexible = null;
 		Boolean hiredDay = null;
 		Double workedTime = null;
@@ -134,7 +139,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 				flexible = isFlexible(conn, mysql, date, (long) employee.getId());
 
 				// System.out.println(employee.getName() + " " + flexible);
-
+				
 				if (flexible == null) {
 					hiredDay = false;
 					workedTime = 0D;
@@ -254,7 +259,7 @@ FOR(date : dates)
 FIN FOR
 </code>
 		 */
-
+		log.exiting(this.getClass().getName(), "doExecute");
 	}
 
 	private void saveToCrewLog(Connection conn, Date date, String employeeKey) {
