@@ -23,4 +23,9 @@ public class Post extends BSBean {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+	@Override
+	public String toString() {
+		return "Post [key=" + key + ", name=" + name + ", Id=" + getId() + "]";
+	}
 }
