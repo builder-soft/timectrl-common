@@ -23,6 +23,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
+import cl.buildersoft.framework.exception.BSSystemException;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
@@ -44,6 +45,8 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 	protected XSSFCellStyle bodyStyle = null;
 	protected XSSFCellStyle titleStyle = null;
 
+	private Integer rowOfSheet = 0;
+
 	@Override
 	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
 			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportParameterList) {
@@ -58,12 +61,46 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 		processEmployeeParameter(conn, reportParameterList);
 		List<Object> params = getReportParams(conn, reportParameterList);
 
-		ResultSet rs = mysql.callSingleSP(conn, this.spName, params);
+		List<List<Object[]>> rss = mysql.callComplexSP(conn, this.spName, params, true);
+		// ResultSet rs = mysql.callSingleSP(conn, this.spName, params);
 
-		resultSetToFile(conn, rs);
+		WorkbookAndSheet workbookAndSheet = createWorkbook();
+
+		for (List<Object[]> rs : rss) {
+
+			listToSheet(rs, workbookAndSheet.getSheet());
+
+		}
+		// resultSetToFile(conn, rs);
+		closeWorkbook(workbookAndSheet.getWorkbook());
 
 		out.add(this.outputFileAndPath);
 
+		return out;
+	}
+
+	private void closeWorkbook(XSSFWorkbook workbook) {
+		FileOutputStream out;
+		try {
+			out = new FileOutputStream(new File(this.outputFileAndPath));
+
+			workbook.write(out);
+			workbook.close();
+			out.close();
+		} catch (FileNotFoundException e) {
+			throw new BSSystemException(e);
+		} catch (IOException e) {
+			throw new BSSystemException(e);
+		}
+	}
+
+	private WorkbookAndSheet createWorkbook() {
+		WorkbookAndSheet out = new WorkbookAndSheet();
+		XSSFWorkbook workbook = new XSSFWorkbook();
+		XSSFSheet sheet = workbook.createSheet("Listado");
+		configStyles(workbook);
+		out.setWorkbook(workbook);
+		out.setSheet(sheet);
 		return out;
 	}
 
@@ -90,6 +127,25 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+
+	protected void listToSheet(List<Object[]> rs, XSSFSheet sheet) {
+		Integer i = 0, j = 0;
+		XSSFRow row = null; // summarySheet.createRow(this.rowOfSheet++);
+		for (Object[] line : rs) {
+			j = 0;
+			row = sheet.createRow(this.rowOfSheet++);
+			writeDataLine(i, j, row, line, true);
+			i++;
+		}
+		this.rowOfSheet++;
+	}
+
+	private void writeDataLine(Integer i, Integer j, XSSFRow row, Object[] line, Boolean force) {
+		XSSFCellStyle customStyle = i == 0 ? headerStyle : bodyStyle;
+		for (Object data : line) {
+			createCell(row, j++, customStyle, data);
 		}
 	}
 
@@ -229,5 +285,26 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 	public Color hex2Rgb(String colorStr) {
 		return new Color(Integer.valueOf(colorStr.substring(1, 3), 16), Integer.valueOf(colorStr.substring(3, 5), 16),
 				Integer.valueOf(colorStr.substring(5, 7), 16));
+	}
+}
+
+class WorkbookAndSheet {
+	XSSFWorkbook workbook = null;
+	XSSFSheet sheet = null;
+
+	public XSSFWorkbook getWorkbook() {
+		return workbook;
+	}
+
+	public void setWorkbook(XSSFWorkbook workbook) {
+		this.workbook = workbook;
+	}
+
+	public XSSFSheet getSheet() {
+		return sheet;
+	}
+
+	public void setSheet(XSSFSheet sheet) {
+		this.sheet = sheet;
 	}
 }
