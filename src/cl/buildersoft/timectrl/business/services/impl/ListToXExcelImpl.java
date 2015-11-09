@@ -184,7 +184,7 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 			if (parameter.getTypeKey().equalsIgnoreCase("EMPLOYEE_LIST")) {
 				parameter.setJavaType("STRING");
 			}
-			value = getParameterType(conn, parameter.getJavaType(), bu, parameter.getValue());
+			value = getParameterType(conn, parameter.getJavaType(), bu, parameter.getValue().trim());
 
 			// if (reportParam.getFromUser()) {
 			out.add(value);
