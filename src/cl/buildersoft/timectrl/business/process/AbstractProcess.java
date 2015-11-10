@@ -20,6 +20,7 @@ import cl.buildersoft.framework.exception.BSException;
 import cl.buildersoft.framework.util.BSConfig;
 import cl.buildersoft.framework.util.BSDataUtils;
 import cl.buildersoft.framework.util.BSDateTimeUtil;
+import cl.buildersoft.framework.util.BSUtils;
 
 public abstract class AbstractProcess {
 	private final static String FILE_NAME = "Process.properties";
@@ -33,8 +34,7 @@ public abstract class AbstractProcess {
 	private String validateLicense = null;
 	private Connection conn = null;
 
-	private static final Logger LOG = Logger.getLogger(AbstractProcess.class
-			.getName());
+	private static final Logger LOG = Logger.getLogger(AbstractProcess.class.getName());
 
 	// private final static Logger LOGGER =
 	// Logger.getLogger(AbstractProcess.class.getName());
@@ -62,8 +62,7 @@ public abstract class AbstractProcess {
 	protected Connection getConnection() {
 		if (this.conn == null) {
 			BSDataUtils du = new BSDataUtils();
-			this.conn = du.getConnection(this.driver, this.serverName + ":"
-					+ this.port, this.database, this.password, this.user);
+			this.conn = du.getConnection(this.driver, this.serverName + ":" + this.port, this.database, this.password, this.user);
 		}
 		return this.conn;
 	}
@@ -74,20 +73,16 @@ public abstract class AbstractProcess {
 		DomainAttribute da = new DomainAttribute();
 
 		BSBeanUtils bu = new BSBeanUtils();
-		List<DomainAttribute> daList = (List<DomainAttribute>) bu.list(
-				getConnection(), da, "cDomain=?", domain.getId());
+		List<DomainAttribute> daList = (List<DomainAttribute>) bu.list(getConnection(), da, "cDomain=?", domain.getId());
 
-		conn = bu.getConnection(getAttribute(daList, "database.driver"),
-				getAttribute(daList, "database.server"),
-				getAttribute(daList, "database.database"),
-				getAttribute(daList, "database.password"),
+		conn = bu.getConnection(getAttribute(daList, "database.driver"), getAttribute(daList, "database.server"),
+				getAttribute(daList, "database.database"), getAttribute(daList, "database.password"),
 				getAttribute(daList, "database.username"));
 
 		return conn;
 	}
 
-	private String getAttribute(List<DomainAttribute> domainAttributeList,
-			String key) {
+	private String getAttribute(List<DomainAttribute> domainAttributeList, String key) {
 		String out = null;
 		for (DomainAttribute domainAttribute : domainAttributeList) {
 			if (domainAttribute.getKey().equalsIgnoreCase(key)) {
@@ -101,13 +96,11 @@ public abstract class AbstractProcess {
 	private void init() {
 		BSConfig config = new BSConfig();
 		String path = System.getenv("BS_PATH");
-		// LOGGER.info("Value of 'BS_PATH' is '" + path + "'");
-		// System.out.println("Value of 'BS_PATH' is '" + path + "'");
-		// log.info(path);
+
+		LOG.log(Level.CONFIG, "Value of 'BS_PATH' is '{0}'", path);
 
 		if (path == null) {
-			throw new BSConfigurationException(
-					"Undefined enviroment variable BS_PATH");
+			throw new BSConfigurationException("Undefined enviroment variable BS_PATH");
 		}
 		String propertyFileName = config.fixPath(path) + FILE_NAME;
 		Properties prop = new Properties();
@@ -130,15 +123,12 @@ public abstract class AbstractProcess {
 
 		Enumeration<Object> propList = prop.keys();
 
-		String msg = null;
+//		String msg = null;
 		while (propList.hasMoreElements()) {
 			Object o = propList.nextElement();
-			msg = o.toString() + " = " + prop.getProperty(o.toString());
-			// Logger.getLogger(getClass().getName()).log(Level.INFO, msg);
-
-			// log.info(o.toString() + " = " + prop.getProperty(o.toString())) ;
-			// System.out.println(o.toString() + " = " +
-			// prop.getProperty(o.toString()));
+//			msg = o.toString() + " = " + prop.getProperty(o.toString());
+	
+			LOG.log(Level.CONFIG, "Property: {0}: {1}", BSUtils.array2ObjectArray(o.toString(), prop.getProperty(o.toString())));
 		}
 		try {
 			Thread.sleep(100);
@@ -170,13 +160,11 @@ public abstract class AbstractProcess {
 				}
 
 				if (!valid) {
-					throw new BSConfigurationException("Argument '"
-							+ argumentName + "' is'n valid");
+					throw new BSConfigurationException("Argument '" + argumentName + "' is'n valid");
 				}
 			}
 		} else {
-			String msg = "Number of arguments not valid. Received "
-					+ args.length + ", expected " + validArgumentList.length
+			String msg = "Number of arguments not valid. Received " + args.length + ", expected " + validArgumentList.length
 					+ ".";
 			BSException e = new BSConfigurationException(msg);
 			LOG.log(Level.SEVERE, msg, e);
@@ -201,13 +189,12 @@ public abstract class AbstractProcess {
 	}
 
 	private void translateDateField() {
-		this.logPath = this.logPath.replaceAll("\\x7BDate\\x7D", BSDateTimeUtil
-				.calendar2String(Calendar.getInstance(), "yyyy-MM-dd"));
+		this.logPath = this.logPath.replaceAll("\\x7BDate\\x7D",
+				BSDateTimeUtil.calendar2String(Calendar.getInstance(), "yyyy-MM-dd"));
 
 	}
 
 	private String concatenateMessage(String message) {
-		return BSDateTimeUtil.calendar2String(Calendar.getInstance(),
-				"yyyy-M-dd hh:mm:ss") + " : " + message;
+		return BSDateTimeUtil.calendar2String(Calendar.getInstance(), "yyyy-M-dd hh:mm:ss") + " : " + message;
 	}
 }

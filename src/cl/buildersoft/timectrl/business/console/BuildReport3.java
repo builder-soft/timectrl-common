@@ -48,7 +48,6 @@ public class BuildReport3 extends AbstractConsoleService {
 		}
 		if (responseList != null) {
 			for (String response : responseList) {
-				// System.out.println(response);
 				LOG.log(Level.INFO, response);
 			}
 		}
