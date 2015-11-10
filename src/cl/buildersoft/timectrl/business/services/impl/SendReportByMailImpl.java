@@ -184,8 +184,7 @@ public class SendReportByMailImpl extends AbstractReportService implements
 		for (String fileName : fileList) {
 			file = new File(fileName);
 			if (!file.delete()) {
-				LOG.log(Level.SEVERE, "Cant delete file '{1}'", fileName);
-				// System.out.println("Cant delete file '" + fileName + "'");
+				LOG.log(Level.SEVERE, "Cant delete file '{0}'", fileName);
 			}
 		}
 	}

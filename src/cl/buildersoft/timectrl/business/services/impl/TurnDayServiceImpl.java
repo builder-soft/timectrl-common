@@ -5,14 +5,18 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
+import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.business.beans.TurnDay;
 import cl.buildersoft.timectrl.business.services.TurnDayService;
 
 public class TurnDayServiceImpl implements TurnDayService {
+	private static final Logger LOG = Logger.getLogger(TurnDayServiceImpl.class.getName());
 	Map<Long, TurnDay> turnDayList = new HashMap<Long, TurnDay>();
 
 	public TurnDayServiceImpl(Connection conn) {
@@ -27,15 +31,11 @@ public class TurnDayServiceImpl implements TurnDayService {
 	@Override
 	public TurnDay markAndUserToTurnDayId(Connection conn, Calendar markTime, Long employeeId, Integer tolerance, Boolean flexible) {
 		BSmySQL mysql = new BSmySQL();
-		// CREATE FUNCTION fMarkAndUserToTurnDayId4(vMarkTime TIMESTAMP,
-		// vEmployeeId BIGINT(20),
-		// vTolerance INTEGER, vFlexible BOOLEAN) RETURNS BIGINT(20)
 		TurnDay out = null;
-		// System.out.println(BSDateTimeUtil.calendar2String(markTime,
-		// "yyyy-MM-dd HH:mm:ss.S"));
+		LOG.log(Level.FINE, "markAndUserToTurnDayId: {0}", BSDateTimeUtil.calendar2String(markTime, "yyyy-MM-dd HH:mm:ss.S"));
 
 		List<Object> params = BSUtils.array2List(markTime, employeeId, tolerance, flexible);
-//		System.out.println(BSDateTimeUtil.calendar2String(markTime, "yyyy-MM-dd HH:mm:ss.SSS"));
+
 		String id = mysql.callFunction(conn, "fMarkAndUserToTurnDayId4", params);
 
 		mysql.closeSQL();

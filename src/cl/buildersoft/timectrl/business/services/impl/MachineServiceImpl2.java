@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
@@ -74,12 +75,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 					dwDay, dwHour, dwMinute, dwSecond, dwWorkCode)) {
 				attendance = new AttendanceLog();
 
-				// calendar = Calendar.getInstance();
-				// // System.out.println(dwYear.value);
-				// calendar.set(dwYear.value, (dwMonth.value - 1), dwDay.value,
-				// dwHour.value, dwMinute.value, dwSecond.value);
-				// calendar.set(Calendar.MILLISECOND, 0);
-				// date = new Timestamp(calendar.getTimeInMillis());
+				LOG.log(Level.FINE, "Year: {0}", dwYear.value.toString());
 
 				attendance.setYear(dwYear.value);
 				attendance.setMonth(dwMonth.value);
@@ -88,7 +84,6 @@ public class MachineServiceImpl2 implements MachineService2 {
 				attendance.setMinute(dwMinute.value);
 				attendance.setSecond(dwSecond.value);
 
-				// attendance.setDate(date);
 				attendance.setEmployeeKey(dwEnrollNumber.value);
 				attendance.setMachine(machine.getId());
 				attendance.setMarkType(readMarkType(conn, dwInOutMode));
@@ -111,8 +106,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 	}
 
 	private void writeToConsole(AttendanceLog attendance, Boolean found) {
-//		System.out.println((found ? "Exists: " : "Absent: ") + attendance.toString());
-		System.out.println((found ? "Exists: " : "Absent: ") + attendance.toString());
+		LOG.log(Level.INFO, (found ? "Exists: {0}" : "Absent: {0}") , attendance.toString());
 	}
 
 	private long readMarkType(Connection conn, Holder<Integer> dwInOutMode) {

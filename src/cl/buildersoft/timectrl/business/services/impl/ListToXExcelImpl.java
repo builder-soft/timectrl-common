@@ -11,6 +11,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -30,6 +32,7 @@ import cl.buildersoft.timectrl.business.beans.ReportType;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
 public class ListToXExcelImpl extends AbstractReportService implements ReportService {
+	private final static Logger LOG = Logger.getLogger(ListToXExcelImpl.class.getName());
 	protected String outputPath = null;
 	protected String outputFile = null;
 	protected String spName = null;
@@ -271,7 +274,7 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 		} else if ("FONT_SIZE".equalsIgnoreCase(key)) {
 			fontSize = Integer.parseInt(value);
 		} else {
-			// System.out.println("Property '" + key + "' not found");
+			LOG.log(Level.WARNING, "Property '{0}' not found", key);
 			out = false;
 		}
 		return out;

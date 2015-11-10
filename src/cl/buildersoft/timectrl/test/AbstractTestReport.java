@@ -5,15 +5,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.util.BSConfig;
+import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.TurnDay;
 import cl.buildersoft.timectrl.business.console.AbstractConsoleService;
 
 public class AbstractTestReport extends AbstractConsoleService {
+	private static final Logger LOG = Logger.getLogger(AbstractTestReport.class.getName());
 	private static final String APOSTROPHE = "'";
 	private static final String EXPECTED_MESSAGE = "', expected='";
 	private static final String TOLERANCE_INFERENCE = "TOLERANCE_INFERENCE";
@@ -45,13 +49,13 @@ public class AbstractTestReport extends AbstractConsoleService {
 				commentRS = rs.getString("cComment");
 
 				if (this.testNumber != null) {
-					System.out.println("Employee Key='" + idToKey(prm.get(0)) + "', Employee Id='" + prm.get(0) + APOSTROPHE);
-					System.out.println("Fecha inicio: " + prm.get(1) + " Fecha termino: " + prm.get(2));
-					System.out.println("cStartMark: '" + startMarkRS + APOSTROPHE);
-					System.out.println("cEndMark: '" + endMarkRS + APOSTROPHE);
-					System.out.println("cStartDiffI: '" + startDiffIRS + APOSTROPHE);
-					System.out.println("cEndDiffI: '" + endDiffIRS + APOSTROPHE);
-					System.out.println("cComment: '" + commentRS + APOSTROPHE);
+					LOG.log(Level.INFO, "Employee Key='" + idToKey(prm.get(0)) + "', Employee Id='" + prm.get(0) + APOSTROPHE);
+					LOG.log(Level.INFO, "Fecha inicio: " + prm.get(1) + " Fecha termino: " + prm.get(2));
+					LOG.log(Level.INFO, "cStartMark: '" + startMarkRS + APOSTROPHE);
+					LOG.log(Level.INFO, "cEndMark: '" + endMarkRS + APOSTROPHE);
+					LOG.log(Level.INFO, "cStartDiffI: '" + startDiffIRS + APOSTROPHE);
+					LOG.log(Level.INFO, "cEndDiffI: '" + endDiffIRS + APOSTROPHE);
+					LOG.log(Level.INFO, "cComment: '" + commentRS + APOSTROPHE);
 				}
 			}
 
@@ -74,14 +78,11 @@ public class AbstractTestReport extends AbstractConsoleService {
 			}
 			// if (comment.length() > 0) {
 			/*
-			if (startMark.length() == 0 && endMark.length() == 0) {
-				comment = "Sin marcas";
-			} else if (startMark.length() == 0) {
-				comment = "Sin entrada";
-			} else if (endMark.length() == 0) {
-				comment = "Sin salida";
-			}
-			*/
+			 * if (startMark.length() == 0 && endMark.length() == 0) { comment =
+			 * "Sin marcas"; } else if (startMark.length() == 0) { comment =
+			 * "Sin entrada"; } else if (endMark.length() == 0) { comment =
+			 * "Sin salida"; }
+			 */
 			Integer indexOf = commentRS.indexOf(comment);
 			if (indexOf == -1) {
 				out = "Comment='" + commentRS + EXPECTED_MESSAGE + comment + APOSTROPHE;
@@ -111,8 +112,8 @@ public class AbstractTestReport extends AbstractConsoleService {
 		BSBeanUtils bu = new BSBeanUtils();
 		Employee employee = new Employee();
 		bu.search(conn, employee, "cRut=?", rut);
-		// System.out.println("Rut:" + rut + " => " + employee.getId() +
-		// " => Key:" + employee.getKey());
+		LOG.log(Level.FINE, "In rutToId Rut: {0} => Id: {1} => Key: {2}",
+				BSUtils.array2ObjectArray(rut, employee.getId(), employee.getKey()));
 		return employee.getId();
 	}
 
@@ -121,8 +122,8 @@ public class AbstractTestReport extends AbstractConsoleService {
 		Employee employee = new Employee();
 		employee.setId((Long) id);
 		bu.search(conn, employee);
-		// System.out.println("Rut:" + employee.getId() + " => Key:" +
-		// employee.getKey());
+		LOG.log(Level.FINE, "In idToKey Id: {0} => Rut: {1} => Key: {2}",
+				BSUtils.array2ObjectArray(id, employee.getRut(), employee.getKey()));
 		return employee.getKey();
 	}
 
@@ -137,7 +138,7 @@ public class AbstractTestReport extends AbstractConsoleService {
 
 	protected void flagTest(int testNumber) {
 		this.testNumber = testNumber;
-		System.out.println("Test " + this.testNumber);
+		LOG.log(Level.FINE, "Test: {0}", this.testNumber);
 
 	}
 

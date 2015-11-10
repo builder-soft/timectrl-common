@@ -5,6 +5,10 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.mysql.jdbc.log.Log;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporter;
@@ -26,26 +30,21 @@ import cl.buildersoft.timectrl.business.beans.ReportParameterType;
 
 @SuppressWarnings({ "deprecation", "rawtypes" })
 public class FileReport {
+	private static final Logger LOG = Logger.getLogger(FileReport.class.getName());
 	private String fileName = null;
 
 	public String doBuild(Connection conn, BSBeanUtils bu, Report report, List<ReportParameterBean> reportParamList,
 			List<ReportPropertyType> reportOutValues) {
 
-		// String fileName = getFileName();
-
-		// String folder = getReportOutParam(conn, bu, reportOutValues,
-		// "OUTPUT_REPORT");
 		String folder = null;
 		if (this.fileName == null) {
 			folder = getReportOutParam(conn, bu, reportOutValues, "OUTPUT_FOLDER");
 		}
 		String fileName = getFileName(conn, bu, reportOutValues);
 
-		// String format = getFormat(conn, bu, reportOutValue);
-
+		LOG.log(Level.INFO, "Filename: {0}", fileName);
 		return buildReportFile(conn, fileName, folder, reportParamList, report);
 
-		// System.out.println(fileName);
 	}
 
 	private String buildReportFile(Connection conn, String fileName, String folder, List<ReportParameterBean> reportParamList,
@@ -58,8 +57,7 @@ public class FileReport {
 		try {
 			jasperReport = (JasperReport) JRLoader.loadObject(new File(jasperFileAndPath));
 		} catch (JRException e) {
-			// System.out.println("Finding " + jasperFileAndPath);
-			e.printStackTrace();
+			LOG.log(Level.SEVERE, "Finding " + jasperFileAndPath, e);
 			throw new BSConfigurationException(e);
 		}
 
@@ -87,7 +85,7 @@ public class FileReport {
 		 */
 
 		// fileName += extention;
-		System.out.println("File to build '" + outputFileAndPath + "'");
+		LOG.log(Level.INFO, "File to build '{0}", outputFileAndPath);
 
 		exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
 		exporter.setParameter(JRExporterParameter.OUTPUT_FILE, new File(outputFileAndPath));
@@ -103,8 +101,9 @@ public class FileReport {
 
 	private String getJasperFile(Connection conn, Report report) {
 		BSConfig config = new BSConfig();
-		String out ="";
-//		String out = fixPath(config.getString(conn, "JASPER_FOLDER")) + report.getJasperFile();
+		String out = "";
+		// String out = fixPath(config.getString(conn, "JASPER_FOLDER")) +
+		// report.getJasperFile();
 		// throw new BSProgrammerException("Under construction");
 		return out;
 	}
@@ -114,11 +113,12 @@ public class FileReport {
 		Object value = null;
 		BSBeanUtils bu = new BSBeanUtils();
 		for (ReportParameterBean reportParam : reportParams) {
-//			value = getType(conn, reportParam.getType(), bu, reportParam.getValue());
-//
-//			if (reportParam.getFromUser()) {
-//				out.put(reportParam.getName(), value);
-//			}
+			// value = getType(conn, reportParam.getType(), bu,
+			// reportParam.getValue());
+			//
+			// if (reportParam.getFromUser()) {
+			// out.put(reportParam.getName(), value);
+			// }
 		}
 
 		/**
@@ -170,12 +170,14 @@ public class FileReport {
 		String out = null;
 		ReportPropertyBean outParam = getReportOutParam(conn, bu, key);
 		for (ReportPropertyType reportOutValue : reportOutValues) {
-			/**<code>
+			/**
+			 * <code>
 			if (reportOutValue.getParam().equals(outParam.getId())) {
 				out = reportOutValue.getValue();
 				break;
 			}
-			</code>*/
+			</code>
+			 */
 		}
 		return out;
 	}
@@ -245,7 +247,7 @@ public class FileReport {
 
 	private ReportPropertyBean getReportOutParam(Connection conn, BSBeanUtils bu, String key) {
 		ReportPropertyBean out = new ReportPropertyBean();
-//		bu.search(conn, out, "cKey=?", key);
+		// bu.search(conn, out, "cKey=?", key);
 		return out;
 	}
 

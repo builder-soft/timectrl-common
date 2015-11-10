@@ -11,6 +11,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -33,6 +35,7 @@ import cl.buildersoft.timectrl.report.FileReport;
 
 @Deprecated
 public class BuildReport2 extends AbstractConsoleService {
+	private static final Logger LOG = Logger.getLogger(BuildReport2.class.getName());
 	private String fileName = null;
 
 	public static void main(String[] args) {
@@ -51,10 +54,9 @@ public class BuildReport2 extends AbstractConsoleService {
 				buildReport.doBuild(id, target);
 			}
 
-			System.out.println("Done!");
+			LOG.log(Level.FINE, "Done!");
 		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Fail!");
+			LOG.log(Level.SEVERE, "Error building report", e);
 		}
 
 	}
@@ -86,8 +88,8 @@ public class BuildReport2 extends AbstractConsoleService {
 		bu.search(conn, report);
 
 		List<ReportParameterBean> reportParamList = null; // validParams(conn,
-																// bu, report,
-																// args);
+															// bu, report,
+															// args);
 		List<ReportPropertyType> reportOutValue = readReportOutValue(conn, bu, report);
 
 		ReportType reportOutType = getReportType(conn, bu, report);
@@ -128,7 +130,7 @@ public class BuildReport2 extends AbstractConsoleService {
 		resultSetToFile(conn, rs);
 
 		new BSmySQL().closeSQL(rs);
-		System.out.println("Report written in " + this.fileName);
+		LOG.log(Level.INFO, "Report written in {0}", this.fileName);
 	}
 
 	private void resultSetToFile(Connection conn, ResultSet rs) {
@@ -301,6 +303,8 @@ public class BuildReport2 extends AbstractConsoleService {
 		return reportType;
 	}
 
+	/**
+	 * <code>
 	private List<ReportParameterBean> validParams(Connection conn, BSBeanUtils bu, Report report, String[] args) {
 		List<ReportParameterBean> out = new ArrayList<ReportParameterBean>();
 		ReportParameterBean temp = null;
@@ -313,18 +317,7 @@ public class BuildReport2 extends AbstractConsoleService {
 			while (rs.next()) {
 				temp = new ReportParameterBean();
 				temp.setId(rs.getLong("cId"));
-
-				// bu.search(conn, temp);
-
-				// System.out.println(temp.getName() + " = " + temp.getValue() +
-				// (temp.getFromUser() ? " (Input by user)" : ""));
-
-				// if (temp.getFromUser()) {
-				// countFromUserParam++;
-				//
-				// temp.setValue(args[i++]);
-				// }
-
+ 
 				out.add(temp);
 			}
 		} catch (SQLException e) {
@@ -337,7 +330,8 @@ public class BuildReport2 extends AbstractConsoleService {
 		}
 		return out;
 	}
-
+</code>
+	 */
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
 

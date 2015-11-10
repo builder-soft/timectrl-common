@@ -25,16 +25,6 @@ public class TestListAttendanceReport extends AbstractTestReport {
 	private static final long SOPORTE_TURN = 5L;
 	private static final String SIN_MARCA = "";
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		System.out.println("setUpBeforeClass");
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		System.out.println("tearDownAfterClass");
-	}
-
 	@Before
 	public void setUp() throws Exception {
 		this.mysql = new BSmySQL();
@@ -46,7 +36,6 @@ public class TestListAttendanceReport extends AbstractTestReport {
 
 	@After
 	public void tearDown() throws Exception {
-		// System.out.println("tearDown");
 		new BSmySQL().closeConnection(this.conn);
 		this.mysql = null;
 		this.testNumber = null;
@@ -81,7 +70,6 @@ public class TestListAttendanceReport extends AbstractTestReport {
 
 	@Test
 	public void test3() {
-		// System.out.println("\nTest2\n");
 		List<Object> prm = getParameters("12927407-7", "2015-01-22");
 		ResultSet rs = execute(mysql, prm);
 		String success = validate(rs, prm, "07:53:19", "20:07:41", "7", "128", "");

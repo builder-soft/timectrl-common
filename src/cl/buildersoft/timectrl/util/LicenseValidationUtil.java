@@ -1,5 +1,7 @@
 package cl.buildersoft.timectrl.util;
 
+import static cl.buildersoft.framework.util.BSUtils.array2ObjectArray;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -8,15 +10,19 @@ import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSSystemException;
 import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSSecurity;
+import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.business.beans.Machine;
 
 public class LicenseValidationUtil {
+	private static final Logger LOG = Logger.getLogger(LicenseValidationUtil.class.getName());
 	private static final int ONE_DAY = 1000 * 60 * 60 * 24;
 
 	public Boolean licenseValidation(Connection conn, String fileContent) {
@@ -32,6 +38,7 @@ public class LicenseValidationUtil {
 			Integer poundPosition = fileContent.indexOf("#");
 			String serials = fileContent.substring(0, poundPosition);
 			String dateExpired = fileContent.substring(poundPosition + 1);
+			LOG.log(Level.FINE, "Serials: {0} Expiration Date: {1}", array2ObjectArray(serials, dateExpired));
 
 			String[] serialsArray = serials.split(",");
 
@@ -49,8 +56,9 @@ public class LicenseValidationUtil {
 					}
 				}
 			} else {
-				System.out.println("No coinciden las series registradas con las del archivo de licencia:\nLI:["
-						+ showList(serialsArray) + "] \nDB:[" + showList(serialsSet) + "]");
+				LOG.log(Level.WARNING,
+						"No coinciden las series registradas con las del archivo de licencia:\nLI:[{0}] \nDB:[{1}]",
+						BSUtils.array2ObjectArray(showList(serialsArray), showList(serialsSet)));
 				success = false;
 			}
 		}
@@ -90,8 +98,7 @@ public class LicenseValidationUtil {
 			out = new String(chars);
 			reader.close();
 		} catch (IOException e) {
-			System.out.println("Error al leer el archivo '" + pathFile + "'");
-			e.printStackTrace();
+			LOG.log(Level.SEVERE, "Error reading file '" + pathFile + "'", e);
 			throw new BSSystemException(e);
 		}
 

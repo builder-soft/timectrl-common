@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.util.BSConfig;
@@ -20,6 +22,7 @@ import cl.buildersoft.timectrl.business.services.PrivilegeService;
 import com4j.Holder;
 
 public class MachineServiceImpl implements MachineService {
+	private final static Logger LOG = Logger.getLogger(MachineServiceImpl.class.getName());
 	private Boolean windows8compatible = null;
 
 	@Override
@@ -54,7 +57,7 @@ public class MachineServiceImpl implements MachineService {
 		Holder<Integer> dwMinute = new Holder<Integer>(0);
 		Holder<Integer> dwSecond = new Holder<Integer>(0);
 		Holder<Integer> dwWorkCode = new Holder<Integer>(0);
-//		Timestamp date = null;
+		// Timestamp date = null;
 
 		api.enableDevice(dwMachineNumber, false);
 		if (api.readGeneralLogData(dwMachineNumber)) {
@@ -62,21 +65,15 @@ public class MachineServiceImpl implements MachineService {
 					dwDay, dwHour, dwMinute, dwSecond, dwWorkCode)) {
 				attendance = new AttendanceLog();
 
-//				Calendar calendar = Calendar.getInstance();
-				// System.out.println(dwYear.value);
-//				calendar.set(dwYear.value, dwMonth.value, dwDay.value, dwHour.value, dwMinute.value, dwSecond.value);
-//				calendar.set(Calendar.MILLISECOND, 0);
-//				date = new Timestamp(calendar.getTimeInMillis());
+				LOG.log(Level.FINE, "Year: {0}", dwYear.value);
 
-//				attendance.setDate(date);
-				
 				attendance.setYear(dwYear.value);
 				attendance.setMonth(dwMonth.value);
 				attendance.setDay(dwDay.value);
 				attendance.setHour(dwHour.value);
 				attendance.setMinute(dwMinute.value);
 				attendance.setSecond(dwMinute.value);
-				
+
 				attendance.setEmployeeKey(dwEnrollNumber.value);
 				attendance.setMachine(machine.getId());
 				attendance.setMarkType((long) dwInOutMode.value);
@@ -99,7 +96,7 @@ public class MachineServiceImpl implements MachineService {
 			Holder<Integer> dwWorkCode) {
 
 		Boolean out = null;
-		
+
 		if (this.windows8compatible == null) {
 			BSConfig config = new BSConfig();
 			this.windows8compatible = config.getBoolean(conn, "W8COMPATIBLE");

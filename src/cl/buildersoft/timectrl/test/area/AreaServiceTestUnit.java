@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import cl.buildersoft.framework.database.BSmySQL;
+import cl.buildersoft.framework.util.BSConsole;
 import cl.buildersoft.framework.util.BSTreeNode;
 import cl.buildersoft.timectrl.business.console.AbstractConsoleService;
 import cl.buildersoft.timectrl.business.services.AreaService;
@@ -32,7 +33,7 @@ public class AreaServiceTestUnit extends AbstractConsoleService {
 		AreaService as = new AreaServiceImpl();
 
 		List<BSTreeNode> tree = as.getAsTree(conn);
-		System.out.println(tree);
+		BSConsole.println(tree.toString());
 		Assert.assertTrue(true);
 	}
 

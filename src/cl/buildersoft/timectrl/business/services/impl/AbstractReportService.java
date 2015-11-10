@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.sf.jasperreports.engine.JRExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -32,6 +34,7 @@ import cl.buildersoft.timectrl.business.services.ReportService;
 
 @SuppressWarnings("unchecked")
 public abstract class AbstractReportService {
+	private static final Logger LOG = Logger.getLogger(AbstractReportService.class.getName());
 	protected static final String NOT_FOUND = "' not found.";
 
 	protected abstract Boolean getPropertyValue(String key, String value);
@@ -301,7 +304,7 @@ public abstract class AbstractReportService {
 			}
 		}
 
-		// System.out.println(sql);
+		LOG.log(Level.FINE, sql);
 
 		BSDataUtils du = new BSDataUtils();
 		ResultSet rs = du.queryResultSet(conn, sql, param);
@@ -338,7 +341,7 @@ public abstract class AbstractReportService {
 	}
 	protected void processEmployeeParameter(Connection conn, List<ReportParameterBean> reportParameterList) {
 		for (ReportParameterBean parameter : reportParameterList) {
-			//System.out.println(parameter.toString());
+			LOG.log(Level.FINE, parameter.toString());
 			if (parameter.getTypeKey().equalsIgnoreCase("EMPLOYEE_LIST") && parameter.getValue().equals("0")) {
 				replaceZeroWithAllIds(conn, parameter);
 				parameter.setJavaType("STRING");
