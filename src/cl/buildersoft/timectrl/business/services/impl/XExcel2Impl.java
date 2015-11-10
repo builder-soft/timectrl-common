@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CreationHelper;
@@ -35,6 +37,7 @@ import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
+import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.services.EmployeeService;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
@@ -52,6 +55,8 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	protected Integer rowOfSheet = 0;
 	protected Integer employeeDepth = 0;
 	protected Integer currentDepth = null;
+	private static final Logger LOG = Logger.getLogger(XExcel2Impl.class
+			.getName());
 
 	private void relationPages(XSSFWorkbook workBook) {
 		Map<DataInSheet, Integer> detailResult = inspectDetail(workBook);
@@ -113,7 +118,8 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		return out;
 	}
 
-	private Map<DataInSheet, Integer> inspectSummary(XSSFWorkbook workBook, Map<DataInSheet, Integer> detailResult) {
+	private Map<DataInSheet, Integer> inspectSummary(XSSFWorkbook workBook,
+			Map<DataInSheet, Integer> detailResult) {
 		XSSFSheet sheet = workBook.getSheetAt(0);
 		// XSSFSheet detail = workBook.getSheetAt(1);
 		Iterator<Row> rowIterator = sheet.iterator();
@@ -149,16 +155,19 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 					firstLoop = false;
 					position = value.indexOf(":");
 					startDateValue = value.substring(position + 1);
-					startDate = BSDateTimeUtil.string2Calendar(startDateValue, "yyyy-MM-dd");
+					startDate = BSDateTimeUtil.string2Calendar(startDateValue,
+							"yyyy-MM-dd");
 
 					row = rowIterator.next();
 					if (rowIterator.hasNext()) {
 						firstCell = row.getCell(SUMMARY_COL_FIRST);
 						if (firstCell.getCellType() == Cell.CELL_TYPE_STRING) {
-							if (firstCell.getStringCellValue().toLowerCase().startsWith("rut")) {
+							if (firstCell.getStringCellValue().toLowerCase()
+									.startsWith("rut")) {
 								row = rowIterator.next();
 								doContinue = true;
-								while (doContinue && row.getRowNum() <= lastRowNumber) {
+								while (doContinue
+										&& row.getRowNum() <= lastRowNumber) {
 									cellRut = row.getCell(SUMMARY_COL_RUT);
 
 									if (cellRut.getCellType() == Cell.CELL_TYPE_STRING) {
@@ -166,16 +175,22 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 										if (isRut(value)) {
 											dataInSheet = new DataInSheet();
 
-											dataInSheet.setMonth(startDate.get(Calendar.MONTH));
-											dataInSheet.setYear(startDate.get(Calendar.YEAR));
+											dataInSheet.setMonth(startDate
+													.get(Calendar.MONTH));
+											dataInSheet.setYear(startDate
+													.get(Calendar.YEAR));
 											dataInSheet.setRut(value);
 
-											CreationHelper createHelper = workBook.getCreationHelper();
-											Hyperlink link = createHelper.createHyperlink(Hyperlink.LINK_DOCUMENT);
+											CreationHelper createHelper = workBook
+													.getCreationHelper();
+											Hyperlink link = createHelper
+													.createHyperlink(Hyperlink.LINK_DOCUMENT);
 
-											Integer rowNumber = detailResult.get(dataInSheet);
+											Integer rowNumber = detailResult
+													.get(dataInSheet);
 											if (rowNumber != null) {
-												String address = "'Detalle'!B" + rowNumber;
+												String address = "'Detalle'!B"
+														+ rowNumber;
 												link.setAddress(address);
 												cellRut.setHyperlink(link);
 												cellRut.setCellStyle(hlink_style);
@@ -209,7 +224,8 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		Integer position = mayBeRut.indexOf("-");
 		if (position > -1) {
 			if (BSUtils.isNumber(mayBeRut.substring(0, position))) {
-				if (mayBeRut.substring(position + 1, mayBeRut.length()).length() == 1) {
+				if (mayBeRut.substring(position + 1, mayBeRut.length())
+						.length() == 1) {
 					out = true;
 				}
 			}
@@ -238,12 +254,16 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 			String cellDateString = cellDate.toString();
 
-			if (cellIndex.getCellType() == Cell.CELL_TYPE_NUMERIC && BSDateTimeUtil.isValidDate(cellDateString, FORMAT_DDMMYYYY)) {
+			if (cellIndex.getCellType() == Cell.CELL_TYPE_NUMERIC
+					&& BSDateTimeUtil.isValidDate(cellDateString,
+							FORMAT_DDMMYYYY)) {
 				dataInSheet = new DataInSheet();
 
-				Calendar calendar = BSDateTimeUtil.string2Calendar(cellDateString, FORMAT_DDMMYYYY);
+				Calendar calendar = BSDateTimeUtil.string2Calendar(
+						cellDateString, FORMAT_DDMMYYYY);
 
-				dataInSheet.setRut(row.getCell(DETAIL_COL_RUT).getStringCellValue());
+				dataInSheet.setRut(row.getCell(DETAIL_COL_RUT)
+						.getStringCellValue());
 				dataInSheet.setMonth(calendar.get(Calendar.MONTH));
 				dataInSheet.setYear(calendar.get(Calendar.YEAR));
 
@@ -258,33 +278,38 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	}
 
 	@Override
-	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
-			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportInputParameterList) {
+	public List<String> execute(Connection conn, Long idReport,
+			ReportType reportType, List<ReportPropertyBean> reportPropertyList,
+			List<ReportParameterBean> reportInputParameterList) {
 		List<String> out = new ArrayList<String>();
 
 		readProperties(conn, reportPropertyList);
 
 		configOutputPathAndFile();
-		processBossAndEmployeeParameter(conn, reportInputParameterList, idReport);
+		processBossAndEmployeeParameter(conn, reportInputParameterList,
+				idReport);
 
 		List<Object> params = getReportParams(conn, reportInputParameterList);
 
 		XSSFWorkbook workbook = new XSSFWorkbook();
 		super.configStyles(workbook);
-		createSummarySheet(conn, workbook, params, getTitleSummary(conn, reportInputParameterList));
+		createSummarySheet(conn, workbook, params,
+				getTitleSummary(conn, reportInputParameterList));
 		createDetailSheet(conn, workbook, params);
 
 		try {
 			relationPages(workbook);
 		} catch (Exception e) {
-			System.out.println("We can not make relation between sheets");
-			e.printStackTrace();
+			LOG.log(Level.SEVERE, "We can not make relation between sheets", e);
+			// System.out.println("We can not make relation between sheets");
+			// e.printStackTrace();
 		}
 		try {
 			autoSizeColumn(workbook);
 		} catch (Exception e) {
-			System.out.println("We can not resize columns of sheets");
-			e.printStackTrace();
+			LOG.log(Level.SEVERE, "We can not resize columns of sheets", e);
+			// System.out.println("We can not resize columns of sheets");
+			// e.printStackTrace();
 		}
 
 		FileOutputStream stream = saveFile(workbook);
@@ -295,23 +320,26 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		return out;
 	}
 
-	private void processBossAndEmployeeParameter(Connection conn, List<ReportParameterBean> reportInputParameterList,
-			Long idReport) {
+	private void processBossAndEmployeeParameter(Connection conn,
+			List<ReportParameterBean> reportInputParameterList, Long idReport) {
 		Integer index = 1;
 		for (ReportParameterBean param : reportInputParameterList) {
 			if ("BOSS_LIST".equals(param.getTypeKey())) {
-				reportInputParameterList.add(index, newParam(conn, param, idReport));
+				reportInputParameterList.add(index,
+						newParam(conn, param, idReport));
 				break;
 			}
 			index++;
 		}
 	}
 
-	private ReportParameterBean newParam(Connection conn, ReportParameterBean bossParam, Long idReport) {
+	private ReportParameterBean newParam(Connection conn,
+			ReportParameterBean bossParam, Long idReport) {
 		ReportParameterBean out = new ReportParameterBean();
 
 		this.currentDepth = 1;
-		String employeeIds = getEmployeeIds(conn, Long.parseLong(bossParam.getValue()));
+		String employeeIds = getEmployeeIds(conn,
+				Long.parseLong(bossParam.getValue()));
 		out.setJavaType("STRING");
 		out.setName("EmployeesId");
 		out.setReport(idReport);
@@ -358,7 +386,8 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		return Integer.parseInt(count) > 0;
 	}
 
-	private String getTitleSummary(Connection conn, List<ReportParameterBean> reportInputParameterList) {
+	private String getTitleSummary(Connection conn,
+			List<ReportParameterBean> reportInputParameterList) {
 		String out = null;
 		Boolean firstLoop = true;
 		String bossId = null;
@@ -384,12 +413,15 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 				firstLoop = false;
 			}
 		}
-		if (bossId == null || startMonth == null || startYear == null || endMonth == null || endYear == null) {
+		if (bossId == null || startMonth == null || startYear == null
+				|| endMonth == null || endYear == null) {
 			out = "Resumen de informe.";
 		} else {
-			Calendar startDate = BSDateTimeUtil.string2Calendar("1-" + startMonth + "-" + startYear, "dd-MM-yyyy");
+			Calendar startDate = BSDateTimeUtil.string2Calendar("1-"
+					+ startMonth + "-" + startYear, "dd-MM-yyyy");
 			String format = BSDateTimeUtil.getFormatDate(conn);
-			String startDateString = BSDateTimeUtil.calendar2String(startDate, format);
+			String startDateString = BSDateTimeUtil.calendar2String(startDate,
+					format);
 
 			String endDateString = getLastDayOfMonth(endMonth, endYear, format);
 
@@ -399,14 +431,17 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 			// endMonth
 			// endYear
 
-			out = "Supervisor:" + getEmployeeName(conn, bossId) + ". Desde: " + startDateString + " hasta " + endDateString;
+			out = "Supervisor:" + getEmployeeName(conn, bossId) + ". Desde: "
+					+ startDateString + " hasta " + endDateString;
 		}
 
 		return out;
 	}
 
-	private String getLastDayOfMonth(String endMonth, String endYear, String format) {
-		Calendar calendar = BSDateTimeUtil.string2Calendar("1-" + endMonth + "-" + endYear, "dd-MM-yyyy");
+	private String getLastDayOfMonth(String endMonth, String endYear,
+			String format) {
+		Calendar calendar = BSDateTimeUtil.string2Calendar("1-" + endMonth
+				+ "-" + endYear, "dd-MM-yyyy");
 
 		calendar.add(Calendar.MONTH, 1);
 		// calendar.set(Calendar.DAY_OF_MONTH, 1);
@@ -421,7 +456,8 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		return employee.getName();
 	}
 
-	private void createDetailSheet(Connection conn, XSSFWorkbook workbook, List<Object> params) {
+	private void createDetailSheet(Connection conn, XSSFWorkbook workbook,
+			List<Object> params) {
 		XSSFSheet detailSheet = workbook.createSheet("Detalle");
 		/**
 		 * <code>
@@ -433,7 +469,8 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 		BSmySQL mysql = new BSmySQL();
 		// ResultSet rs = mysql.callSingleSP(conn, spName, params);
-		List<List<Object[]>> rss = mysql.callComplexSP(conn, spName, params, true);
+		List<List<Object[]>> rss = mysql.callComplexSP(conn, spName, params,
+				true);
 		this.rowOfSheet = 0;
 
 		Integer i = 0, j = 0;
@@ -464,7 +501,8 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 				// writeDataLine(i, j, row, firstLine, false);
 				// } else {
 				row = detailSheet.createRow(this.rowOfSheet++);
-				writeDataLine(i, j, row, line, true, i == 0 ? this.headerStyle : this.bodyStyle);
+				writeDataLine(i, j, row, line, true, i == 0 ? this.headerStyle
+						: this.bodyStyle);
 				// }
 				i++;
 			}
@@ -473,11 +511,13 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 	}
 
-	private void createSummarySheet(Connection conn, XSSFWorkbook workbook, List<Object> params, String title) {
+	private void createSummarySheet(Connection conn, XSSFWorkbook workbook,
+			List<Object> params, String title) {
 		Integer i = null;
 		Integer j = null;
 		BSmySQL mysql = new BSmySQL();
-		List<List<Object[]>> rss = mysql.callComplexSP(conn, spNameSummary, params, true);
+		List<List<Object[]>> rss = mysql.callComplexSP(conn, spNameSummary,
+				params, true);
 
 		XSSFSheet summarySheet = workbook.createSheet("Resumen");
 		// XSSFCell cell = null;
@@ -515,7 +555,8 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 					 */
 					firstLine = line;
 					for (int k = 0; k <= this.colsAsTitle - 1; k++) {
-						headerData[k] = headerLine[k].toString() + " : " + firstLine[k].toString();
+						headerData[k] = headerLine[k].toString() + " : "
+								+ firstLine[k].toString();
 						// headerData[k]="";
 					}
 					row = summarySheet.createRow(this.rowOfSheet++);
@@ -546,11 +587,13 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		 */
 	}
 
-	private void writeDataLine(Integer i, Integer j, XSSFRow row, Object[] line, Boolean force) {
+	private void writeDataLine(Integer i, Integer j, XSSFRow row,
+			Object[] line, Boolean force) {
 		writeDataLine(i, j, row, line, force, null);
 	}
 
-	private void writeDataLine(Integer i, Integer j, XSSFRow row, Object[] line, Boolean force, XSSFCellStyle style) {
+	private void writeDataLine(Integer i, Integer j, XSSFRow row,
+			Object[] line, Boolean force, XSSFCellStyle style) {
 		XSSFCellStyle customStyle = null;
 		for (Object data : line) {
 			if (force) {
@@ -652,7 +695,8 @@ class DataInSheet {
 
 	@Override
 	public String toString() {
-		return "\nDataInSheet [rut=" + rut + ", month=" + month + ", year=" + year + "]";
+		return "\nDataInSheet [rut=" + rut + ", month=" + month + ", year="
+				+ year + "]";
 	}
 
 	@Override

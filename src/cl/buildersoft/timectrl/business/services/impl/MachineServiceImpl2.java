@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
@@ -20,14 +21,16 @@ import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.Machine;
 import cl.buildersoft.timectrl.business.beans.MarkType;
 import cl.buildersoft.timectrl.business.beans.Privilege;
+import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.services.MachineService2;
 import cl.buildersoft.timectrl.business.services.PrivilegeService;
-
 import com4j.Holder;
 
 public class MachineServiceImpl2 implements MachineService2 {
 	// private Boolean windows8compatible = null;
 
+	private static final Logger LOG = Logger.getLogger(MachineServiceImpl2.class
+			.getName());
 	@Override
 	public _zkemProxy connect(Connection conn, Machine machine) {
 		BSBeanUtils bu = new BSBeanUtils();
@@ -108,6 +111,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 	}
 
 	private void writeToConsole(AttendanceLog attendance, Boolean found) {
+//		System.out.println((found ? "Exists: " : "Absent: ") + attendance.toString());
 		System.out.println((found ? "Exists: " : "Absent: ") + attendance.toString());
 	}
 

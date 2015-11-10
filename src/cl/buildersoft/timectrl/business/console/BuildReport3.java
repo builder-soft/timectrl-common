@@ -3,6 +3,8 @@ package cl.buildersoft.timectrl.business.console;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
@@ -13,12 +15,14 @@ import cl.buildersoft.timectrl.business.beans.Report;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
+import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.services.ParameterService;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
 public class BuildReport3 extends AbstractConsoleService {
-
 	private static final String NOT_FOUND = "' not found.";
+	private static final Logger LOG = Logger.getLogger(BuildReport3.class
+			.getName());
 
 	public static void main(String[] args) {
 		BuildReport3 buildReport = new BuildReport3();
@@ -44,7 +48,8 @@ public class BuildReport3 extends AbstractConsoleService {
 		}
 		if (responseList != null) {
 			for (String response : responseList) {
-				System.out.println(response);
+				// System.out.println(response);
+				LOG.log(Level.INFO, response);
 			}
 		}
 	}
@@ -55,7 +60,8 @@ public class BuildReport3 extends AbstractConsoleService {
 		Report report = new Report();
 
 		if (!bu.search(conn, report, "cKey=?", reportKey)) {
-			throw new BSConfigurationException("Report '" + reportKey + NOT_FOUND);
+			throw new BSConfigurationException("Report '" + reportKey
+					+ NOT_FOUND);
 		}
 
 		return execute(conn, report.getId(), arrayToList(target));
@@ -84,17 +90,21 @@ public class BuildReport3 extends AbstractConsoleService {
 
 		ReportService reportService = getInstance(reportType);
 
-		List<ReportPropertyBean> reportPropertyList = reportService.loadReportProperties(conn, id);
+		List<ReportPropertyBean> reportPropertyList = reportService
+				.loadReportProperties(conn, id);
 		// List<ReportPropertyType> outValues =
 		// reportService.loadOutValues(conn, outParams);
-		List<ReportParameterBean> parameters = reportService.loadParameter(conn, id);
+		List<ReportParameterBean> parameters = reportService.loadParameter(
+				conn, id);
 
 		if (parameters.size() != target.size()) {
-			throw new BSConfigurationException("Amount of parameters do not match");
+			throw new BSConfigurationException(
+					"Amount of parameters do not match");
 		}
 		reportService.fillParameters(parameters, target);
 
-		List<String> out = reportService.execute(conn, report.getId(), reportType, reportPropertyList, parameters);
+		List<String> out = reportService.execute(conn, report.getId(),
+				reportType, reportPropertyList, parameters);
 
 		return out;
 	}
@@ -103,7 +113,8 @@ public class BuildReport3 extends AbstractConsoleService {
 	public ReportService getInstance(ReportType reportType) {
 		ReportService instance = null;
 		try {
-			Class<ReportService> javaClass = (Class<ReportService>) Class.forName(reportType.getJavaClass());
+			Class<ReportService> javaClass = (Class<ReportService>) Class
+					.forName(reportType.getJavaClass());
 			instance = (ReportService) javaClass.newInstance();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -112,10 +123,12 @@ public class BuildReport3 extends AbstractConsoleService {
 		return instance;
 	}
 
-	public ParameterService getInstanceOfParameter(ReportParameterBean reportParameter) {
+	public ParameterService getInstanceOfParameter(
+			ReportParameterBean reportParameter) {
 		ParameterService instance = null;
 		try {
-			Class<ParameterService> javaClass = (Class<ParameterService>) Class.forName(reportParameter.getTypeSource());
+			Class<ParameterService> javaClass = (Class<ParameterService>) Class
+					.forName(reportParameter.getTypeSource());
 			instance = (ParameterService) javaClass.newInstance();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -134,11 +147,13 @@ public class BuildReport3 extends AbstractConsoleService {
 		return report;
 	}
 
-	private ReportType getReportType(Connection conn, BSBeanUtils bu, Report report) {
+	private ReportType getReportType(Connection conn, BSBeanUtils bu,
+			Report report) {
 		ReportType reportType = new ReportType();
 		reportType.setId(report.getType());
 		if (!bu.search(conn, reportType)) {
-			throw new BSProgrammerException("Report type '" + report.getType() + NOT_FOUND);
+			throw new BSProgrammerException("Report type '" + report.getType()
+					+ NOT_FOUND);
 		}
 		return reportType;
 	}
