@@ -1,4 +1,4 @@
-@echo off
+ren @echo off
 
 IF "%BS_PATH%" == "" GOTO error
 
