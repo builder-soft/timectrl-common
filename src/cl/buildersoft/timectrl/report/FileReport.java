@@ -27,6 +27,7 @@ import cl.buildersoft.timectrl.business.beans.ReportPropertyType;
 import cl.buildersoft.timectrl.business.beans.ReportParameterType;
 
 @SuppressWarnings({ "deprecation", "rawtypes" })
+@Deprecated
 public class FileReport {
 	private static final Logger LOG = Logger.getLogger(FileReport.class.getName());
 	private String fileName = null;
