@@ -42,6 +42,7 @@ import cl.buildersoft.timectrl.business.services.ReportService;
 
 /** Este es el reporte a Excel que enlaza dos hojas en la misma planilla */
 public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
+	private static final Logger LOG = Logger.getLogger(XExcel2Impl.class.getName());
 	private static final int ROWS_VERIFY_WIDTH = 10;
 	private static final String FORMAT_DDMMYYYY = "dd-MM-yyyy";
 	private static final int SUMMARY_COL_FIRST = 0;
@@ -54,7 +55,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	protected Integer rowOfSheet = 0;
 	protected Integer employeeDepth = 0;
 	protected Integer currentDepth = null;
-	private static final Logger LOG = Logger.getLogger(XExcel2Impl.class.getName());
 
 	private void relationPages(XSSFWorkbook workBook) {
 		Map<DataInSheet, Integer> detailResult = inspectDetail(workBook);
@@ -322,6 +322,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	}
 
 	private String getEmployeeIds(Connection conn, Long boss) {
+		LOG.entering(XExcel2Impl.class.getName(), "getEmployeeIds", boss);
 		String out = "";
 
 		String sql = "SELECT cId FROM tEmployee WHERE cBoss=?";
@@ -350,7 +351,11 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		} catch (SQLException e) {
 			throw new BSDataBaseException(e);
 		}
-		return out.length() > 0 ? out.substring(0, out.length() - 1) : "";
+		out = out.length() > 0 ? out.substring(0, out.length() - 1) : "";
+		
+		LOG.exiting(XExcel2Impl.class.getName(), "getEmployeeIds", out);
+
+		return out;
 	}
 
 	private boolean haveJunior(Connection conn, Long employee, BSmySQL mysql) {
