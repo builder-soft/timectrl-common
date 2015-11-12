@@ -29,17 +29,15 @@ import cl.buildersoft.timectrl.business.beans.Report;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
-import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
 /**
  * <code>
  http://leonardotrujillo.com/2014/12/error-contrasena-incorrecta-en-thunderbird-al-acceder-a-gmail/
- 
+  http://www.codejava.net/java-ee/javamail/send-e-mail-with-attachment-in-java
 </code>
  */
-public class SendReportByMailImpl extends AbstractReportService implements
-		ReportService {
+public class SendReportByMailImpl extends AbstractReportService implements ReportService {
 	private String subReport = null;
 	private String server = null;
 	private String port = null;
@@ -52,37 +50,19 @@ public class SendReportByMailImpl extends AbstractReportService implements
 	private String destiny = null;
 	private String manpowerMail = null;
 
-	private static final Logger LOG = Logger
-			.getLogger(SendReportByMailImpl.class.getName());
+	private static final Logger LOG = Logger.getLogger(SendReportByMailImpl.class.getName());
 
 	// private IdRut idRut = null;
 
-	private List<ReportPropertyBean> loadReportProperties_(Connection conn,
-			Long idReport) {
-		List<ReportPropertyBean> properties = super.loadReportProperties(conn,
-				idReport);
-
-		return properties;
-	}
-
-	private List<ReportParameterBean> loadInputParameter_(Connection conn,
-			Long idReport) {
-		return null;
-	}
-
-	public List<String> execute(Connection conn, Long idReport,
-			ReportType reportType, List<ReportPropertyBean> reportPropertyList,
-			List<ReportParameterBean> reportParameterList) {
+	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
+			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportParameterList) {
 		readProperties(conn, reportPropertyList);
 
 		DestinyEnum destiny = getDestiny(reportPropertyList);
 		if (destiny == null) {
-			throw new BSConfigurationException(
-					"No set destination. It can be '"
-							+ DestinyEnum.EACH_ONE.name() + "', '"
-							+ DestinyEnum.MANPOWER.name() + "' or '"
-							+ DestinyEnum.BOSS_ONLY.name() + "'. This was '"
-							+ this.destiny + "'");
+			throw new BSConfigurationException("No set destination. It can be '" + DestinyEnum.EACH_ONE.name() + "', '"
+					+ DestinyEnum.MANPOWER.name() + "' or '" + DestinyEnum.BOSS_ONLY.name() + "'. This was '" + this.destiny
+					+ "'");
 		}
 		List<String> out = null;
 		List<String> fileList = null;
@@ -100,23 +80,19 @@ public class SendReportByMailImpl extends AbstractReportService implements
 			 */
 			ReportParameterBean bossParameter = getBossParameter(reportParameterList);
 			if (bossParameter == null) {
-				throw new BSConfigurationException(
-						"Report was configured as 'BOSS_ONLY' but 'Boss' parameter not exists.");
+				throw new BSConfigurationException("Report was configured as 'BOSS_ONLY' but 'Boss' parameter not exists.");
 			}
 
-			Employee boss = getEmployee(conn,
-					Long.parseLong(bossParameter.getValue()));
+			Employee boss = getEmployee(conn, Long.parseLong(bossParameter.getValue()));
 
-			fileList = executeReport(conn, idReport, reportType,
-					reportPropertyList, reportParameterList);
+			fileList = executeReport(conn, idReport, reportType, reportPropertyList, reportParameterList);
 			out = sendMail(fileList, boss.getMail());
 
 			deleteTempFiles(fileList);
 
 			break;
 		case MANPOWER:
-			fileList = executeReport(conn, idReport, reportType,
-					reportPropertyList, reportParameterList);
+			fileList = executeReport(conn, idReport, reportType, reportPropertyList, reportParameterList);
 			out = sendMail(fileList, manpowerMail);
 
 			deleteTempFiles(fileList);
@@ -126,8 +102,7 @@ public class SendReportByMailImpl extends AbstractReportService implements
 			ReportParameterBean employeeParameter = getEmployeeParameter(reportParameterList);
 			List<IdRut> employeeList = null;
 			if (employeeParameter != null) {
-				employeeList = getEmployeeList(conn,
-						employeeParameter.getValue());
+				employeeList = getEmployeeList(conn, employeeParameter.getValue());
 			} else {
 				employeeList = getEmployeeList(conn, "0");
 			}
@@ -140,8 +115,7 @@ public class SendReportByMailImpl extends AbstractReportService implements
 				if (mail != null && mail.trim().length() > 0) {
 					updateEmployeeId(reportParameterList, idRut.getId());
 
-					fileList = executeReport(conn, idReport, reportType,
-							reportPropertyList, reportParameterList);
+					fileList = executeReport(conn, idReport, reportType, reportPropertyList, reportParameterList);
 					List<String> outTemp = sendMail(fileList, mail);
 
 					for (String oneOutTemp : outTemp) {
@@ -167,8 +141,7 @@ public class SendReportByMailImpl extends AbstractReportService implements
 		return out;
 	}
 
-	private ReportParameterBean getBossParameter(
-			List<ReportParameterBean> reportParameterList) {
+	private ReportParameterBean getBossParameter(List<ReportParameterBean> reportParameterList) {
 		ReportParameterBean out = null;
 		for (ReportParameterBean reportParameter : reportParameterList) {
 			if (reportParameter.getTypeKey().equalsIgnoreCase("BOSS_LIST")) {
@@ -189,42 +162,37 @@ public class SendReportByMailImpl extends AbstractReportService implements
 		}
 	}
 
-	private List<String> executeReport(Connection conn, Long idReport,
-			ReportType reportType, List<ReportPropertyBean> reportPropertyList,
-			List<ReportParameterBean> reportInputParameterList) {
+	private List<String> executeReport(Connection conn, Long idReport, ReportType reportType,
+			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportInputParameterList) {
 		List<String> out = null;
 
 		Report subReport = getReportByKey(conn, this.subReport);
 		ReportService subReportService = getInstance(conn, subReport);
 
-		List<ReportPropertyBean> subReportPropertyList = subReportService
-				.loadReportProperties(conn, subReport.getId());
-		List<ReportParameterBean> subReportInputParameterList = subReportService
-				.loadParameter(conn, subReport.getId());
+		List<ReportPropertyBean> subReportPropertyList = subReportService.loadReportProperties(conn, subReport.getId());
+		List<ReportParameterBean> subReportInputParameterList = subReportService.loadParameter(conn, subReport.getId());
 
 		ReportPropertyBean outputPath = getOutputPath(subReportPropertyList);
 		String tempPath = getTempPath();
 		outputPath.setPropertyValue(tempPath);
-		copyParameterValues(reportInputParameterList,
-				subReportInputParameterList);
+		copyParameterValues(reportInputParameterList, subReportInputParameterList);
 
-		out = subReportService.execute(conn, subReport.getId(),
-				getReportType(conn, subReport), subReportPropertyList,
+		out = subReportService.execute(conn, subReport.getId(), getReportType(conn, subReport), subReportPropertyList,
 				subReportInputParameterList);
 
 		return out;
 	}
 
-	private void copyParameterValues(
-			List<ReportParameterBean> reportInputParameterList,
+	private void copyParameterValues(List<ReportParameterBean> reportInputParameterList,
 			List<ReportParameterBean> subReportInputParameterList) {
 		for (int i = 0; i < reportInputParameterList.size(); i++) {
-			subReportInputParameterList.get(i).setValue(
-					reportInputParameterList.get(i).getValue());
+			subReportInputParameterList.get(i).setValue(reportInputParameterList.get(i).getValue());
 		}
 
 	}
 
+	/**
+	 * <code>
 	private String getOutputFileName(String extension) {
 		return "File-{Random}" + extension;
 	}
@@ -233,7 +201,12 @@ public class SendReportByMailImpl extends AbstractReportService implements
 		String value = outputFile.getPropertyValue();
 		return value.substring(value.lastIndexOf("."));
 	}
-
+		
+	private ReportPropertyBean getOutputFile(List<ReportPropertyBean> subReportPropertyList) {
+		return getProperty(subReportPropertyList, "OUTPUT_FILE");
+	}
+</code>
+	 */
 	private String getTempPath() {
 		String out = System.getProperty("java.io.tmpdir");
 		if (out == null) {
@@ -245,18 +218,11 @@ public class SendReportByMailImpl extends AbstractReportService implements
 		return out;
 	}
 
-	private ReportPropertyBean getOutputFile(
-			List<ReportPropertyBean> subReportPropertyList) {
-		return getProperty(subReportPropertyList, "OUTPUT_FILE");
-	}
-
-	private ReportPropertyBean getOutputPath(
-			List<ReportPropertyBean> subReportPropertyList) {
+	private ReportPropertyBean getOutputPath(List<ReportPropertyBean> subReportPropertyList) {
 		return getProperty(subReportPropertyList, "OUTPUT_PATH");
 	}
 
-	private ReportPropertyBean getProperty(
-			List<ReportPropertyBean> subReportPropertyList, String propertyKey) {
+	private ReportPropertyBean getProperty(List<ReportPropertyBean> subReportPropertyList, String propertyKey) {
 		ReportPropertyBean out = null;
 
 		for (ReportPropertyBean prb : subReportPropertyList) {
@@ -274,8 +240,7 @@ public class SendReportByMailImpl extends AbstractReportService implements
 		Report out = new Report();
 
 		if (!bu.search(conn, out, "cKey=?", subReportKey)) {
-			throw new BSConfigurationException("Report '" + subReportKey
-					+ NOT_FOUND);
+			throw new BSConfigurationException("Report '" + subReportKey + NOT_FOUND);
 		}
 
 		return out;
@@ -295,11 +260,6 @@ public class SendReportByMailImpl extends AbstractReportService implements
 	}
 
 	private List<String> sendMail(List<String> pathAndFileNameList, String to) {
-		/**
-		 * <code>
- http://www.codejava.net/java-ee/javamail/send-e-mail-with-attachment-in-java
- </code>
-		 */
 		Properties props = System.getProperties();
 
 		List<String> out = new ArrayList<String>();
@@ -312,7 +272,7 @@ public class SendReportByMailImpl extends AbstractReportService implements
 		props.put("mail.smtp.auth", this.smtpAuth);
 
 		Session session = Session.getDefaultInstance(props);
-		// session.setDebug(true);
+
 		MimeMessage message = new MimeMessage(session);
 
 		try {
@@ -330,7 +290,6 @@ public class SendReportByMailImpl extends AbstractReportService implements
 			}
 
 			message.setSubject(this.subject);
-			// message.setText(this.messageText);
 
 			MimeBodyPart messageBodyPart = new MimeBodyPart();
 			messageBodyPart.setContent(this.messageText, "text/html");
@@ -348,8 +307,7 @@ public class SendReportByMailImpl extends AbstractReportService implements
 					}
 					multipart.addBodyPart(attachPart);
 
-					fileName = filePath.substring(filePath
-							.lastIndexOf(File.separator) + 1);
+					fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
 					out.add("Archivo '" + fileName + "' enviado a " + to);
 				}
 				message.setContent(multipart);
@@ -378,8 +336,7 @@ public class SendReportByMailImpl extends AbstractReportService implements
 		reportType.setId(report.getType());
 		BSBeanUtils bu = new BSBeanUtils();
 		if (!bu.search(conn, reportType)) {
-			throw new BSProgrammerException("Report type '" + report.getType()
-					+ NOT_FOUND);
+			throw new BSProgrammerException("Report type '" + report.getType() + NOT_FOUND);
 		}
 		return reportType;
 	}

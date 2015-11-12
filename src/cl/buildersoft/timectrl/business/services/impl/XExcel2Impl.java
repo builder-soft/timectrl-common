@@ -37,7 +37,6 @@ import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
-import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.services.EmployeeService;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
