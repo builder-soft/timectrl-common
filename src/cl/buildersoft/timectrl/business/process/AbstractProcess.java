@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
@@ -19,12 +18,12 @@ import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSException;
 import cl.buildersoft.framework.util.BSConfig;
 import cl.buildersoft.framework.util.BSDataUtils;
-import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSUtils;
+import cl.buildersoft.timectrl.util.LicenseValidationUtil;
 
 public abstract class AbstractProcess {
 	private final static String FILE_NAME = "Process.properties";
-	private String logPath = null;
+	// private String logPath = null;
 	private String database = null;
 	private String driver = null;
 	private String password = null;
@@ -33,6 +32,7 @@ public abstract class AbstractProcess {
 	private String port = null;
 	private String validateLicense = null;
 	private Connection conn = null;
+	private String webInfPath = null;
 
 	private static final Logger LOG = Logger.getLogger(AbstractProcess.class.getName());
 
@@ -55,8 +55,12 @@ public abstract class AbstractProcess {
 
 	public AbstractProcess() {
 		init();
-
 		this.conn = getConnection();
+		Boolean success = licenseValidation(this.conn);
+		if (!success) {
+			LOG.log(Level.SEVERE, "License invalid");
+			throw new BSConfigurationException("Licencia no es válida");
+		}
 	}
 
 	protected Connection getConnection() {
@@ -93,22 +97,23 @@ public abstract class AbstractProcess {
 		return out;
 	}
 
-	private void init() {
+	protected void init() {
 		BSConfig config = new BSConfig();
-		String path = System.getenv("BS_PATH");
+		this.webInfPath = System.getenv("BS_PATH");
 
-		LOG.log(Level.CONFIG, "Value of 'BS_PATH' is '{0}'", path);
+		LOG.log(Level.CONFIG, "Value of 'BS_PATH' is '{0}'", this.webInfPath);
 
-		if (path == null) {
+		if (this.webInfPath == null) {
 			throw new BSConfigurationException("Undefined enviroment variable BS_PATH");
 		}
-		String propertyFileName = config.fixPath(path) + FILE_NAME;
+		this.webInfPath = config.fixPath(this.webInfPath);
+		String propertyFileName = this.webInfPath + FILE_NAME;
 		Properties prop = new Properties();
 		InputStream inputStream;
 		try {
 			inputStream = new FileInputStream(propertyFileName);
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			LOG.log(Level.SEVERE, "File not found '" + propertyFileName + "'", e);
 			throw new BSConfigurationException(e);
 		}
 
@@ -123,11 +128,8 @@ public abstract class AbstractProcess {
 
 		Enumeration<Object> propList = prop.keys();
 
-//		String msg = null;
 		while (propList.hasMoreElements()) {
 			Object o = propList.nextElement();
-//			msg = o.toString() + " = " + prop.getProperty(o.toString());
-	
 			LOG.log(Level.CONFIG, "Property: {0}: {1}", BSUtils.array2ObjectArray(o.toString(), prop.getProperty(o.toString())));
 		}
 		try {
@@ -137,8 +139,23 @@ public abstract class AbstractProcess {
 		}
 	}
 
+	protected Boolean licenseValidation(Connection conn) {
+		Boolean out = true;
+		if (Boolean.parseBoolean(this.validateLicense)) {
+			LicenseValidationUtil lv = new LicenseValidationUtil();
+			out = lv.licenseValidation(conn, lv.readFile(getLicenseFileDatPath()));
+		}
+		return out;
+	}
+
+	private String getLicenseFileDatPath() {
+		// BSConfig config = new BSConfig();
+		String out = this.webInfPath + "LicenseFile.dat";
+		return out;
+	}
+
 	private void readProperties(Properties prop) {
-		this.logPath = prop.getProperty("logPath");
+		// this.logPath = prop.getProperty("logPath");
 		this.database = prop.getProperty("database");
 		this.driver = prop.getProperty("driver");
 		this.password = prop.getProperty("password");
@@ -157,6 +174,15 @@ public abstract class AbstractProcess {
 			for (String argumentName : validArgumentList) {
 				if ("DOMAIN".equalsIgnoreCase(argumentName)) {
 					valid = validateDomain(args[index]);
+				}
+				if ("DELETE_MARKS_OF_MACHINE".equalsIgnoreCase(argumentName)) {
+					try{
+						Boolean.parseBoolean(args[index]);
+					}catch(Exception e)
+					{
+						valid = false;
+					}
+					 
 				}
 
 				if (!valid) {
@@ -187,7 +213,8 @@ public abstract class AbstractProcess {
 
 		return domain != null;
 	}
-
+	/**
+	 * <code>
 	private void translateDateField() {
 		this.logPath = this.logPath.replaceAll("\\x7BDate\\x7D",
 				BSDateTimeUtil.calendar2String(Calendar.getInstance(), "yyyy-MM-dd"));
@@ -197,4 +224,6 @@ public abstract class AbstractProcess {
 	private String concatenateMessage(String message) {
 		return BSDateTimeUtil.calendar2String(Calendar.getInstance(), "yyyy-M-dd hh:mm:ss") + " : " + message;
 	}
+	</code>
+	 */
 }

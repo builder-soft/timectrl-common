@@ -94,11 +94,6 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 	private String[] validArguments = { "DOMAIN" };
 
-	@Override
-	protected String[] getArguments() {
-		return this.validArguments;
-	}
-
 	public static void main(String[] args) {
 		LoadCrewTable lct = new LoadCrewTable();
 		lct.doExecute(args);
@@ -107,6 +102,8 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 	@Override
 	public void doExecute(String[] args) {
 		LOG.entering(this.getClass().getName(), "doExecute", args);
+		this.init();
+
 		validateArguments(args);
 		Connection conn = getConnection(getDomainByBatabase(args[0]));
 
@@ -192,6 +189,11 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 		mysql.closeConnection(conn);
 		LOG.exiting(this.getClass().getName(), "doExecute");
+	}
+
+	@Override
+	protected String[] getArguments() {
+		return this.validArguments;
 	}
 
 	private void saveToCrewLog(Connection conn, Date date, String employeeKey) {
