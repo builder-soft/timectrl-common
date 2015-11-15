@@ -130,7 +130,7 @@ public abstract class AbstractProcess {
 
 		while (propList.hasMoreElements()) {
 			Object o = propList.nextElement();
-			LOG.log(Level.CONFIG, "Property: {0}: {1}", BSUtils.array2ObjectArray(o.toString(), prop.getProperty(o.toString())));
+			LOG.log(Level.CONFIG, "Property: {0}= {1}", BSUtils.array2ObjectArray(o.toString(), prop.getProperty(o.toString())));
 		}
 		try {
 			Thread.sleep(100);
