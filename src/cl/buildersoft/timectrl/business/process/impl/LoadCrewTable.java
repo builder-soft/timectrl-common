@@ -185,6 +185,11 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 				 */
 			}
 
+			if (employeeList.size() == 0) {
+				saveToCrewProcess(conn, date, null, 0D, false, false);
+				saveToCrewLog(conn, date, null);
+			}
+
 		}
 
 		mysql.closeConnection(conn);
@@ -353,7 +358,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 		for (Date date = minDate.getTime(); minDate.before(maxDate); minDate.add(Calendar.DATE, 1), date = minDate.getTime()) {
 			// Do your job here with `date`.
-			 out.add(date);
+			out.add(date);
 		}
 
 		// getMaxDate(conn);
