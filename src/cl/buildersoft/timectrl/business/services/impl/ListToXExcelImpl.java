@@ -274,7 +274,7 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 		} else if ("FONT_SIZE".equalsIgnoreCase(key)) {
 			fontSize = Integer.parseInt(value);
 		} else {
-			LOG.log(Level.WARNING, "Property '{0}' not found", key);
+			LOG.log(Level.WARNING, "Property {0} not found", key);
 			out = false;
 		}
 		return out;

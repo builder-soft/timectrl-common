@@ -101,7 +101,7 @@ public abstract class AbstractProcess {
 		BSConfig config = new BSConfig();
 		this.webInfPath = System.getenv("BS_PATH");
 
-		LOG.log(Level.CONFIG, "Value of 'BS_PATH' is '{0}'", this.webInfPath);
+		LOG.log(Level.CONFIG, "Value of 'BS_PATH' is {0}", this.webInfPath);
 
 		if (this.webInfPath == null) {
 			throw new BSConfigurationException("Undefined enviroment variable BS_PATH");

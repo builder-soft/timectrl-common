@@ -343,6 +343,22 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 	}
 
 	private List<Date> listDateUnprocessed(Connection conn) {
+		List<Date> out = new ArrayList<Date>();
+
+		Calendar maxDate = getMaxDate(conn);
+		Calendar minDate = getMinDate(conn);
+
+		LOG.log(Level.FINE, "Date range is {0} and {1}",
+				BSUtils.array2ObjectArray(BSDateTimeUtil.calendar2String(minDate), BSDateTimeUtil.calendar2String(maxDate)));
+
+		for (Date date = minDate.getTime(); minDate.before(maxDate); minDate.add(Calendar.DATE, 1), date = minDate.getTime()) {
+			// Do your job here with `date`.
+			 out.add(date);
+		}
+
+		// getMaxDate(conn);
+		/**
+		 * <code>
 		BSmySQL mysql = new BSmySQL();
 
 		String sql = "SELECT DISTINCT DATE(cDate) AS cDate ";
@@ -351,8 +367,6 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		sql += "LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey ";
 		sql += "WHERE b.cid IS NULL AND c.cId IS NOT NULL ";
 		sql += "ORDER BY cDate DESC";
-
-		List<Date> out = new ArrayList<Date>();
 
 		ResultSet rs = mysql.queryResultSet(conn, sql, null);
 
@@ -366,7 +380,35 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 			mysql.closeSQL(rs);
 			mysql.closeSQL();
 		}
+</code>
+		 */
+		return out;
+	}
 
+	private Calendar getMaxDate(Connection conn) {
+		return getLimitDate(conn, true);
+	}
+
+	private Calendar getMinDate(Connection conn) {
+		return getLimitDate(conn, false);
+	}
+
+	private Calendar getLimitDate(Connection conn, boolean max) {
+		Calendar out = null;
+		String sql = "SELECT " + (max ? "MAX" : "MIN") + "(cDate) FROM tAttendanceLog;";
+		BSmySQL mysql = new BSmySQL();
+		ResultSet rs = mysql.queryResultSet(conn, sql, null);
+
+		try {
+			if (rs.next()) {
+				out = BSDateTimeUtil.date2Calendar(rs.getDate(1));
+			}
+		} catch (SQLException e) {
+			throw new BSDataBaseException(e);
+		} finally {
+			mysql.closeSQL(rs);
+			mysql.closeSQL();
+		}
 		return out;
 	}
 }
