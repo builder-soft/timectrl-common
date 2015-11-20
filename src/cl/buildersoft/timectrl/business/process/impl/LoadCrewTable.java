@@ -349,7 +349,8 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 	private List<Date> listDateUnprocessed(Connection conn) {
 		List<Date> out = new ArrayList<Date>();
-
+		/**
+		 * <code>
 		Calendar maxDate = getMaxDate(conn);
 		Calendar minDate = getMinDate(conn);
 
@@ -362,8 +363,13 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		}
 
 		// getMaxDate(conn);
-		/**
-		 * <code>
+		
+		</code>
+		 */
+		
+		
+		
+		
 		BSmySQL mysql = new BSmySQL();
 
 		String sql = "SELECT DISTINCT DATE(cDate) AS cDate ";
@@ -385,8 +391,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 			mysql.closeSQL(rs);
 			mysql.closeSQL();
 		}
-</code>
-		 */
+
 		return out;
 	}
 
