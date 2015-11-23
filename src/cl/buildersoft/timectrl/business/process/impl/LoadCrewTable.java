@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.xmlbeans.impl.common.Levenshtein;
+
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSDataBaseException;
@@ -128,7 +130,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 		for (Date date : dateList) {
 			calendar = BSDateTimeUtil.date2Calendar(date);
-			LOG.fine("----------" + BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
+			LOG.log(Level.FINE, "----------" + BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
 
 			List<IdRut> employeeList = listEmployeeByDate(conn, date);
 			for (IdRut employee : employeeList) {
@@ -146,16 +148,16 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 						turnDay = getTurnDay(conn, tds, calendar, (long) employee.getId(), tolerance, true);
 						if (turnDay != null) {
 							businessDay = tds.isBusinessDay(turnDay);
-							hiredDay = true;
 						}
+						hiredDay = true;
 					} else {
 						turnDay = getTurnDay(conn, tds, calendar, (long) employee.getId(), tolerance, false);
 						businessDay = tds.isBusinessDay(turnDay);
 
 						startMark = getStartMark(conn, tds, employee.getKey(), tolerance, date, businessDay, false, turnDay);
-
+						hiredDay = turnDay != null;
 					}
-					hiredDay = turnDay != null;
+					
 
 				}
 				endMark = getEndMark(conn, employee.getKey(), startMark, hoursWorkday, date, tolerance, businessDay, turnDay);
@@ -181,7 +183,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 				endMark = null;
 				turnDay = null;
 				businessDay = null;
-</code>
+				</code>
 				 */
 			}
 
@@ -366,10 +368,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		
 		</code>
 		 */
-		
-		
-		
-		
+
 		BSmySQL mysql = new BSmySQL();
 
 		String sql = "SELECT DISTINCT DATE(cDate) AS cDate ";
