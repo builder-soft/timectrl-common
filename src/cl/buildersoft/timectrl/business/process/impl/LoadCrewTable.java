@@ -187,11 +187,12 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 				 */
 			}
 
+			/**<code>
 			if (employeeList.size() == 0) {
 				saveToCrewProcess(conn, date, null, 0D, false, false);
 				saveToCrewLog(conn, date, null);
-			}
-
+			}</code>
+*/
 		}
 
 		mysql.closeConnection(conn);
@@ -316,6 +317,8 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		sql += "LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey ";
 		sql += "WHERE DATE(cDate) = ? AND b.cid IS NULL AND NOT c.cId IS NULL;";
 
+		LOG.log(Level.CONFIG, "SQL for get Employees by Date is: {0}", sql);
+		
 		BSmySQL mysql = new BSmySQL();
 
 		ResultSet rs = mysql.queryResultSet(conn, sql, date);
@@ -376,8 +379,14 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		sql += "LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog ";
 		sql += "LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey ";
 		sql += "WHERE b.cid IS NULL AND c.cId IS NOT NULL ";
-		sql += "ORDER BY cDate DESC";
+		sql += "ORDER BY cDate DESC;";
+		
+		//sql = "SELECT DISTINCT DATE(cDate) AS cDate FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey where c.cId IS NOT NULL ;";
 
+		
+
+		LOG.log(Level.CONFIG, "SQL for get Dates is: {0}", sql);
+		
 		ResultSet rs = mysql.queryResultSet(conn, sql, null);
 
 		try {
