@@ -316,6 +316,8 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		sql += "LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog ";
 		sql += "LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey ";
 		sql += "WHERE DATE(cDate) = ? AND b.cid IS NULL AND NOT c.cId IS NULL;";
+		
+		sql = "SELECT DISTINCT c.cId FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog AND b.cid IS NULL LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey AND NOT c.cId IS NULL WHERE DATE(cDate) = ?;";
 
 		LOG.log(Level.CONFIG, "SQL for get Employees by Date is: {0}", sql);
 		
@@ -382,8 +384,8 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		sql += "ORDER BY cDate DESC;";
 		
 		//sql = "SELECT DISTINCT DATE(cDate) AS cDate FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey where c.cId IS NOT NULL ;";
-
 		
+		sql = "SELECT DISTINCT DATE(cDate) AS cDate FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog AND b.cid IS NULL LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey AND c.cId IS NOT NULL ORDER BY cDate DESC;";
 
 		LOG.log(Level.CONFIG, "SQL for get Dates is: {0}", sql);
 		
