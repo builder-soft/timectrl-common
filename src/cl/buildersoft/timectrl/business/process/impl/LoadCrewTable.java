@@ -125,15 +125,16 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		Integer hoursWorkday = Integer.parseInt(mysql.callFunction(conn, "fGetHoursWorkday", null));
 
 		List<Date> dateList = listDateUnprocessed(conn);
-
+		List<IdRut> employeeList = employeeList(conn);
+		
 		for (Date date : dateList) {
 			calendar = BSDateTimeUtil.date2Calendar(date);
-			LOG.log(Level.FINE, "----------" + BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
+//			LOG.log(Level.FINE, "----------" + BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
 
-			List<IdRut> employeeList = listEmployeeByDate(conn, date);
+			
 			for (IdRut employee : employeeList) {
 				flexible = isFlexible(conn, mysql, date, (long) employee.getId());
-				LOG.log(Level.FINE, "Employee: {0}, Flexible: {1}", BSUtils.array2ObjectArray(employee, flexible));
+				LOG.log(Level.FINE, "Employee: {0}, Flexible: {1}, Date: {2}", BSUtils.array2ObjectArray(employee, flexible, date));
 
 				if (flexible == null) {
 					hiredDay = false;
@@ -155,7 +156,6 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 						startMark = getStartMark(conn, tds, employee.getKey(), tolerance, date, businessDay, false, turnDay);
 						hiredDay = turnDay != null;
 					}
-
 				}
 				endMark = getEndMark(conn, employee.getKey(), startMark, hoursWorkday, date, tolerance, businessDay, turnDay);
 
@@ -192,6 +192,8 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 			}</code>
 			 */
 
+			/**
+			 * <code>
 			try {
 				Integer seconds = 5;
 				LOG.log(Level.FINE, "Waiting {0} seconds", seconds);
@@ -199,6 +201,8 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 			} catch (InterruptedException e) {
 				LOG.log(Level.SEVERE, "InterruptedException", e);
 			}
+			</code>
+			 */
 		}
 
 		mysql.closeConnection(conn);
@@ -297,7 +301,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		return out;
 	}
 
-	private TurnDay getTurnDay(Connection conn, TurnDayService tds, Calendar date, Long employeeId, Integer tolerance,
+	public TurnDay getTurnDay(Connection conn, TurnDayService tds, Calendar date, Long employeeId, Integer tolerance,
 			Boolean flexible) {
 		TurnDay out = tds.markAndUserToTurnDayId(conn, date, employeeId, tolerance, flexible);
 		return out;
@@ -315,7 +319,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		return out;
 	}
 
-	private List<IdRut> listEmployeeByDate(Connection conn, Date date) {
+	private List<IdRut> employeeList(Connection conn) {
 		IdRut idRut = null;
 		Long employeeId = null;
 		String sql = "SELECT DISTINCT c.cId ";
@@ -325,12 +329,13 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		sql += "WHERE DATE(cDate) = ? AND b.cid IS NULL AND NOT c.cId IS NULL;";
 
 		sql = "SELECT DISTINCT c.cId FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog AND b.cid IS NULL LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey AND NOT c.cId IS NULL WHERE DATE(cDate) = ?  AND c.cId IS NOT NULL ORDER BY c.cId;";
+		sql = "SELECT cId FROM tEmployee ORDER BY cId;";
 
-		LOG.log(Level.CONFIG, "SQL for get Employees by Date is: {0}", sql);
+		LOG.log(Level.FINEST, "SQL for get Employees by Date is: {0}", sql);
 
 		BSmySQL mysql = new BSmySQL();
 
-		ResultSet rs = mysql.queryResultSet(conn, sql, date);
+		ResultSet rs = mysql.queryResultSet(conn, sql, null);
 		List<IdRut> out = new ArrayList<IdRut>();
 		String key = null;
 		try {

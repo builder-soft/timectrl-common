@@ -97,7 +97,7 @@ public abstract class AbstractProcess {
 		return out;
 	}
 
-	protected void init() {
+	public void init() {
 		BSConfig config = new BSConfig();
 		this.webInfPath = System.getenv("BS_PATH");
 
