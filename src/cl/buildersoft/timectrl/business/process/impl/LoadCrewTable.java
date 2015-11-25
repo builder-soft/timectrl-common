@@ -19,8 +19,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.xmlbeans.impl.common.Levenshtein;
-
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSDataBaseException;
@@ -157,7 +155,6 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 						startMark = getStartMark(conn, tds, employee.getKey(), tolerance, date, businessDay, false, turnDay);
 						hiredDay = turnDay != null;
 					}
-					
 
 				}
 				endMark = getEndMark(conn, employee.getKey(), startMark, hoursWorkday, date, tolerance, businessDay, turnDay);
@@ -187,12 +184,21 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 				 */
 			}
 
-			/**<code>
+			/**
+			 * <code>
 			if (employeeList.size() == 0) {
 				saveToCrewProcess(conn, date, null, 0D, false, false);
 				saveToCrewLog(conn, date, null);
 			}</code>
-*/
+			 */
+
+			try {
+				Integer seconds = 5;
+				LOG.log(Level.FINE, "Waiting {0} seconds", seconds);
+				Thread.sleep(seconds * 1000);
+			} catch (InterruptedException e) {
+				LOG.log(Level.SEVERE, "InterruptedException", e);
+			}
 		}
 
 		mysql.closeConnection(conn);
@@ -237,7 +243,8 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 	}
 
 	private Double getWorkedTime(Calendar startMark, Calendar endMark) {
-		LOG.entering(this.getClass().getName(), "getWorkedTime", BSUtils.array2ObjectArray(startMark, endMark));
+		LOG.entering(this.getClass().getName(), "getWorkedTime",
+				BSUtils.array2ObjectArray(BSDateTimeUtil.calendar2String(startMark), BSDateTimeUtil.calendar2String(endMark)));
 		Double out = 0D;
 		long diff = endMark.getTimeInMillis() - startMark.getTimeInMillis();
 
@@ -316,32 +323,28 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		sql += "LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog ";
 		sql += "LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey ";
 		sql += "WHERE DATE(cDate) = ? AND b.cid IS NULL AND NOT c.cId IS NULL;";
-		
-		sql = "SELECT DISTINCT c.cId FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog AND b.cid IS NULL LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey AND NOT c.cId IS NULL WHERE DATE(cDate) = ?;";
+
+		sql = "SELECT DISTINCT c.cId FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog AND b.cid IS NULL LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey AND NOT c.cId IS NULL WHERE DATE(cDate) = ?  AND c.cId IS NOT NULL ORDER BY c.cId;";
 
 		LOG.log(Level.CONFIG, "SQL for get Employees by Date is: {0}", sql);
-		
+
 		BSmySQL mysql = new BSmySQL();
 
 		ResultSet rs = mysql.queryResultSet(conn, sql, date);
 		List<IdRut> out = new ArrayList<IdRut>();
 		String key = null;
 		try {
-
 			sql = "SELECT cKey FROM tEmployee WHERE cId=?";
 			while (rs.next()) {
 				employeeId = rs.getLong(1);
-
 				idRut = idRutMap.get(employeeId);
 				if (idRut == null) {
 					key = mysql.queryField(conn, sql, employeeId);
-
 					idRut = new IdRut();
 					idRut.setId(employeeId.intValue());
 					idRut.setKey(key);
 					idRutMap.put(employeeId, idRut);
 				}
-
 				out.add(idRut);
 			}
 		} catch (SQLException e) {
@@ -382,13 +385,14 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		sql += "LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey ";
 		sql += "WHERE b.cid IS NULL AND c.cId IS NOT NULL ";
 		sql += "ORDER BY cDate DESC;";
-		
-		//sql = "SELECT DISTINCT DATE(cDate) AS cDate FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey where c.cId IS NOT NULL ;";
-		
+
+		// sql =
+		// "SELECT DISTINCT DATE(cDate) AS cDate FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey where c.cId IS NOT NULL ;";
+
 		sql = "SELECT DISTINCT DATE(cDate) AS cDate FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog AND b.cid IS NULL LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey AND c.cId IS NOT NULL ORDER BY cDate DESC;";
 
 		LOG.log(Level.CONFIG, "SQL for get Dates is: {0}", sql);
-		
+
 		ResultSet rs = mysql.queryResultSet(conn, sql, null);
 
 		try {
