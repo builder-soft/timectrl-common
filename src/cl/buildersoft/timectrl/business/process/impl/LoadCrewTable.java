@@ -126,15 +126,16 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 		List<Date> dateList = listDateUnprocessed(conn);
 		List<IdRut> employeeList = employeeList(conn);
-		
+
 		for (Date date : dateList) {
 			calendar = BSDateTimeUtil.date2Calendar(date);
-//			LOG.log(Level.FINE, "----------" + BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
+			// LOG.log(Level.FINE, "----------" +
+			// BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
 
-			
 			for (IdRut employee : employeeList) {
 				flexible = isFlexible(conn, mysql, date, (long) employee.getId());
-				LOG.log(Level.FINE, "Employee: {0}, Flexible: {1}, Date: {2}", BSUtils.array2ObjectArray(employee, flexible, date));
+				LOG.log(Level.FINE, "Employee: {0}, Flexible: {1}, Date: {2}",
+						BSUtils.array2ObjectArray(employee, flexible, date));
 
 				if (flexible == null) {
 					hiredDay = false;
@@ -215,13 +216,20 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 	}
 
 	private void saveToCrewLog(Connection conn, Date date, String employeeKey) {
+		LOG.log(Level.FINE, "At save tCrewLog, parameters are Date:{0} and EmployeeKey: {1}",
+				BSUtils.array2ObjectArray(date, employeeKey));
 		BSmySQL mysql = new BSmySQL();
 		String sql = "INSERT INTO tCrewLog(cAttendanceLog, cWhen) ";
-		sql += "SELECT cId,NOW() FROM tAttendanceLog WHERE DATE(cDate)=? AND cEmployeeKey=?";
+		sql += "SELECT cId, NOW() FROM tAttendanceLog WHERE DATE(cDate)=? AND cEmployeeKey=?";
 
 		List<Object> params = BSUtils.array2List(date, employeeKey);
 
-		mysql.update(conn, sql, params);
+Integer 		counter = mysql.update(conn, sql, params);
+//if(counter==0){
+//	sql = "INSERT INTO tCrewLog(cAttendanceLog, cWhen) VALUES();";
+//	sql += "SELECT null, NOW() FROM tAttendanceLog WHERE DATE(cDate)=? AND cEmployeeKey=?";
+//
+//}
 		mysql.closeSQL();
 	}
 
