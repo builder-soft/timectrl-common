@@ -137,6 +137,10 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 				LOG.log(Level.FINE, "Employee: {0}, Flexible: {1}, Date: {2}",
 						BSUtils.array2ObjectArray(employee, flexible, date));
 
+				if (employee.getKey().equals("386") || employee.getKey().equals("192")) {
+					LOG.log(Level.FINE, "Employee {0}", employee);
+				}
+
 				if (flexible == null) {
 					hiredDay = false;
 					workedTime = 0D;
@@ -169,7 +173,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 				}
 
 				saveToCrewProcess(conn, date, (long) employee.getId(), workedTime, attend, hiredDay);
-				saveToCrewLog(conn, date, employee.getKey());
+				// saveToCrewLog(conn, date, employee.getKey());
 
 				/**
 				 * <code>
@@ -224,12 +228,13 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 		List<Object> params = BSUtils.array2List(date, employeeKey);
 
-Integer 		counter = mysql.update(conn, sql, params);
-//if(counter==0){
-//	sql = "INSERT INTO tCrewLog(cAttendanceLog, cWhen) VALUES();";
-//	sql += "SELECT null, NOW() FROM tAttendanceLog WHERE DATE(cDate)=? AND cEmployeeKey=?";
-//
-//}
+		Integer counter = mysql.update(conn, sql, params);
+		// if(counter==0){
+		// sql = "INSERT INTO tCrewLog(cAttendanceLog, cWhen) VALUES();";
+		// sql +=
+		// "SELECT null, NOW() FROM tAttendanceLog WHERE DATE(cDate)=? AND cEmployeeKey=?";
+		//
+		// }
 		mysql.closeSQL();
 	}
 
@@ -337,7 +342,7 @@ Integer 		counter = mysql.update(conn, sql, params);
 		sql += "WHERE DATE(cDate) = ? AND b.cid IS NULL AND NOT c.cId IS NULL;";
 
 		sql = "SELECT DISTINCT c.cId FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog AND b.cid IS NULL LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey AND NOT c.cId IS NULL WHERE DATE(cDate) = ?  AND c.cId IS NOT NULL ORDER BY c.cId;";
-		sql = "SELECT cId FROM tEmployee ORDER BY cId;";
+		sql = "SELECT cId FROM tEmployee ORDER BY cKey;";
 
 		LOG.log(Level.FINEST, "SQL for get Employees by Date is: {0}", sql);
 
@@ -403,7 +408,25 @@ Integer 		counter = mysql.update(conn, sql, params);
 		// "SELECT DISTINCT DATE(cDate) AS cDate FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey where c.cId IS NOT NULL ;";
 
 		sql = "SELECT DISTINCT DATE(cDate) AS cDate FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog AND b.cid IS NULL LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey AND c.cId IS NOT NULL ORDER BY cDate DESC;";
+		sql = "select DISTINCT DATE(a.cDate) AS cDate from tAttendanceLog as a left join tcrewprocess as b on date(a.cdate) = b.cdate and b.cid is null ORDER BY a.cDate DESC;";
+		sql = "select DISTINCT DATE(a.cDate) from tAttendanceLog as a left join tcrewprocess as b on date(a.cdate) = b.cdate and b.cid is null left join temployee as c on a.cemployeeKey = c.ckey where c.cid is not null ORDER BY a.cDate DESC;";
+		sql = "select DISTINCT DATE(a.cDate) from tAttendanceLog as a left join tcrewprocess as b on date(a.cdate) = date(b.cdate) left join temployee as c on a.cemployeeKey = c.ckey where c.cid is not null and b.cid is null ORDER BY a.cDate DESC;";
+		sql = "select DISTINCT DATE(a.cDate) from tAttendanceLog as a left join temployee as c on a.cemployeeKey = c.ckey where date(a.cdate) not in (select distinct(cdate) from tcrewprocess) and c.cid is not null ORDER BY a.cDate DESC;";
 
+		/**
+		 * <code>
+select a.*, b.*, c.cid, c.ckey # DISTINCT DATE(a.cDate), count(a.cdate) AS abc
+from tAttendanceLog as a 
+left join tcrewprocess as b on date(a.cdate) = date(b.cdate) #and b.cid is null 
+left join temployee as c on a.cemployeeKey = c.ckey 
+where c.cid is not null 
+and b.cid is null 
+and date(a.cdate) in ('2015-10-31', '2015-10-30')  
+and a.cemployeekey='192'
+#group by date(a.cDate)
+ORDER BY a.cDate DESC;
+</code>
+		 */
 		LOG.log(Level.CONFIG, "SQL for get Dates is: {0}", sql);
 
 		ResultSet rs = mysql.queryResultSet(conn, sql, null);
