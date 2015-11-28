@@ -146,6 +146,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 					workedTime = 0D;
 					attend = false;
 				} else {
+
 					if (flexible) {
 						startMark = getStartMark(conn, tds, employee.getKey(), tolerance, date, null, true, null);
 
@@ -154,13 +155,22 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 							businessDay = tds.isBusinessDay(turnDay);
 						}
 						hiredDay = true;
+
 					} else {
 						turnDay = getTurnDay(conn, tds, calendar, (long) employee.getId(), tolerance, false);
 						businessDay = tds.isBusinessDay(turnDay);
 
 						startMark = getStartMark(conn, tds, employee.getKey(), tolerance, date, businessDay, false, turnDay);
 						hiredDay = turnDay != null;
+
+						/**
+						 * <code>
+						 * 
+						 * </code>
+						 */
+
 					}
+
 				}
 				endMark = getEndMark(conn, employee.getKey(), startMark, hoursWorkday, date, tolerance, businessDay, turnDay);
 
@@ -173,20 +183,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 				}
 
 				saveToCrewProcess(conn, date, (long) employee.getId(), workedTime, attend, hiredDay);
-				// saveToCrewLog(conn, date, employee.getKey());
 
-				/**
-				 * <code>
-				flexible = null;
-				hiredDay = null;
-				workedTime = null;
-				attend = null;
-				startMark = null;
-				endMark = null;
-				turnDay = null;
-				businessDay = null;
-				</code>
-				 */
 			}
 
 			/**
