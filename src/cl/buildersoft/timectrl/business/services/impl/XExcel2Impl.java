@@ -262,19 +262,19 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 	@Override
 	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
-			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportInputParameterList) {
+			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportParameterList) {
 		List<String> out = new ArrayList<String>();
 
 		readProperties(conn, reportPropertyList);
 
 		configOutputPathAndFile();
-		processBossAndEmployeeParameter(conn, reportInputParameterList, idReport);
+		processBossAndEmployeeParameter(conn, reportParameterList, idReport);
 
-		List<Object> params = getReportParams(conn, reportInputParameterList);
+		List<Object> params = getReportParams(conn, reportParameterList);
 
 		XSSFWorkbook workbook = new XSSFWorkbook();
 		super.configStyles(workbook);
-		createSummarySheet(conn, workbook, params, getTitleSummary(conn, reportInputParameterList));
+		createSummarySheet(conn, workbook, params, getTitleSummary(conn, reportParameterList));
 		createDetailSheet(conn, workbook, params);
 
 		try {

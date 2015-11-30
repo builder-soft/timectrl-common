@@ -9,6 +9,7 @@ public class Report extends BSBean {
 	private String key = null;
 	private String name = null;
 	private Long type = null;
+	private String javaClass = null;
 
 	public String getName() {
 		return name;
@@ -34,9 +35,17 @@ public class Report extends BSBean {
 		this.key = key;
 	}
 
+	public String getJavaClass() {
+		return javaClass;
+	}
+
+	public void setJavaClass(String javaClass) {
+		this.javaClass = javaClass;
+	}
+
 	@Override
 	public String toString() {
-		return "Report [key=" + key + ", name=" + name + ", type=" + type + ", getId()=" + getId() + "]";
+		return "Report [key=" + key + ", name=" + name + ", type=" + type + ", javaClass=" + javaClass + ", Id=" + getId() + "]";
 	}
 
 }
