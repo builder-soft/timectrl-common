@@ -107,7 +107,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		validateArguments(args);
 		Connection conn = getConnection(getDomainByBatabase(args[0]));
 
-		// LOG.fine("Begin Process...");
+		LOG.log(Level.INFO, "Begin Process...");
 
 		Boolean flexible = null;
 		Boolean hiredDay = null;
@@ -129,8 +129,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 		for (Date date : dateList) {
 			calendar = BSDateTimeUtil.date2Calendar(date);
-			// LOG.log(Level.FINE, "----------" +
-			// BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
+			LOG.log(Level.FINE, "----------" + BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
 
 			for (IdRut employee : employeeList) {
 				flexible = isFlexible(conn, mysql, date, (long) employee.getId());
@@ -146,7 +145,6 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 					workedTime = 0D;
 					attend = false;
 				} else {
-
 					if (flexible) {
 						startMark = getStartMark(conn, tds, employee.getKey(), tolerance, date, null, true, null);
 
@@ -161,7 +159,8 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 						businessDay = tds.isBusinessDay(turnDay);
 
 						startMark = getStartMark(conn, tds, employee.getKey(), tolerance, date, businessDay, false, turnDay);
-						hiredDay = turnDay != null;
+//						hiredDay = turnDay != null;
+						hiredDay = businessDay;
 
 						/**
 						 * <code>
@@ -208,7 +207,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		}
 
 		mysql.closeConnection(conn);
-		LOG.exiting(this.getClass().getName(), "doExecute");
+		LOG.log(Level.INFO, "Process Done!");
 	}
 
 	@Override
