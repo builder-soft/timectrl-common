@@ -16,7 +16,13 @@ import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.process.ExecuteProcess;
 import cl.buildersoft.timectrl.business.services.MachineService2;
 import cl.buildersoft.timectrl.business.services.impl.MachineServiceImpl2;
-
+/**
+ * Para borrar las marcas de prueba, ejecutar:
+ * delete from tattendancelog  where cemployeekey like '77%';
+ * 
+ * @author cmoscoso
+ *
+ */
 public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 	private static final Logger LOG = Logger.getLogger(ReadMarks.class.getName());
 	private String[] validArguments = { "DOMAIN", "DELETE_MARKS_OF_MACHINE" };
@@ -43,11 +49,12 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 		BSBeanUtils bu = new BSBeanUtils();
 		@SuppressWarnings("unchecked")
 		List<Machine> machines = (List<Machine>) bu.listAll(conn, new Machine());
-		MachineService2 service = new MachineServiceImpl2();
+		MachineService2 service = null;// new MachineServiceImpl2();
 
 		_zkemProxy api = null;
 		for (Machine machine : machines) {
 			try {
+				service = new MachineServiceImpl2();
 				api = service.connect(conn, machine);
 			} catch (BSConfigurationException e) {
 				LOG.log(Level.SEVERE, "Can not connect to machine", e);
@@ -72,6 +79,7 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 					deleteMarks(api);
 				}
 				service.disconnect(api);
+				service = null;
 			}
 			api = null;
 			deleteMarksAtEnd = deleteMarksAtEnd(args);

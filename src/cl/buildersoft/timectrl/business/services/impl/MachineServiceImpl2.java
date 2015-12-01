@@ -106,7 +106,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 	}
 
 	private void writeToConsole(AttendanceLog attendance, Boolean found) {
-		LOG.log(Level.INFO, (found ? "Exists: {0}" : "Absent: {0}") , attendance.toString());
+		LOG.log(Level.INFO, (found ? "Found: {0}" : "Not Found: {0}") , attendance.toString());
 	}
 
 	private long readMarkType(Connection conn, Holder<Integer> dwInOutMode) {
@@ -472,6 +472,11 @@ public class MachineServiceImpl2 implements MachineService2 {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			out = false;
+		}finally
+		{
+			mysql.closeSQL(rs);
+			mysql.closeSQL();
+			params.clear();
 		}
 
 		/**
@@ -516,6 +521,8 @@ public class MachineServiceImpl2 implements MachineService2 {
 			e.printStackTrace();
 		} finally {
 			mysql.closeSQL(rs);
+			mysql.closeSQL();
+			params.clear();
 		}
 
 	}
