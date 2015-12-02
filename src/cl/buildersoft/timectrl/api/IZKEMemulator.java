@@ -6,7 +6,7 @@ import com4j.EventCookie;
 import com4j.Holder;
 
 public class IZKEMemulator implements _zkemProxy {
-	public int maxRecords = 3;
+	public int maxRecords = 4;
 	private Integer counter = 0;
 
 	@Override
@@ -64,7 +64,7 @@ public class IZKEMemulator implements _zkemProxy {
 		dwEnrollNumber.value = "77" + counter;
 		dwVerifyMode.value = 1;
 		dwInOutMode.value = 1;
-		dwYear.value = 2014;
+		dwYear.value = 2020;
 		dwMonth.value = 7;
 		dwDay.value = 27;
 		dwHour.value = 23;
