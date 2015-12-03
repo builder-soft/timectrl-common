@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRExporter;
@@ -23,7 +25,7 @@ import cl.buildersoft.timectrl.business.beans.ReportType;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
 public class FileReportImpl extends AbstractReportService implements ReportService {
-	private String jasperPath = null;
+	private final static Logger LOG = Logger.getLogger(FileReportImpl.class.getName());	private String jasperPath = null;
 	private String jasperFile = null;
 	private String outputPath = null;
 	private String outputFile = null;
@@ -131,6 +133,41 @@ public class FileReportImpl extends AbstractReportService implements ReportServi
 			this.format = value;
 		}
 		return out;
+	}
+
+	@Override
+	public Boolean runAsDetachedThread() {
+		return false;
+	}
+
+	@Override
+	public void setConnectionData(String driverName, String serverName, String database, String password, String username) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportId(Long reportId) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportType(ReportType reportType) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportPropertyList(List<ReportPropertyBean> reportPropertyList) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportParameterList(List<ReportParameterBean> reportParameterList) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void run() {
+		LOG.log(Level.SEVERE, "This class dont run as single thread {0}", FileReportImpl.class.getName());
 	}
 
 }

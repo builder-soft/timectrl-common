@@ -25,6 +25,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
+import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.framework.exception.BSSystemException;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
@@ -289,6 +290,42 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 		return new Color(Integer.valueOf(colorStr.substring(1, 3), 16), Integer.valueOf(colorStr.substring(3, 5), 16),
 				Integer.valueOf(colorStr.substring(5, 7), 16));
 	}
+
+	@Override
+	public Boolean runAsDetachedThread() {
+		return false;
+	}
+
+	@Override
+	public void setConnectionData(String driverName, String serverName, String database, String password, String username) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportId(Long reportId) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportType(ReportType reportType) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportPropertyList(List<ReportPropertyBean> reportPropertyList) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportParameterList(List<ReportParameterBean> reportParameterList) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void run() {
+		 LOG.log(Level.SEVERE, "This class dont run as single thread {0}", ListToXExcelImpl.class.getName());
+	}
+
 }
 
 class WorkbookAndSheet {

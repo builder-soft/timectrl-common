@@ -10,6 +10,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -18,12 +20,14 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
+import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
 public class ListToExcelImpl extends AbstractReportService implements ReportService {
+	private final static Logger LOG = Logger.getLogger(ListToExcelImpl.class.getName());
 	private String outputPath = null;
 	private String outputFile = null;
 	private String spName = null;
@@ -152,6 +156,42 @@ public class ListToExcelImpl extends AbstractReportService implements ReportServ
 	protected String parseCustomVariable(String key) {
 
 		return null;
+	}
+
+	@Override
+	public Boolean runAsDetachedThread() {
+		return false;
+	}
+
+	@Override
+	public void setConnectionData(String driverName, String serverName, String database, String password, String username) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportId(Long reportId) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportType(ReportType reportType) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportPropertyList(List<ReportPropertyBean> reportPropertyList) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportParameterList(List<ReportParameterBean> reportParameterList) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void run() {
+		LOG.log(Level.SEVERE, "This class dont run as single thread {0}", ListToExcelImpl.class.getName());
+
 	}
 
 }
