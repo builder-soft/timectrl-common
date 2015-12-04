@@ -27,6 +27,7 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.framework.exception.BSSystemException;
+import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
@@ -65,7 +66,13 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 		processEmployeeParameter(conn, reportParameterList);
 		List<Object> params = getReportParams(conn, reportParameterList);
 
+		LOG.log(Level.INFO, "Just before run 'big' store procedure called {0}.", this.spName);
+		long startTime = System.currentTimeMillis();
 		List<List<Object[]>> rss = mysql.callComplexSP(conn, this.spName, params, true);
+		long endTime = System.currentTimeMillis();
+		LOG.log(Level.INFO, "Just after run 'big' store procedure called {0}. This took {1} miliseconds",
+				BSUtils.array2ObjectArray(this.spName, endTime - startTime));
+
 		// ResultSet rs = mysql.callSingleSP(conn, this.spName, params);
 
 		WorkbookAndSheet workbookAndSheet = createWorkbook();
@@ -323,7 +330,7 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 
 	@Override
 	public void run() {
-		 LOG.log(Level.SEVERE, "This class dont run as single thread {0}", ListToXExcelImpl.class.getName());
+		LOG.log(Level.SEVERE, "This class dont run as single thread {0}", ListToXExcelImpl.class.getName());
 	}
 
 }
