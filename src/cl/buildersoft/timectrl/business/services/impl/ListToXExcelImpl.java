@@ -25,7 +25,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
+import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.framework.exception.BSSystemException;
+import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
@@ -64,7 +66,13 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 		processEmployeeParameter(conn, reportParameterList);
 		List<Object> params = getReportParams(conn, reportParameterList);
 
+		LOG.log(Level.INFO, "Just before run 'big' store procedure called {0}.", this.spName);
+		long startTime = System.currentTimeMillis();
 		List<List<Object[]>> rss = mysql.callComplexSP(conn, this.spName, params, true);
+		long endTime = System.currentTimeMillis();
+		LOG.log(Level.INFO, "Just after run 'big' store procedure called {0}. This took {1} miliseconds",
+				BSUtils.array2ObjectArray(this.spName, endTime - startTime));
+
 		// ResultSet rs = mysql.callSingleSP(conn, this.spName, params);
 
 		WorkbookAndSheet workbookAndSheet = createWorkbook();
@@ -274,7 +282,7 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 		} else if ("FONT_SIZE".equalsIgnoreCase(key)) {
 			fontSize = Integer.parseInt(value);
 		} else {
-			LOG.log(Level.WARNING, "Property {0} not found", key);
+			LOG.log(Level.WARNING, "Property '{0}' not found", key);
 			out = false;
 		}
 		return out;
@@ -289,6 +297,42 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 		return new Color(Integer.valueOf(colorStr.substring(1, 3), 16), Integer.valueOf(colorStr.substring(3, 5), 16),
 				Integer.valueOf(colorStr.substring(5, 7), 16));
 	}
+
+	@Override
+	public Boolean runAsDetachedThread() {
+		return false;
+	}
+
+	@Override
+	public void setConnectionData(String driverName, String serverName, String database, String password, String username) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportId(Long reportId) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportType(ReportType reportType) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportPropertyList(List<ReportPropertyBean> reportPropertyList) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void setReportParameterList(List<ReportParameterBean> reportParameterList) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void run() {
+		LOG.log(Level.SEVERE, "This class dont run as single thread {0}", ListToXExcelImpl.class.getName());
+	}
+
 }
 
 class WorkbookAndSheet {

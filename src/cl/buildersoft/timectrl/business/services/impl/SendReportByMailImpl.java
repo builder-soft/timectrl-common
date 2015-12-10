@@ -21,8 +21,11 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
+import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
+import cl.buildersoft.framework.util.BSDataUtils;
+import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.IdRut;
 import cl.buildersoft.timectrl.business.beans.Report;
@@ -34,25 +37,57 @@ import cl.buildersoft.timectrl.business.services.ReportService;
 /**
  * <code>
  http://leonardotrujillo.com/2014/12/error-contrasena-incorrecta-en-thunderbird-al-acceder-a-gmail/
-  http://www.codejava.net/java-ee/javamail/send-e-mail-with-attachment-in-java
+ 
 </code>
  */
-public class SendReportByMailImpl extends AbstractReportService implements ReportService {
+public class SendReportByMailImpl extends AbstractReportService implements ReportService, Runnable {
 	private String subReport = null;
 	private String server = null;
 	private String port = null;
 	private String enableTLS = null;
 	private String smtpAuth = null;
-	private String username = null;
-	private String password = null;
+	private String usernameMail = null;
+	private String passwordMail = null;
 	private String subject = null;
 	private String messageText = null;
 	private String destiny = null;
 	private String manpowerMail = null;
 
+	private String driverName = null;
+	private String serverName = null;
+	private String database = null;
+	private String passwordDB = null;
+	private String usernameDB = null;
+	private Long reportId = null;
+	private ReportType reportType = null;
+	private List<ReportPropertyBean> reportPropertyList = null;
+	private List<ReportParameterBean> reportParameterList = null;
+
 	private static final Logger LOG = Logger.getLogger(SendReportByMailImpl.class.getName());
 
-	// private IdRut idRut = null;
+	@Override
+	public void run() {
+		try {
+			BSmySQL mysql = new BSmySQL();
+
+			long start = System.currentTimeMillis();
+
+			String myClassName = SendReportByMailImpl.class.getName();
+			LOG.log(Level.INFO, "Start thread of class {0}", myClassName);
+			Connection conn = mysql.getConnection(this.driverName, this.serverName, this.database, this.passwordDB,
+					this.usernameDB);
+			execute(conn, this.reportId, this.reportType, reportPropertyList, reportParameterList);
+
+			long end = System.currentTimeMillis();
+
+			LOG.log(Level.INFO, "End thread of class {0}. It ended in {1} miliseconds.",
+					BSUtils.array2ObjectArray(myClassName, end - start));
+
+		} catch (Exception e) {
+			LOG.log(Level.SEVERE, e.getMessage(), e);
+		}
+
+	}
 
 	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
 			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportParameterList) {
@@ -93,6 +128,11 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 			break;
 		case MANPOWER:
 			fileList = executeReport(conn, idReport, reportType, reportPropertyList, reportParameterList);
+			if (fileList != null && fileList.size() >= 1) {
+				LOG.log(Level.INFO, "File was created in {0}", fileList.get(0));
+			} else {
+				LOG.log(Level.SEVERE, "Can not created correcty report file.");
+			}
 			out = sendMail(fileList, manpowerMail);
 
 			deleteTempFiles(fileList);
@@ -157,7 +197,7 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 		for (String fileName : fileList) {
 			file = new File(fileName);
 			if (!file.delete()) {
-				LOG.log(Level.SEVERE, "Cant delete file {0}", fileName);
+				LOG.log(Level.SEVERE, "Cant delete file '{0}'", fileName);
 			}
 		}
 	}
@@ -201,7 +241,7 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 		String value = outputFile.getPropertyValue();
 		return value.substring(value.lastIndexOf("."));
 	}
-		
+
 	private ReportPropertyBean getOutputFile(List<ReportPropertyBean> subReportPropertyList) {
 		return getProperty(subReportPropertyList, "OUTPUT_FILE");
 	}
@@ -260,6 +300,11 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 	}
 
 	private List<String> sendMail(List<String> pathAndFileNameList, String to) {
+		/**
+		 * <code>
+ http://www.codejava.net/java-ee/javamail/send-e-mail-with-attachment-in-java
+ </code>
+		 */
 		Properties props = System.getProperties();
 
 		List<String> out = new ArrayList<String>();
@@ -272,11 +317,12 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 		props.put("mail.smtp.auth", this.smtpAuth);
 
 		Session session = Session.getDefaultInstance(props);
-
+		// session.setDebug(true);
 		MimeMessage message = new MimeMessage(session);
 
+		Transport transport = null;
 		try {
-			message.setFrom(new InternetAddress(this.username));
+			message.setFrom(new InternetAddress(this.usernameMail));
 			String[] toArray = stringToArray(to);
 			InternetAddress[] toAddress = new InternetAddress[toArray.length];
 
@@ -290,6 +336,7 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 			}
 
 			message.setSubject(this.subject);
+			// message.setText(this.messageText);
 
 			MimeBodyPart messageBodyPart = new MimeBodyPart();
 			messageBodyPart.setContent(this.messageText, "text/html");
@@ -298,12 +345,11 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 			multipart.addBodyPart(messageBodyPart);
 			if (pathAndFileNameList != null && pathAndFileNameList.size() > 0) {
 				for (String filePath : pathAndFileNameList) {
-
 					MimeBodyPart attachPart = new MimeBodyPart();
 					try {
 						attachPart.attachFile(filePath);
 					} catch (IOException ex) {
-						ex.printStackTrace();
+						LOG.log(Level.SEVERE, ex.getMessage(), ex);
 					}
 					multipart.addBodyPart(attachPart);
 
@@ -312,15 +358,23 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 				}
 				message.setContent(multipart);
 			}
-
-			Transport transport = session.getTransport("smtp");
-			transport.connect(this.server, this.username, this.password);
+			transport = session.getTransport("smtp");
+			transport.connect(this.server, this.usernameMail, this.passwordMail);
 			transport.sendMessage(message, message.getAllRecipients());
-			transport.close();
 		} catch (AddressException e) {
+			LOG.log(Level.SEVERE, e.getMessage(), e);
 			throw new BSConfigurationException(e);
 		} catch (MessagingException e) {
+			LOG.log(Level.SEVERE, e.getMessage(), e);
 			throw new BSConfigurationException(e);
+		} finally {
+			if (transport != null) {
+				try {
+					transport.close();
+				} catch (MessagingException e) {
+					LOG.log(Level.SEVERE, e.getMessage(), e);
+				}
+			}
 		}
 		return out;
 	}
@@ -357,9 +411,9 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 		} else if ("mail.smtp.auth".equalsIgnoreCase(key)) {
 			this.smtpAuth = value;
 		} else if ("mail.smtp.user".equalsIgnoreCase(key)) {
-			this.username = value;
+			this.usernameMail = value;
 		} else if ("mail.smtp.password".equalsIgnoreCase(key)) {
-			this.password = value;
+			this.passwordMail = value;
 		} else if ("SUBJECT".equalsIgnoreCase(key)) {
 			this.subject = value;
 		} else if ("TEXT".equalsIgnoreCase(key)) {
@@ -376,4 +430,41 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 	protected String parseCustomVariable(String key) {
 		return null;
 	}
+
+	@Override
+	public Boolean runAsDetachedThread() {
+		return true;
+	}
+
+	@Override
+	public void setConnectionData(String driverName, String serverName, String database, String passwordDB, String usernameDB) {
+		this.driverName = driverName;
+		this.serverName = serverName;
+		this.database = database;
+		this.passwordDB = passwordDB;
+		this.usernameDB = usernameDB;
+
+	}
+
+	@Override
+	public void setReportId(Long reportId) {
+		this.reportId = reportId;
+	}
+
+	@Override
+	public void setReportType(ReportType reportType) {
+		this.reportType = reportType;
+
+	}
+
+	@Override
+	public void setReportPropertyList(List<ReportPropertyBean> reportPropertyList) {
+		this.reportPropertyList = reportPropertyList;
+	}
+
+	@Override
+	public void setReportParameterList(List<ReportParameterBean> reportParameterList) {
+		this.reportParameterList = reportParameterList;
+	}
+
 }
