@@ -215,6 +215,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		return this.validArguments;
 	}
 
+	/**<code>
 	private void saveToCrewLog(Connection conn, Date date, String employeeKey) {
 		LOG.log(Level.FINE, "At save tCrewLog, parameters are Date:{0} and EmployeeKey: {1}",
 				BSUtils.array2ObjectArray(date, employeeKey));
@@ -233,7 +234,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		// }
 		mysql.closeSQL();
 	}
-
+</code>*/
 	private void saveToCrewProcess(Connection conn, Date date, Long employeeId, Double workedTime, Boolean attend,
 			Boolean hiredDay) {
 		LOG.entering(this.getClass().getName(), "saveToCrewProcess",
@@ -291,11 +292,11 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		return out;
 
 	}
-
+/** <code>
 	private Boolean isBusinessDay(TurnDayService tds, TurnDay turnDay) {
 		return tds.isBusinessDay(turnDay);
 	}
-
+</code>*/
 	private Calendar getStartMark(Connection conn, TurnDayService tds, String employeeKey, Integer tolerance, Date date,
 			Boolean businessDay, Boolean flexible, TurnDay turnDay) {
 		BSmySQL mysql = new BSmySQL();
@@ -440,7 +441,7 @@ ORDER BY a.cDate DESC;
 
 		return out;
 	}
-
+/**<code>
 	private Calendar getMaxDate(Connection conn) {
 		return getLimitDate(conn, true);
 	}
@@ -467,4 +468,5 @@ ORDER BY a.cDate DESC;
 		}
 		return out;
 	}
+	</code>*/
 }

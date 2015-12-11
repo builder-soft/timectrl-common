@@ -15,7 +15,6 @@ import cl.buildersoft.timectrl.business.beans.Report;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
-import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.services.ParameterService;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
@@ -128,6 +127,7 @@ public class BuildReport3 extends AbstractConsoleService {
 	public ParameterService getInstanceOfParameter(ReportParameterBean reportParameter) {
 		ParameterService instance = null;
 		try {
+			@SuppressWarnings("unchecked")
 			Class<ParameterService> javaClass = (Class<ParameterService>) Class.forName(reportParameter.getTypeSource());
 			instance = (ParameterService) javaClass.newInstance();
 		} catch (Exception e) {

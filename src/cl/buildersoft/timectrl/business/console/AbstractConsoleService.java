@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -15,7 +14,6 @@ import java.util.logging.Logger;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.util.BSConfig;
 import cl.buildersoft.framework.util.BSDataUtils;
-import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.util.LicenseValidationUtil;
 

@@ -4,6 +4,7 @@ import cl.buildersoft.framework.beans.BSBean;
 
 public class Profile extends BSBean {
 	private static final long serialVersionUID = -7720519574923823260L;
+	@SuppressWarnings("unused")
 	private String TABLE = "tProfile";
 	private String name = null;
 	private Long costCenter = null;
@@ -35,8 +36,7 @@ public class Profile extends BSBean {
 
 	@Override
 	public String toString() {
-		return "Profile [name=" + name + ", costCenter=" + costCenter
-				+ ", companyCost=" + companyCost + "]";
+		return "Profile [name=" + name + ", costCenter=" + costCenter + ", companyCost=" + companyCost + "]";
 	}
 
 }

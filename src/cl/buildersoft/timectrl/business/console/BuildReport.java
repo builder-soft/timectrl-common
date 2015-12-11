@@ -287,10 +287,10 @@ ORDER BY SSN
 		Map<String, Object> out = new HashMap<String, Object>();
 
 		// Integer idEmployeInteger = Integer.parseInt(employee);
-		BSDateTimeUtil dtu = new BSDateTimeUtil();
+//		BSDateTimeUtil dtu = new BSDateTimeUtil();
 
-		Date startDateDate = dtu.calendar2Date(dtu.string2Calendar(startDate, "yyyy-MM-dd"));
-		Date endDateDate = dtu.calendar2Date(dtu.string2Calendar(endDate, "yyyy-MM-dd"));
+		Date startDateDate = BSDateTimeUtil.calendar2Date(BSDateTimeUtil.string2Calendar(startDate, "yyyy-MM-dd"));
+		Date endDateDate = BSDateTimeUtil.calendar2Date(BSDateTimeUtil.string2Calendar(endDate, "yyyy-MM-dd"));
 
 		out.put("UserId", employee);
 		out.put("StartDate", startDateDate);
