@@ -13,6 +13,7 @@ public class EmployeeTurn extends BSBean {
 	private String turnName = null;
 	private Calendar startDate = null;
 	private Calendar endDate = null;
+	private Boolean exception = null;
 
 	public Long getEmployee() {
 		return employee;
@@ -54,10 +55,18 @@ public class EmployeeTurn extends BSBean {
 		this.turnName = turnName;
 	}
 
+	public Boolean getException() {
+		return exception;
+	}
+
+	public void setException(Boolean exception) {
+		this.exception = exception;
+	}
+
 	@Override
 	public String toString() {
-		return "EmployeeTurn [employee=" + employee + ", turn=" + turn + ", turnName=" + turnName + ", startDate=" + startDate
-				+ ", endDate=" + endDate + ", Id=" + getId() + "]";
+		return "EmployeeTurn [Id=" + getId() + ", employee=" + employee + ", turn=" + turn + ", turnName=" + turnName
+				+ ", startDate=" + startDate + ", endDate=" + endDate + ", exception=" + exception + "]";
 	}
 
 }
