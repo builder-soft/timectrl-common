@@ -365,7 +365,7 @@ public abstract class AbstractReportService {
 		parameter.setValue(newValue);
 	}
 
-	protected ReportParameterBean getReportParameter(List<ReportParameterBean> parameterList, String parameterName) {
+	public ReportParameterBean getReportParameter(List<ReportParameterBean> parameterList, String parameterName) {
 		ReportParameterBean out = null;
 		for (ReportParameterBean parameter : parameterList) {
 			if (parameter.getTypeKey().equalsIgnoreCase(parameterName)) {
@@ -376,7 +376,7 @@ public abstract class AbstractReportService {
 		return out;
 	}
 
-	protected ReportPropertyBean getReportProperty(List<ReportPropertyBean> propertiesList, String propertyName) {
+	public ReportPropertyBean getReportProperty(List<ReportPropertyBean> propertiesList, String propertyName) {
 		ReportPropertyBean out = null;
 		for (ReportPropertyBean property : propertiesList) {
 			if (property.getPropertyTypeKey().equalsIgnoreCase(propertyName)) {
