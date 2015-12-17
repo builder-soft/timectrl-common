@@ -274,6 +274,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 		XSSFWorkbook workbook = new XSSFWorkbook();
 		super.configStyles(workbook);
+		resetVariables();
 		createSummarySheet(conn, workbook, params, getTitleSummary(conn, reportParameterList));
 		createDetailSheet(conn, workbook, params);
 
@@ -294,6 +295,11 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		out.add(this.outputFileAndPath);
 
 		return out;
+	}
+
+	private void resetVariables() {
+		rowOfSheet = 0;
+
 	}
 
 	private void processBossAndEmployeeParameter(Connection conn, List<ReportParameterBean> reportInputParameterList,
@@ -352,7 +358,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 			throw new BSDataBaseException(e);
 		}
 		out = out.length() > 0 ? out.substring(0, out.length() - 1) : "";
-		
+
 		LOG.exiting(XExcel2Impl.class.getName(), "getEmployeeIds", out);
 
 		return out;

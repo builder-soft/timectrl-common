@@ -67,24 +67,25 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 
 	@Override
 	public void run() {
+		BSmySQL mysql = new BSmySQL();
+		Connection conn = null;
 		try {
-			BSmySQL mysql = new BSmySQL();
-
 			long start = System.currentTimeMillis();
 
-			String myClassName = SendReportByMailImpl.class.getName();
-			LOG.log(Level.INFO, "Start thread of class {0}", myClassName);
-			Connection conn = mysql.getConnection(this.driverName, this.serverName, this.database, this.passwordDB,
-					this.usernameDB);
+			String thisClassName = SendReportByMailImpl.class.getName();
+			LOG.log(Level.INFO, "Start thread of class {0}", thisClassName);
+			conn = mysql.getConnection(this.driverName, this.serverName, this.database, this.passwordDB, this.usernameDB);
 			execute(conn, this.reportId, this.reportType, reportPropertyList, reportParameterList);
 
 			long end = System.currentTimeMillis();
 
 			LOG.log(Level.INFO, "End thread of class {0}. It ended in {1} miliseconds.",
-					BSUtils.array2ObjectArray(myClassName, end - start));
+					BSUtils.array2ObjectArray(thisClassName, end - start));
 
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE, e.getMessage(), e);
+		} finally {
+			mysql.closeConnection(conn);
 		}
 
 	}

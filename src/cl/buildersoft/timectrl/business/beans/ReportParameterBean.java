@@ -1,6 +1,6 @@
 package cl.buildersoft.timectrl.business.beans;
 
-public class ReportParameterBean {
+public class ReportParameterBean implements Cloneable {
 	private Long id = null;
 	private Long report = null;
 	private String name = null;
@@ -115,6 +115,25 @@ public class ReportParameterBean {
 
 	public void setJavaType(String javaType) {
 		this.javaType = javaType;
+	}
+
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		ReportParameterBean out = new ReportParameterBean();
+		out.setId(getId());
+		out.setReport(getReport());
+		out.setName(getName());
+		out.setLabel(getLabel());
+		out.setOrder(getOrder());
+		out.setTypeId(getTypeId());
+		out.setTypeKey(getTypeKey());
+		out.setTypeName(getTypeName());
+		out.setHtmlFile(getHtmlFile());
+		out.setTypeSource(getTypeSource());
+		out.setValue(getValue());
+		out.setJavaType(getJavaType());
+
+		return super.clone();
 	}
 
 }
