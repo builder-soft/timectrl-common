@@ -65,15 +65,19 @@ public abstract class AbstractConsoleService {
 		validateProperties();
 		// getAppPath();
 
-		Enumeration<Object> propList = prop.keys();
-		while (propList.hasMoreElements()) {
-			Object o = propList.nextElement();
-			LOG.log(Level.CONFIG, "{0} : {1}", BSUtils.array2ObjectArray(o.toString(), prop.getProperty(o.toString())));
-		}
+		logPropertyValues(prop);
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void logPropertyValues(Properties prop) {
+		Enumeration<Object> propList = prop.keys();
+		while (propList.hasMoreElements()) {
+			Object o = propList.nextElement();
+			LOG.log(Level.CONFIG, "{0} : {1}", BSUtils.array2ObjectArray(o.toString(), prop.getProperty(o.toString())));
 		}
 	}
 
