@@ -333,6 +333,12 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 		LOG.log(Level.SEVERE, "This class dont run as single thread {0}", ListToXExcelImpl.class.getName());
 	}
 
+	@Override
+	public void waitBeforeRun(Integer seconds) {
+		LOG.log(Level.SEVERE, "This class dont run as single thread {0}", ListToXExcelImpl.class.getName());
+		
+	}
+
 }
 
 class WorkbookAndSheet {

@@ -34,4 +34,6 @@ public interface ReportService extends Runnable {
 	public ReportPropertyBean getReportProperty(List<ReportPropertyBean> propertiesList, String propertyName);
 
 	public ReportParameterBean getReportParameter(List<ReportParameterBean> parameterList, String parameterName);
+
+	public void waitBeforeRun(Integer seconds);
 }

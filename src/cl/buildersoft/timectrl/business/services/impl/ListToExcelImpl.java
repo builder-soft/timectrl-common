@@ -194,4 +194,9 @@ public class ListToExcelImpl extends AbstractReportService implements ReportServ
 
 	}
 
+	@Override
+	public void waitBeforeRun(Integer seconds) {
+		LOG.log(Level.SEVERE, "This class dont run as single thread {0}", ListToExcelImpl.class.getName());
+	}
+
 }

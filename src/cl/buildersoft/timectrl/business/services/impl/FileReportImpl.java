@@ -170,4 +170,10 @@ public class FileReportImpl extends AbstractReportService implements ReportServi
 		LOG.log(Level.SEVERE, "This class dont run as single thread {0}", FileReportImpl.class.getName());
 	}
 
+	@Override
+	public void waitBeforeRun(Integer seconds) {
+		LOG.log(Level.SEVERE, "This class dont run as single thread {0}", FileReportImpl.class.getName());
+		
+	}
+
 }

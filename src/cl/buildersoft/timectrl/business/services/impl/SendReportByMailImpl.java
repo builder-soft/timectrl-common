@@ -59,6 +59,8 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 	private String passwordDB = null;
 	private String usernameDB = null;
 	private Long reportId = null;
+	private Integer waitBeforeRun = 0;
+
 	private ReportType reportType = null;
 	private List<ReportPropertyBean> reportPropertyList = null;
 	private List<ReportParameterBean> reportParameterList = null;
@@ -70,6 +72,7 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 		BSmySQL mysql = new BSmySQL();
 		Connection conn = null;
 		try {
+			Thread.sleep(this.waitBeforeRun * 1000);
 			long start = System.currentTimeMillis();
 
 			String thisClassName = SendReportByMailImpl.class.getName();
@@ -90,7 +93,7 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 
 	}
 
-	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
+	public synchronized List<String> execute(Connection conn, Long idReport, ReportType reportType,
 			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportParameterList) {
 		readProperties(conn, reportPropertyList);
 
@@ -199,8 +202,11 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 			file = new File(fileName);
 			if (!file.delete()) {
 				LOG.log(Level.SEVERE, "Cant delete file '{0}'", fileName);
+			} else {
+				LOG.log(Level.INFO, "File {0} was deleted", fileName);
 			}
 		}
+
 	}
 
 	private List<String> executeReport(Connection conn, Long idReport, ReportType reportType,
@@ -220,6 +226,8 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 
 		out = subReportService.execute(conn, subReport.getId(), getReportType(conn, subReport), subReportPropertyList,
 				subReportInputParameterList);
+
+		LOG.log(Level.INFO, "File created was {0}", out.toString());
 
 		return out;
 	}
@@ -466,6 +474,12 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 	@Override
 	public void setReportParameterList(List<ReportParameterBean> reportParameterList) {
 		this.reportParameterList = reportParameterList;
+	}
+
+	@Override
+	public void waitBeforeRun(Integer seconds) {
+		this.waitBeforeRun = waitBeforeRun;
+
 	}
 
 }
