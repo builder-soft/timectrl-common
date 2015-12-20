@@ -51,8 +51,9 @@ public class BuildReport3 extends AbstractConsoleService {
 		}
 	}
 
-	private List<String> doBuild(String reportKey, String[] target) {
+	public List<String> doBuild(String reportKey, String[] target) {
 		Connection conn = getConnection();
+
 		BSBeanUtils bu = new BSBeanUtils();
 		Report report = new Report();
 
@@ -60,10 +61,18 @@ public class BuildReport3 extends AbstractConsoleService {
 			throw new BSConfigurationException("Report '" + reportKey + NOT_FOUND);
 		}
 
-		return execute(conn, report.getId(), arrayToList(target));
+		setConnection(conn);
+		List<String> out = doBuild(report.getId(), target);
+
+		BSmySQL mysql = new BSmySQL();
+		mysql.closeConnection(conn);
+
+		return out;
+
+		// return execute(conn, report.getId(), arrayToList(target));
 	}
 
-	private List<String> doBuild(Long id, String[] target) {
+	public List<String> doBuild(Long id, String[] target) {
 		Connection conn = getConnection();
 		List<String> out = execute(conn, id, arrayToList(target));
 		new BSmySQL().closeConnection(conn);
@@ -118,7 +127,6 @@ public class BuildReport3 extends AbstractConsoleService {
 			instance = (ReportService) javaClass.newInstance();
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE, "Class of ReportService not found", e);
-
 			throw new BSProgrammerException(e);
 		}
 		return instance;
