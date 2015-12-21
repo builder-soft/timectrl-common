@@ -11,12 +11,15 @@ import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.framework.exception.BSUserException;
+import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.Report;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
+import cl.buildersoft.timectrl.business.services.EmployeeService;
 import cl.buildersoft.timectrl.business.services.ParameterService;
 import cl.buildersoft.timectrl.business.services.ReportService;
+import cl.buildersoft.timectrl.business.services.impl.EmployeeServiceImpl;
 
 public class BuildReport3 extends AbstractConsoleService {
 	private static final String NOT_FOUND = "' not found.";
@@ -68,13 +71,11 @@ public class BuildReport3 extends AbstractConsoleService {
 		mysql.closeConnection(conn);
 
 		return out;
-
-		// return execute(conn, report.getId(), arrayToList(target));
 	}
 
 	public List<String> doBuild(Long id, String[] target) {
 		Connection conn = getConnection();
-		List<String> out = execute(conn, id, arrayToList(target));
+		List<String> out = execute2(conn, id, arrayToList(target));
 		new BSmySQL().closeConnection(conn);
 		return out;
 	}
@@ -88,9 +89,10 @@ public class BuildReport3 extends AbstractConsoleService {
 		return out;
 	}
 
+	@Deprecated
 	private List<String> execute(Connection conn, Long id, List<String> target) {
 		BSBeanUtils bu = new BSBeanUtils();
-		Report report = getReport(id, bu, conn);
+		Report report = getReport(conn, id);
 		ReportType reportType = getReportType(conn, report);
 
 		ReportService reportService = getInstance(conn, report);
@@ -104,6 +106,116 @@ public class BuildReport3 extends AbstractConsoleService {
 		reportService.fillParameters(parameters, target);
 
 		List<String> out = reportService.execute(conn, report.getId(), reportType, reportPropertyList, parameters);
+
+		return out;
+	}
+
+	private List<String> execute2(Connection conn, Long reportId, List<String> parameters) {
+		Report report = getReport(conn, reportId);
+		ReportType reportType = getReportType(conn, report);
+
+		ReportService reportService = getInstance(conn, report);
+
+		List<ReportParameterBean> reportParameterList = reportService.loadParameter(conn, reportId);
+		// List<String> parameters = readParametersFromPage(reportParameterList,
+		// request);
+
+		List<ReportPropertyBean> reportPropertyList = reportService.loadReportProperties(conn, reportId);
+		reportService.fillParameters(reportParameterList, parameters);
+
+		List<String> responseList = new ArrayList<String>();
+
+		// ********************************************************
+		ReportParameterBean bossId = reportService.getReportParameter(reportParameterList, "BOSS_LIST");
+
+		if (bossId != null && "0".equalsIgnoreCase(bossId.getValue())) {
+			EmployeeService es = new EmployeeServiceImpl();
+			List<Employee> bossList = es.listBoss(conn);
+
+			List<ReportParameterBean> parameterListBackup = cloneParameterList(reportParameterList);
+
+			for (Employee boss : bossList) {
+				bossId.setValue(boss.getId().toString());
+				responseList.addAll(executeReport(conn, reportId, reportType, reportService, reportParameterList,
+						reportPropertyList));
+				reportParameterList = cloneParameterList(parameterListBackup);
+				bossId = reportService.getReportParameter(reportParameterList, "BOSS_LIST");
+			}
+		} else {
+			responseList = executeReport(conn, reportId, reportType, reportService, reportParameterList, reportPropertyList);
+		}
+
+		// ********************************************************
+
+		BSmySQL mysql = new BSmySQL();
+		mysql.closeConnection(conn);
+
+		if (reportService.runAsDetachedThread()) {
+			responseList.clear();
+			responseList.add("La solicitud se esta procesando de manera desatendida.");
+		}
+
+		return responseList;
+
+		/**
+		 * <code>		
+		Map<Integer, String> responseMap = new HashMap<Integer, String>();
+		Integer index = 0;
+
+		for (String responseString : responseList) {
+			responseMap.put(index++, responseString);
+		}
+
+		request.setAttribute("ResponseMap", responseMap);
+		request.getSession().setAttribute("ResponseMap", responseMap);
+
+		forward(request, response, "/WEB-INF/jsp/timectrl/report/execute/show-resonse.jsp");
+</code>
+		 */
+	}
+
+	private List<String> executeReport(Connection conn, Long reportId, ReportType reportType, ReportService reportService,
+			List<ReportParameterBean> reportParameterList, List<ReportPropertyBean> reportPropertyList) {
+		List<String> responseList;
+		if (reportService.runAsDetachedThread()) {
+			// HttpSession session = request.getSession(false);
+			// Map<String, DomainAttribute> domainAttribute = (Map<String,
+			// DomainAttribute>) session.getAttribute("DomainAttribute");
+
+			reportService.setConnectionData(this.getDriver(), this.getServerName(), this.getDatabase(), this.getPassword(),
+					this.getUser());
+
+			// reportService.setConnectionData(domainAttribute.get("database.driver").getValue(),
+			// domainAttribute.get("database.server").getValue(),
+			// domainAttribute.get("database.database").getValue(),
+			// domainAttribute.get("database.password").getValue(),
+			// domainAttribute.get("database.username").getValue());
+
+			reportService.setReportId(reportId);
+			reportService.setReportParameterList(reportParameterList);
+			reportService.setReportPropertyList(reportPropertyList);
+			reportService.setReportType(reportType);
+
+			Thread thread = new Thread(reportService, reportService.getClass().getName());
+			thread.start();
+			responseList = new ArrayList<String>();
+			responseList.add("La solicitud se esta procesando de manera desatendida.");
+		} else {
+			responseList = reportService.execute(conn, reportId, reportType, reportPropertyList, reportParameterList);
+		}
+		return responseList;
+	}
+
+	private List<ReportParameterBean> cloneParameterList(List<ReportParameterBean> sourceList) {
+		List<ReportParameterBean> out = new ArrayList<ReportParameterBean>(sourceList.size());
+
+		for (ReportParameterBean item : sourceList) {
+			try {
+				out.add((ReportParameterBean) item.clone());
+			} catch (CloneNotSupportedException e) {
+				LOG.log(Level.SEVERE, e.getMessage(), e);
+			}
+		}
 
 		return out;
 	}
@@ -146,8 +258,9 @@ public class BuildReport3 extends AbstractConsoleService {
 
 	}
 
-	private Report getReport(Long reportId, BSBeanUtils bu, Connection conn) {
+	private Report getReport(Connection conn, Long reportId) {
 		Report report = new Report();
+		BSBeanUtils bu = new BSBeanUtils();
 		report.setId(reportId);
 		if (!bu.search(conn, report)) {
 			throw new BSProgrammerException("Report '" + reportId + NOT_FOUND);
