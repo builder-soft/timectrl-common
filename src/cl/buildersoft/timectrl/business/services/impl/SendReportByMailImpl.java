@@ -371,11 +371,11 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 			transport.connect(this.server, this.usernameMail, this.passwordMail);
 			transport.sendMessage(message, message.getAllRecipients());
 		} catch (AddressException e) {
-			LOG.log(Level.SEVERE, e.getMessage(), e);
-			throw new BSConfigurationException(e);
+			LOG.log(Level.SEVERE, "File " + pathAndFileNameList.toString() + " can't sended to " + to + "", e);
+			// throw new BSConfigurationException(e);
 		} catch (MessagingException e) {
-			LOG.log(Level.SEVERE, e.getMessage(), e);
-			throw new BSConfigurationException(e);
+			LOG.log(Level.SEVERE, "File " + pathAndFileNameList.toString() + " can't sended to " + to + "", e);
+			// throw new BSConfigurationException(e);
 		} finally {
 			if (transport != null) {
 				try {
@@ -389,6 +389,7 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 	}
 
 	private String[] stringToArray(String to) {
+		LOG.log(Level.FINE, "Mail to {0}", to);
 		to = to.replaceAll(",", ";");
 		String[] out = to.split(";");
 		return out;

@@ -24,6 +24,7 @@ import cl.buildersoft.timectrl.business.services.impl.EmployeeServiceImpl;
 public class BuildReport3 extends AbstractConsoleService {
 	private static final String NOT_FOUND = "' not found.";
 	private static final Logger LOG = Logger.getLogger(BuildReport3.class.getName());
+	private Boolean runFromConsole = false;
 
 	public static void main(String[] args) {
 		BuildReport3 buildReport = new BuildReport3();
@@ -36,6 +37,7 @@ public class BuildReport3 extends AbstractConsoleService {
 		if (args.length < 1) {
 			throw new BSUserException("Arguments not enough");
 		}
+		this.runFromConsole = true;
 		String key = args[0];
 		String[] target = new String[args.length - 1];
 		System.arraycopy(args, 1, target, 0, target.length);
@@ -64,7 +66,7 @@ public class BuildReport3 extends AbstractConsoleService {
 			throw new BSConfigurationException("Report '" + reportKey + NOT_FOUND);
 		}
 
-		setConnection(conn);
+//		setConnection(conn);
 		List<String> out = doBuild(report.getId(), target);
 
 		BSmySQL mysql = new BSmySQL();
@@ -75,8 +77,14 @@ public class BuildReport3 extends AbstractConsoleService {
 
 	public List<String> doBuild(Long id, String[] target) {
 		Connection conn = getConnection();
-		List<String> out = execute2(conn, id, arrayToList(target));
-		new BSmySQL().closeConnection(conn);
+		List<String> out = new ArrayList<String>();
+		try {
+			out = execute2(conn, id, arrayToList(target));
+		} catch (Exception e) {
+			LOG.log(Level.SEVERE, "Error at process report", e);
+		} finally {
+			new BSmySQL().closeConnection(conn);
+		}
 		return out;
 	}
 
@@ -147,8 +155,8 @@ public class BuildReport3 extends AbstractConsoleService {
 
 		// ********************************************************
 
-		BSmySQL mysql = new BSmySQL();
-		mysql.closeConnection(conn);
+//		BSmySQL mysql = new BSmySQL();
+//		mysql.closeConnection(conn);
 
 		if (reportService.runAsDetachedThread()) {
 			responseList.clear();
@@ -177,7 +185,8 @@ public class BuildReport3 extends AbstractConsoleService {
 	private List<String> executeReport(Connection conn, Long reportId, ReportType reportType, ReportService reportService,
 			List<ReportParameterBean> reportParameterList, List<ReportPropertyBean> reportPropertyList) {
 		List<String> responseList;
-		if (reportService.runAsDetachedThread()) {
+		if (!runFromConsole && reportService.runAsDetachedThread()) {
+			// if (reportService.runAsDetachedThread()) {
 			// HttpSession session = request.getSession(false);
 			// Map<String, DomainAttribute> domainAttribute = (Map<String,
 			// DomainAttribute>) session.getAttribute("DomainAttribute");
