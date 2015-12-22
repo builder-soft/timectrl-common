@@ -1,5 +1,6 @@
 package cl.buildersoft.timectrl.business.services.impl;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +14,6 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSDataBaseException;
-import cl.buildersoft.framework.exception.BSException;
 import cl.buildersoft.timectrl.api.ClassFactory;
 import cl.buildersoft.timectrl.api.IZKEMException;
 import cl.buildersoft.timectrl.api._zkemProxy;
@@ -22,16 +22,16 @@ import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.Machine;
 import cl.buildersoft.timectrl.business.beans.MarkType;
 import cl.buildersoft.timectrl.business.beans.Privilege;
-import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.services.MachineService2;
 import cl.buildersoft.timectrl.business.services.PrivilegeService;
+
 import com4j.Holder;
 
 public class MachineServiceImpl2 implements MachineService2 {
 	// private Boolean windows8compatible = null;
 
-	private static final Logger LOG = Logger.getLogger(MachineServiceImpl2.class
-			.getName());
+	private static final Logger LOG = Logger.getLogger(MachineServiceImpl2.class.getName());
+
 	@Override
 	public _zkemProxy connect(Connection conn, Machine machine) {
 		BSBeanUtils bu = new BSBeanUtils();
@@ -106,7 +106,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 	}
 
 	private void writeToConsole(AttendanceLog attendance, Boolean found) {
-		LOG.log(Level.INFO, (found ? "Found: {0}" : "Not Found: {0}") , attendance.toString());
+		LOG.log(Level.INFO, (found ? "Found: {0}" : "Not Found: {0}"), attendance.toString());
 	}
 
 	private long readMarkType(Connection conn, Holder<Integer> dwInOutMode) {
@@ -452,15 +452,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 		BSmySQL mysql = new BSmySQL();
 		List<Object> params = new ArrayList<Object>();
 
-		params.add(attendance.getEmployeeKey());
-		params.add(attendance.getMachine());
-		params.add(attendance.getMarkType());
-		params.add(attendance.getYear());
-		params.add(attendance.getMonth());
-		params.add(attendance.getDay());
-		params.add(attendance.getHour());
-		params.add(attendance.getMinute());
-		params.add(attendance.getSecond());
+		setParameters(attendance, params);
 
 		ResultSet rs = mysql.callSingleSP(conn, "pExistsAttendanceLog", params);
 
@@ -472,8 +464,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			out = false;
-		}finally
-		{
+		} finally {
 			mysql.closeSQL(rs);
 			mysql.closeSQL();
 			params.clear();
@@ -502,15 +493,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 		BSmySQL mysql = new BSmySQL();
 		List<Object> params = new ArrayList<Object>();
 
-		params.add(attendance.getEmployeeKey());
-		params.add(attendance.getMachine());
-		params.add(attendance.getMarkType());
-		params.add(attendance.getYear());
-		params.add(attendance.getMonth());
-		params.add(attendance.getDay());
-		params.add(attendance.getHour());
-		params.add(attendance.getMinute());
-		params.add(attendance.getSecond());
+		setParameters(attendance, params);
 
 		ResultSet rs = null;
 		try {
@@ -527,11 +510,68 @@ public class MachineServiceImpl2 implements MachineService2 {
 
 	}
 
+	private void setParameters(AttendanceLog attendance, List<Object> params) {
+		params.add(attendance.getEmployeeKey());
+		params.add(attendance.getMachine());
+		params.add(attendance.getMarkType());
+		params.add(attendance.getYear());
+		params.add(attendance.getMonth());
+		params.add(attendance.getDay());
+		params.add(attendance.getHour());
+		params.add(attendance.getMinute());
+		params.add(attendance.getSecond());
+	}
+
 	@Override
 	public Long getDefaultGroup(Connection conn) {
 		BSBeanUtils bu = new BSBeanUtils();
 		String sql = "SELECT MIN(cId) AS cMin FROM tGroup;";
 		String min = bu.queryField(conn, sql, null);
 		return Long.parseLong(min);
+	}
+
+	@Override
+	public void saveAttendanceLog(Connection conn, List<AttendanceLog> attendanceList) {
+		// List<Object> params = new ArrayList<Object>();
+		CallableStatement stmt = null;
+		try {
+			stmt = conn.prepareCall("call pSaveAttendanceLog2(?,?,?,?,?,?,?,?,?)");
+			conn.setAutoCommit(false);
+
+			for (AttendanceLog attendance : attendanceList) {
+				// setParameters(attendance, params);
+				Integer i = 1;
+				stmt.setString(i++, attendance.getEmployeeKey());
+				stmt.setLong(i++, attendance.getMachine());
+				stmt.setLong(i++, attendance.getMarkType());
+				stmt.setInt(i++, attendance.getYear());
+				stmt.setInt(i++, attendance.getMonth());
+				stmt.setInt(i++, attendance.getDay());
+				stmt.setInt(i++, attendance.getHour());
+				stmt.setInt(i++, attendance.getMinute());
+				stmt.setInt(i++, attendance.getSecond());
+
+				stmt.addBatch();
+			}
+			  stmt.executeBatch();
+			conn.commit();
+ 			 
+		} catch (SQLException e) {
+			try {
+				conn.rollback();
+			} catch (SQLException e1) {
+				throw new BSDataBaseException(e);
+			}
+			LOG.log(Level.SEVERE, e.getMessage(), e);
+		} finally {
+			try {
+				if (!stmt.isClosed()) {
+					stmt.clearBatch();
+					stmt.close();
+				}
+			} catch (SQLException e) {
+				throw new BSDataBaseException(e);
+			}
+		}
 	}
 }

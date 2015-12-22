@@ -6,8 +6,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
+import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
-import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.exception.BSUserException;
 import cl.buildersoft.timectrl.api._zkemProxy;
 import cl.buildersoft.timectrl.business.beans.AttendanceLog;
@@ -16,12 +16,13 @@ import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.process.ExecuteProcess;
 import cl.buildersoft.timectrl.business.services.MachineService2;
 import cl.buildersoft.timectrl.business.services.impl.MachineServiceImpl2;
+
 /**
- * Para borrar las marcas de prueba, ejecutar:
- * delete from tattendancelog  where cemployeekey like '77%';
- * 
- * @author cmoscoso
- *
+ * <code>
+   Para borrar las marcas de prueba, ejecutar: 
+   delete from tattendancelog where cemployeekey like '77%';
+  
+ </code>
  */
 public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 	private static final Logger LOG = Logger.getLogger(ReadMarks.class.getName());
@@ -39,8 +40,9 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 
 	@Override
 	public void doExecute(String[] args) {
-		LOG.entering(ReadMarks.class.getName(), "doExecute", args);
-//		this.init();
+		// LOG.entering(ReadMarks.class.getName(), "doExecute", args);
+		LOG.logp(Level.INFO, this.getClass().getName(), "doExecute", "Starting Method", args);
+		// this.init();
 		Connection conn = getConnection(getDomainByBatabase(args[0]));
 
 		validateArguments(args);
@@ -66,11 +68,14 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 				List<AttendanceLog> attendanceLog = null;
 				try {
 					attendanceLog = service.listAttendence(conn, api, machine);
-					LOG.log(Level.INFO, "{0} marks found.", attendanceLog.size());
-					 
+					LOG.log(Level.INFO, "There are {0} marks.", attendanceLog.size());
+
+					Long start = System.currentTimeMillis();
 					saveToDataBase(conn, service, bu, attendanceLog);
+					Long end = System.currentTimeMillis();
+					LOG.log(Level.INFO, "Insert record was in {0} miliseconds", (end - start));
 				} catch (Exception e) {
-					e.printStackTrace();
+					LOG.log(Level.SEVERE, e.getMessage(), e);
 					deleteMarksAtEnd = false;
 				} finally {
 					attendanceLog.clear();
@@ -85,7 +90,13 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 			deleteMarksAtEnd = deleteMarksAtEnd(args);
 
 		}
-		LOG.exiting(ReadMarks.class.getName(), "doExecute");
+
+		BSmySQL mysql = new BSmySQL();
+		mysql.closeConnection(conn);
+
+		LOG.logp(Level.INFO, this.getClass().getName(), "doExecute", "Ending Method");
+
+		// LOG.exiting(ReadMarks.class.getName(), "doExecute");
 		/**
 		 * <code>
 		 * conectar a la base de datos.
@@ -106,8 +117,6 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 		 */
 	}
 
-	 
-
 	private void deleteMarks(_zkemProxy api) {
 		Integer dwMachineNumber = 1;
 		api.enableDevice(dwMachineNumber, false);
@@ -117,18 +126,20 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 	}
 
 	private void saveToDataBase(Connection conn, MachineService2 service, BSBeanUtils bu, List<AttendanceLog> attendanceList) {
+		service.saveAttendanceLog(conn, attendanceList);
+		/**
+		 * <code>
 		for (AttendanceLog attendance : attendanceList) {
 			if (!service.existsAttendanceLog(conn, attendance)) {
 				try {
 					service.saveAttendanceLog(conn, attendance);
-					// bu.save(conn, attendance);
 				} catch (BSDataBaseException e) {
 					LOG.log(Level.SEVERE, "Fail to save  " + attendance.toString(), e);
-					// log("Fail to save " + attendance.toString() + " Detail:"
-					// + e.toString());
 				}
 			}
 		}
+</code>
+		 */
 	}
 
 	private Boolean deleteMarksAtEnd(String[] args) {
