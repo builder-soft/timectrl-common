@@ -36,6 +36,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 	private static final Logger LOG = Logger.getLogger(LoadCrewTable.class.getName());
 	private static final String DATE_TIME_FORMAT_CONST = "yyyy-MM-dd HH:mm:ss.S";
 	private Map<Long, IdRut> idRutMap = new HashMap<Long, IdRut>();
+	private String[] validArguments = { "DOMAIN" };
 	/**
 	 * <code>
 	SET vTolerance = fGetTolerance();
@@ -91,8 +92,6 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 	cerrar la coneccion a la base de datos
 	</code>
 	 */
-
-	private String[] validArguments = { "DOMAIN" };
 
 	public static void main(String[] args) {
 		LoadCrewTable lct = new LoadCrewTable();
