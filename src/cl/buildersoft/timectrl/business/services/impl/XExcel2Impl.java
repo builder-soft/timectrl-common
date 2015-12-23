@@ -9,9 +9,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,7 +39,6 @@ import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
-import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.services.EmployeeService;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
@@ -56,6 +57,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	protected Integer employeeDepth = 0;
 	protected Integer currentDepth = null;
 	private static final Logger LOG = Logger.getLogger(XExcel2Impl.class.getName());
+	private Set<Long> employeeIdSet = new HashSet<Long>();
 
 	private void relationPages(XSSFWorkbook workBook) {
 		Map<DataInSheet, Integer> detailResult = inspectDetail(workBook);
@@ -314,6 +316,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 		this.currentDepth = 1;
 		String employeeIds = getEmployeeIds(conn, Long.parseLong(bossParam.getValue()));
+		LOG.log(Level.INFO, "Length of employee list is {0}", employeeIds.length());
 		out.setJavaType("STRING");
 		out.setName("EmployeesId");
 		out.setReport(idReport);
@@ -323,6 +326,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	}
 
 	private String getEmployeeIds(Connection conn, Long boss) {
+		LOG.logp(Level.INFO, this.getClass().getName(), "getEmployeeIds", "Starting method with Boss={0}", boss.toString());
 		String out = "";
 
 		String sql = "SELECT cId FROM tEmployee WHERE cBoss=?";
@@ -331,21 +335,26 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 		try {
 			while (rs.next()) {
-				Long employee = rs.getLong(1);
+				Long employeeId = rs.getLong(1);
 
-				if (haveJunior(conn, employee, mysql) && boss != employee) {
-					if (this.employeeDepth == 0) {
-						out += getEmployeeIds(conn, employee) + ",";
-					} else {
-						if (this.currentDepth < this.employeeDepth) {
-							this.currentDepth++;
-							out += getEmployeeIds(conn, employee) + ",";
-							this.currentDepth--;
+				if (!employeeIdSet.contains(employeeId)) {
+					employeeIdSet.add(employeeId);
+					if (haveJunior(conn, employeeId, mysql) && boss != employeeId) {
+						if (this.employeeDepth == 0) {
+							out += getEmployeeIds(conn, employeeId) + ",";
+						} else {
+							if (this.currentDepth < this.employeeDepth) {
+								this.currentDepth++;
+								out += getEmployeeIds(conn, employeeId) + ",";
+								this.currentDepth--;
 
+							}
 						}
 					}
+					out += employeeId.toString() + ",";
+				}else{
+					LOG.log(Level.WARNING, "Employee Id {0} exists", employeeId);
 				}
-				out += employee.toString() + ",";
 			}
 			mysql.closeSQL(rs);
 		} catch (SQLException e) {
