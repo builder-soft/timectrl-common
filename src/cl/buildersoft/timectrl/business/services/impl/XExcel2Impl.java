@@ -9,9 +9,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,6 +57,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	protected Integer rowOfSheet = 0;
 	protected Integer employeeDepth = 0;
 	protected Integer currentDepth = null;
+	private Set<Long> employeeIdSet = new HashSet<Long>();
 
 	private void relationPages(XSSFWorkbook workBook) {
 		Map<DataInSheet, Integer> detailResult = inspectDetail(workBook);
@@ -328,7 +331,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	}
 
 	private String getEmployeeIds(Connection conn, Long boss) {
-		LOG.entering(XExcel2Impl.class.getName(), "getEmployeeIds", boss);
+		LOG.logp(Level.INFO, this.getClass().getName(), "getEmployeeIds", "Starting method with Boss={0}", boss.toString());
 		String out = "";
 
 		String sql = "SELECT cId FROM tEmployee WHERE cBoss=?";
@@ -337,25 +340,30 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 		try {
 			while (rs.next()) {
-				Long employee = rs.getLong(1);
+				Long employeeId = rs.getLong(1);
 
-				if (haveJunior(conn, employee, mysql) && boss != employee) {
-					if (this.employeeDepth == 0) {
-						out += getEmployeeIds(conn, employee) + ",";
-					} else {
-						if (this.currentDepth < this.employeeDepth) {
-							this.currentDepth++;
-							out += getEmployeeIds(conn, employee) + ",";
-							this.currentDepth--;
-
+				if (!employeeIdSet.contains(employeeId)) {
+					employeeIdSet.add(employeeId);
+					if (haveJunior(conn, employeeId, mysql) && boss != employeeId) {
+						if (this.employeeDepth == 0) {
+							out += getEmployeeIds(conn, employeeId) + ",";
+						} else {
+							if (this.currentDepth < this.employeeDepth) {
+								this.currentDepth++;
+								out += getEmployeeIds(conn, employeeId) + ",";
+								this.currentDepth--;
+							}
 						}
 					}
+					out += employeeId.toString() + ",";
+				} else {
+					LOG.log(Level.WARNING, "Employee Id {0} exists", employeeId);
 				}
-				out += employee.toString() + ",";
 			}
-			mysql.closeSQL(rs);
 		} catch (SQLException e) {
 			throw new BSDataBaseException(e);
+		} finally {
+			mysql.closeSQL(rs);
 		}
 		out = out.length() > 0 ? out.substring(0, out.length() - 1) : "";
 
