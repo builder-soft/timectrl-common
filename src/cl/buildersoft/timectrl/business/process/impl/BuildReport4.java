@@ -29,12 +29,12 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 	private static final Logger LOG = Logger.getLogger(BuildReport4.class.getName());
 	private Boolean runFromConsole = false;
 
-	private String[] validArguments = { "DOMAIN" };
+	private String[] validArguments = { "DOMAIN", "REPORT_KEY" };
 
 	public static void main(String[] args) {
-		BuildReport4 buildReport = new BuildReport4();
-		buildReport.init();
-		buildReport.doExecute(args);
+		BuildReport4 br4 = new BuildReport4();
+		// buildReport.init();
+		br4.doExecute(args);
 		System.exit(0);
 	}
 
@@ -44,9 +44,9 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 			throw new BSUserException("Arguments not enough");
 		}
 		this.runFromConsole = true;
-		String key = args[0];
-		String[] target = new String[args.length - 1];
-		System.arraycopy(args, 1, target, 0, target.length);
+		String key = args[1];
+		String[] target = new String[args.length - 2];
+		System.arraycopy(args, 2, target, 0, target.length);
 		List<String> responseList = null;
 
 		if (BSUtils.isNumber(key)) {
@@ -55,6 +55,7 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 		} else {
 			responseList = doBuild(key, target);
 		}
+
 		if (responseList != null) {
 			for (String response : responseList) {
 				LOG.log(Level.INFO, response);
@@ -67,7 +68,12 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 		return validArguments;
 	}
 
-	public List<String> doBuild(String reportKey, String[] target) {
+	/**
+	 * <code>
+	 * 
+	</code>
+	 */
+	private List<String> doBuild(String reportKey, String[] target) {
 		Connection conn = getConnection();
 
 		BSBeanUtils bu = new BSBeanUtils();
@@ -85,8 +91,7 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 
 		return out;
 	}
-
-	public List<String> doBuild(Long id, String[] target) {
+	private List<String> doBuild(Long id, String[] target) {
 		Connection conn = getConnection();
 		List<String> out = new ArrayList<String>();
 		try {
@@ -98,7 +103,6 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 		}
 		return out;
 	}
-
 	private List<String> arrayToList(String[] target) {
 		List<String> out = new ArrayList<String>();
 		for (String s : target) {
@@ -108,6 +112,7 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 		return out;
 	}
 
+	/**<code>
 	@Deprecated
 	private List<String> execute(Connection conn, Long id, List<String> target) {
 		BSBeanUtils bu = new BSBeanUtils();
@@ -128,7 +133,8 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 
 		return out;
 	}
-
+</code>*/
+	
 	private List<String> execute2(Connection conn, Long reportId, List<String> parameters) {
 		Report report = getReport(conn, reportId);
 		ReportType reportType = getReportType(conn, report);
