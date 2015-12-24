@@ -10,8 +10,6 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
-import cl.buildersoft.framework.exception.BSUserException;
-import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.Report;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
@@ -40,27 +38,43 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 
 	@Override
 	public void doExecute(String[] args) {
+		this.init();
+
+		validateArguments(args, false);
+		/**
+		 * <code>
 		if (args.length < 1) {
 			throw new BSUserException("Arguments not enough");
 		}
+		</code>
+		 */
+		Connection conn = getConnection(getDomainByBatabase(args[0]));
 		this.runFromConsole = true;
 		String key = args[1];
 		String[] target = new String[args.length - 2];
-		System.arraycopy(args, 2, target, 0, target.length);
+		System.arraycopy(args, 1, target, 0, target.length);
 		List<String> responseList = null;
 
-		if (BSUtils.isNumber(key)) {
-			Long id = Long.parseLong((String) key);
-			responseList = doBuild(id, target);
-		} else {
-			responseList = doBuild(key, target);
-		}
+		Long reportId = keyToReportId(conn, key);
+
+		responseList = doBuild(conn, reportId, target);
 
 		if (responseList != null) {
 			for (String response : responseList) {
 				LOG.log(Level.INFO, response);
 			}
 		}
+	}
+
+	private Long keyToReportId(Connection conn, String key) {
+		BSBeanUtils bu = new BSBeanUtils();
+		Report report = new Report();
+
+		if (!bu.search(conn, report, "cKey=?", key)) {
+			throw new BSConfigurationException("Report '" + key + NOT_FOUND);
+		}
+
+		return report.getId();
 	}
 
 	@Override
@@ -70,11 +84,10 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 
 	/**
 	 * <code>
-	 * 
-	</code>
-	 */
+	   
+	
 	private List<String> doBuild(String reportKey, String[] target) {
-		Connection conn = getConnection();
+//		Connection conn = getConnection();
 
 		BSBeanUtils bu = new BSBeanUtils();
 		Report report = new Report();
@@ -91,8 +104,10 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 
 		return out;
 	}
-	private List<String> doBuild(Long id, String[] target) {
-		Connection conn = getConnection();
+	</code>
+	 */
+	private List<String> doBuild(Connection conn, Long id, String[] target) {
+
 		List<String> out = new ArrayList<String>();
 		try {
 			out = execute2(conn, id, arrayToList(target));
@@ -103,6 +118,7 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 		}
 		return out;
 	}
+
 	private List<String> arrayToList(String[] target) {
 		List<String> out = new ArrayList<String>();
 		for (String s : target) {
@@ -112,29 +128,32 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 		return out;
 	}
 
-	/**<code>
-	@Deprecated
-	private List<String> execute(Connection conn, Long id, List<String> target) {
-		BSBeanUtils bu = new BSBeanUtils();
-		Report report = getReport(conn, id);
-		ReportType reportType = getReportType(conn, report);
+	/**
+	 * <code>
+	 * 
+	 * @Deprecated private List<String> execute(Connection conn, Long id,
+	 *             List<String> target) { BSBeanUtils bu = new BSBeanUtils();
+	 *             Report report = getReport(conn, id); ReportType reportType =
+	 *             getReportType(conn, report);
+	 * 
+	 *             ReportService reportService = getInstance(conn, report);
+	 * 
+	 *             List<ReportPropertyBean> reportPropertyList =
+	 *             reportService.loadReportProperties(conn, id);
+	 *             List<ReportParameterBean> parameters =
+	 *             reportService.loadParameter(conn, id);
+	 * 
+	 *             if (parameters.size() != target.size()) { throw new
+	 *             BSConfigurationException
+	 *             ("Amount of parameters do not match"); }
+	 *             reportService.fillParameters(parameters, target);
+	 * 
+	 *             List<String> out = reportService.execute(conn,
+	 *             report.getId(), reportType, reportPropertyList, parameters);
+	 * 
+	 *             return out; } </code>
+	 */
 
-		ReportService reportService = getInstance(conn, report);
-
-		List<ReportPropertyBean> reportPropertyList = reportService.loadReportProperties(conn, id);
-		List<ReportParameterBean> parameters = reportService.loadParameter(conn, id);
-
-		if (parameters.size() != target.size()) {
-			throw new BSConfigurationException("Amount of parameters do not match");
-		}
-		reportService.fillParameters(parameters, target);
-
-		List<String> out = reportService.execute(conn, report.getId(), reportType, reportPropertyList, parameters);
-
-		return out;
-	}
-</code>*/
-	
 	private List<String> execute2(Connection conn, Long reportId, List<String> parameters) {
 		Report report = getReport(conn, reportId);
 		ReportType reportType = getReportType(conn, report);

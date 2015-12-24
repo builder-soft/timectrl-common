@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
@@ -15,6 +16,7 @@ import cl.buildersoft.framework.beans.Domain;
 import cl.buildersoft.framework.beans.DomainAttribute;
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.exception.BSConfigurationException;
+import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.exception.BSException;
 import cl.buildersoft.framework.util.BSConfig;
 import cl.buildersoft.framework.util.BSDataUtils;
@@ -71,13 +73,27 @@ public abstract class AbstractProcess {
 		return this.conn;
 	}
 
+	protected void closeConnection(Connection conn) {
+		if (conn != null) {
+			try {
+				if (!conn.isClosed()) {
+					conn.close();
+				}
+			} catch (SQLException e) {
+				throw new BSDataBaseException(e);
+			}
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	protected Connection getConnection(Domain domain) {
 		Connection conn = null;
 		DomainAttribute da = new DomainAttribute();
 
+		Connection tempConn = getConnection();
 		BSBeanUtils bu = new BSBeanUtils();
-		List<DomainAttribute> daList = (List<DomainAttribute>) bu.list(getConnection(), da, "cDomain=?", domain.getId());
+		List<DomainAttribute> daList = (List<DomainAttribute>) bu.list(tempConn, da, "cDomain=?", domain.getId());
+		closeConnection(tempConn);
 
 		conn = bu.getConnection(getAttribute(daList, "database.driver"), getAttribute(daList, "database.server"),
 				getAttribute(daList, "database.database"), getAttribute(daList, "database.password"),
@@ -167,34 +183,40 @@ public abstract class AbstractProcess {
 	}
 
 	protected void validateArguments(String[] args) {
+		validateArguments(args, true);
+	}
+
+	protected void validateArguments(String[] args, Boolean validateLen) {
 		String[] validArgumentList = getArguments();
-		if (args.length == validArgumentList.length) {
-			Integer index = 0;
-			Boolean valid = true;
-			for (String argumentName : validArgumentList) {
-				if ("DOMAIN".equalsIgnoreCase(argumentName)) {
-					valid = validateDomain(args[index]);
-				}
-				if ("DELETE_MARKS_OF_MACHINE".equalsIgnoreCase(argumentName)) {
-					try{
-						Boolean.parseBoolean(args[index]);
-					}catch(Exception e)
-					{
-						valid = false;
-					}
-					 
+
+		if (validateLen) {
+			if (args.length != validArgumentList.length) {
+				String msg = "Number of arguments not valid. Received " + args.length + ", expected " + validArgumentList.length
+						+ ".";
+				BSException e = new BSConfigurationException(msg);
+				LOG.log(Level.SEVERE, msg, e);
+				throw e;
+			}
+		}
+
+		Integer index = 0;
+		Boolean valid = true;
+		for (String argumentName : validArgumentList) {
+			if ("DOMAIN".equalsIgnoreCase(argumentName)) {
+				valid = validateDomain(args[index]);
+			}
+			if ("DELETE_MARKS_OF_MACHINE".equalsIgnoreCase(argumentName)) {
+				try {
+					Boolean.parseBoolean(args[index]);
+				} catch (Exception e) {
+					valid = false;
 				}
 
-				if (!valid) {
-					throw new BSConfigurationException("Argument '" + argumentName + "' is'n valid");
-				}
 			}
-		} else {
-			String msg = "Number of arguments not valid. Received " + args.length + ", expected " + validArgumentList.length
-					+ ".";
-			BSException e = new BSConfigurationException(msg);
-			LOG.log(Level.SEVERE, msg, e);
-			throw e;
+
+			if (!valid) {
+				throw new BSConfigurationException("Argument '" + argumentName + "' is'n valid");
+			}
 		}
 
 	}
@@ -213,6 +235,7 @@ public abstract class AbstractProcess {
 
 		return domain != null;
 	}
+
 	/**
 	 * <code>
 	private void translateDateField() {
@@ -226,7 +249,7 @@ public abstract class AbstractProcess {
 	}
 	</code>
 	 */
-	
+
 	public String getDriver() {
 		return driver;
 	}
