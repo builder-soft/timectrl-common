@@ -19,19 +19,14 @@ import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.exception.BSException;
 import cl.buildersoft.framework.util.BSConfig;
-import cl.buildersoft.framework.util.BSDataUtils;
+import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.util.LicenseValidationUtil;
 
 public abstract class AbstractProcess {
 	private final static String FILE_NAME = "Process.properties";
 	// private String logPath = null;
-	private String database = null;
-	private String driver = null;
-	private String password = null;
-	private String serverName = null;
-	private String user = null;
-	private String port = null;
+	private String dsName = null;
 	private String validateLicense = null;
 	private Connection conn = null;
 	private String webInfPath = null;
@@ -67,8 +62,8 @@ public abstract class AbstractProcess {
 
 	protected Connection getConnection() {
 		if (this.conn == null) {
-			BSDataUtils du = new BSDataUtils();
-			this.conn = du.getConnection(this.driver, this.serverName + ":" + this.port, this.database, this.password, this.user);
+			BSConnectionFactory cf = new BSConnectionFactory();
+			this.conn = cf.getConnection(this.dsName);
 		}
 		return this.conn;
 	}
@@ -88,29 +83,11 @@ public abstract class AbstractProcess {
 	@SuppressWarnings("unchecked")
 	protected Connection getConnection(Domain domain) {
 		Connection conn = null;
-		DomainAttribute da = new DomainAttribute();
 
-		Connection tempConn = getConnection();
-		BSBeanUtils bu = new BSBeanUtils();
-		List<DomainAttribute> daList = (List<DomainAttribute>) bu.list(tempConn, da, "cDomain=?", domain.getId());
-		closeConnection(tempConn);
-
-		conn = bu.getConnection(getAttribute(daList, "database.driver"), getAttribute(daList, "database.server"),
-				getAttribute(daList, "database.database"), getAttribute(daList, "database.password"),
-				getAttribute(daList, "database.username"));
+		BSConnectionFactory cf = new BSConnectionFactory();
+		conn = cf.getConnection(domain.getDatabase());
 
 		return conn;
-	}
-
-	private String getAttribute(List<DomainAttribute> domainAttributeList, String key) {
-		String out = null;
-		for (DomainAttribute domainAttribute : domainAttributeList) {
-			if (domainAttribute.getKey().equalsIgnoreCase(key)) {
-				out = domainAttribute.getValue();
-				break;
-			}
-		}
-		return out;
 	}
 
 	public void init() {
@@ -140,7 +117,7 @@ public abstract class AbstractProcess {
 			throw new BSConfigurationException(e);
 		}
 
-		readProperties(prop);
+		 
 
 		Enumeration<Object> propList = prop.keys();
 
@@ -170,17 +147,7 @@ public abstract class AbstractProcess {
 		return out;
 	}
 
-	private void readProperties(Properties prop) {
-		// this.logPath = prop.getProperty("logPath");
-		this.database = prop.getProperty("database");
-		this.driver = prop.getProperty("driver");
-		this.password = prop.getProperty("password");
-		this.serverName = prop.getProperty("server");
-		this.user = prop.getProperty("user");
-		this.port = prop.getProperty("port");
-		this.validateLicense = prop.getProperty("validateLicense");
-
-	}
+	 
 
 	protected void validateArguments(String[] args) {
 		validateArguments(args, true);
@@ -250,51 +217,12 @@ public abstract class AbstractProcess {
 	</code>
 	 */
 
-	public String getDriver() {
-		return driver;
+	public String getDSName() {
+		return this.dsName;
 	}
 
-	public void setDriver(String driver) {
-		this.driver = driver;
+	public void setDSName(String dsName) {
+		this.dsName= dsName;
 	}
 
-	public String getServerName() {
-		return serverName;
-	}
-
-	public void setServerName(String serverName) {
-		this.serverName = serverName;
-	}
-
-	public String getDatabase() {
-		return database;
-	}
-
-	public void setDatabase(String database) {
-		this.database = database;
-	}
-
-	public String getUser() {
-		return user;
-	}
-
-	public void setUser(String user) {
-		this.user = user;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getPort() {
-		return port;
-	}
-
-	public void setPort(String port) {
-		this.port = port;
-	}
 }

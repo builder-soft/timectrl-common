@@ -304,7 +304,7 @@ public class ListToXExcelImpl extends AbstractReportService implements ReportSer
 	}
 
 	@Override
-	public void setConnectionData(String driverName, String serverName, String database, String password, String username) {
+	public void setConnectionData(String dsName) {
 		throw new BSProgrammerException("This report run as same thread of container");
 	}
 

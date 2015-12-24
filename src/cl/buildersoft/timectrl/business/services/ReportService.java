@@ -21,7 +21,7 @@ public interface ReportService extends Runnable {
 
 	public Boolean runAsDetachedThread();
 
-	public void setConnectionData(String driverName, String serverName, String database, String password, String username);
+	public void setConnectionData(String dsName);
 
 	public void setReportId(Long reportId);
 

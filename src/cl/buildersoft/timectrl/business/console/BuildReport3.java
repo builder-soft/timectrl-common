@@ -25,6 +25,8 @@ public class BuildReport3 extends AbstractConsoleService {
 	private static final String NOT_FOUND = "' not found.";
 	private static final Logger LOG = Logger.getLogger(BuildReport3.class.getName());
 	private Boolean runFromConsole = false;
+	private String dsName = null;
+	
 
 	public static void main(String[] args) {
 		BuildReport3 buildReport = new BuildReport3();
@@ -191,8 +193,7 @@ public class BuildReport3 extends AbstractConsoleService {
 			// Map<String, DomainAttribute> domainAttribute = (Map<String,
 			// DomainAttribute>) session.getAttribute("DomainAttribute");
 
-			reportService.setConnectionData(this.getDriver(), this.getServerName(), this.getDatabase(), this.getPassword(),
-					this.getUser());
+			reportService.setConnectionData(this.dsName);
 
 			// reportService.setConnectionData(domainAttribute.get("database.driver").getValue(),
 			// domainAttribute.get("database.server").getValue(),

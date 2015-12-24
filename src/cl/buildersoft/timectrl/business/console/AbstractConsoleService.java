@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.util.BSConfig;
-import cl.buildersoft.framework.util.BSDataUtils;
+import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.util.LicenseValidationUtil;
 
@@ -26,12 +26,7 @@ public abstract class AbstractConsoleService {
 	// private final Boolean VALIDATE_LICENSE = false;
 	private Connection conn = null;
 
-	private String driver = null;
-	private String serverName = null;
-	private String database = null;
-	private String user = null;
-	private String password = null;
-	private String port = null;
+	private String dsName = null;
 
 	private String logPath = null;
 	private String webPath = null;
@@ -63,8 +58,8 @@ public abstract class AbstractConsoleService {
 			throw new BSConfigurationException(e);
 		}
 
-		readProperties(prop);
-		validateProperties();
+		// readProperties(prop);
+		// validateProperties();
 		// getAppPath();
 
 		logPropertyValues(prop);
@@ -93,31 +88,6 @@ public abstract class AbstractConsoleService {
 		return out;
 	}
 
-	private void readProperties(Properties prop) {
-		this.webPath = prop.getProperty("webPath");
-		this.logPath = prop.getProperty("logPath");
-		this.database = prop.getProperty("database");
-		this.driver = prop.getProperty("driver");
-		this.password = prop.getProperty("password");
-		this.serverName = prop.getProperty("server");
-		this.user = prop.getProperty("user");
-		this.port = prop.getProperty("port");
-		this.validateLicense = prop.getProperty("validateLicense");
-	}
-
-	private void validateProperties() {
-		validateVariable(this.webPath, "webPath");
-		validateVariable(this.logPath, "logPath");
-		validateVariable(this.database, "database");
-		validateVariable(this.driver, "driver");
-		validateVariable(this.password, "password");
-		validateVariable(this.serverName, "serverName");
-		validateVariable(this.user, "user");
-		validateVariable(this.port, "port");
-		validateVariable(this.validateLicense, "validateLicense");
-
-	}
-
 	private void validateVariable(String value, String name) {
 		if (value == null) {
 			String msg = "La variable '" + name + "' no se ha configurado apropiadamente, revise el archivo '" + FILE_NAME + "'";
@@ -127,8 +97,8 @@ public abstract class AbstractConsoleService {
 
 	protected Connection getConnection() {
 		if (this.conn == null) {
-			BSDataUtils du = new BSDataUtils();
-			this.conn = du.getConnection(this.driver, this.serverName + ":" + this.port, this.database, this.password, this.user);
+			BSConnectionFactory cf = new BSConnectionFactory();
+			this.conn = cf.getConnection(this.dsName);
 		}
 		return this.conn;
 	}
@@ -156,51 +126,12 @@ public abstract class AbstractConsoleService {
 		return out;
 	}
 
-	public String getDriver() {
-		return driver;
+	public String getDSName() {
+		return dsName;
 	}
 
-	public void setDriver(String driver) {
-		this.driver = driver;
+	public void setDSName(String dsName) {
+		this.dsName = dsName;
 	}
 
-	public String getServerName() {
-		return serverName;
-	}
-
-	public void setServerName(String serverName) {
-		this.serverName = serverName;
-	}
-
-	public String getDatabase() {
-		return database;
-	}
-
-	public void setDatabase(String database) {
-		this.database = database;
-	}
-
-	public String getUser() {
-		return user;
-	}
-
-	public void setUser(String user) {
-		this.user = user;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getPort() {
-		return port;
-	}
-
-	public void setPort(String port) {
-		this.port = port;
-	}
 }

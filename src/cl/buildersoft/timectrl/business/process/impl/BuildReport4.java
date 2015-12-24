@@ -10,6 +10,7 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
+import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.Report;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
@@ -22,10 +23,11 @@ import cl.buildersoft.timectrl.business.services.ParameterService;
 import cl.buildersoft.timectrl.business.services.ReportService;
 import cl.buildersoft.timectrl.business.services.impl.EmployeeServiceImpl;
 
-public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
+public class BuildReport4 extends AbstractProcess  implements ExecuteProcess {
 	private static final String NOT_FOUND = "' not found.";
 	private static final Logger LOG = Logger.getLogger(BuildReport4.class.getName());
 	private Boolean runFromConsole = false;
+	private String dsName = null;
 
 	private String[] validArguments = { "DOMAIN", "REPORT_KEY" };
 
@@ -38,9 +40,15 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 
 	@Override
 	public void doExecute(String[] args) {
-		this.init();
+//		this.init();
 
-		validateArguments(args, false);
+		this.dsName = args[0];
+		String key = args[1];
+		String[] target = new String[args.length - 2];
+		System.arraycopy(args, 1, target, 0, target.length);
+		
+		
+//		validateArguments(args, false);
 		/**
 		 * <code>
 		if (args.length < 1) {
@@ -48,11 +56,14 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 		}
 		</code>
 		 */
-		Connection conn = getConnection(getDomainByBatabase(args[0]));
+		
+		BSConnectionFactory cf = new BSConnectionFactory();
+		Connection conn = cf.getConnection(dsName);
+		
+		
 		this.runFromConsole = true;
-		String key = args[1];
-		String[] target = new String[args.length - 2];
-		System.arraycopy(args, 1, target, 0, target.length);
+	
+		
 		List<String> responseList = null;
 
 		Long reportId = keyToReportId(conn, key);
@@ -107,7 +118,6 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 	</code>
 	 */
 	private List<String> doBuild(Connection conn, Long id, String[] target) {
-
 		List<String> out = new ArrayList<String>();
 		try {
 			out = execute2(conn, id, arrayToList(target));
@@ -222,8 +232,7 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 			List<ReportParameterBean> reportParameterList, List<ReportPropertyBean> reportPropertyList) {
 		List<String> responseList;
 		if (!runFromConsole && reportService.runAsDetachedThread()) {
-			reportService.setConnectionData(this.getDriver(), this.getServerName(), this.getDatabase(), this.getPassword(),
-					this.getUser());
+			reportService.setConnectionData(this.dsName);
 
 			reportService.setReportId(reportId);
 			reportService.setReportParameterList(reportParameterList);

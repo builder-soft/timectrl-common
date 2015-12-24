@@ -24,6 +24,7 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
+import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.framework.util.BSDataUtils;
 import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.business.beans.Employee;
@@ -53,11 +54,7 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 	private String destiny = null;
 	private String manpowerMail = null;
 
-	private String driverName = null;
-	private String serverName = null;
-	private String database = null;
-	private String passwordDB = null;
-	private String usernameDB = null;
+	private String dsName = null;
 	private Long reportId = null;
 	private Integer waitBeforeRun = 0;
 
@@ -69,7 +66,7 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 
 	@Override
 	public void run() {
-		BSmySQL mysql = new BSmySQL();
+		BSConnectionFactory cf = new BSConnectionFactory();
 		Connection conn = null;
 		try {
 			Thread.sleep(this.waitBeforeRun * 1000);
@@ -77,7 +74,9 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 
 			String thisClassName = SendReportByMailImpl.class.getName();
 			LOG.log(Level.INFO, "Start thread of class {0}", thisClassName);
-			conn = mysql.getConnection(this.driverName, this.serverName, this.database, this.passwordDB, this.usernameDB);
+
+			conn = cf.getConnection(this.dsName);
+
 			execute(conn, this.reportId, this.reportType, reportPropertyList, reportParameterList);
 
 			long end = System.currentTimeMillis();
@@ -88,7 +87,7 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE, e.getMessage(), e);
 		} finally {
-			mysql.closeConnection(conn);
+			cf.closeConnection(conn);
 		}
 
 	}
@@ -447,12 +446,8 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 	}
 
 	@Override
-	public void setConnectionData(String driverName, String serverName, String database, String passwordDB, String usernameDB) {
-		this.driverName = driverName;
-		this.serverName = serverName;
-		this.database = database;
-		this.passwordDB = passwordDB;
-		this.usernameDB = usernameDB;
+	public void setConnectionData(String dsName) {
+		this.dsName = dsName;
 
 	}
 
