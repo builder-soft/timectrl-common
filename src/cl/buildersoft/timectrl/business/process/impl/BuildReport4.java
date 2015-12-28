@@ -45,7 +45,7 @@ public class BuildReport4 extends AbstractProcess  implements ExecuteProcess {
 		this.dsName = args[0];
 		String key = args[1];
 		String[] target = new String[args.length - 2];
-		System.arraycopy(args, 1, target, 0, target.length);
+		System.arraycopy(args, 2, target, 0, target.length);
 		
 		
 //		validateArguments(args, false);

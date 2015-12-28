@@ -46,11 +46,11 @@ public abstract class AbstractProcess {
 	 */
 	abstract protected String[] getArguments();
 
-	public AbstractProcess(Connection conn) {
+	public void AbstractProcessBuilder(Connection conn) {
 		this.conn = conn;
 	}
 
-	public AbstractProcess() {
+	public void AbstractProcessBuilder() {
 		init();
 		this.conn = getConnection();
 		Boolean success = licenseValidation(this.conn);
