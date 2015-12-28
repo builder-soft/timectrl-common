@@ -346,7 +346,12 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 					employeeIdSet.add(employeeId);
 					if (haveJunior(conn, employeeId, mysql) && boss != employeeId) {
 						if (this.employeeDepth == 0) {
-							out += getEmployeeIds(conn, employeeId) + ",";
+							out += getEmployeeIds(conn, employeeId);
+							if (out.trim().length() > 0) {
+								out += ",";
+							} else {
+								LOG.log(Level.WARNING, "Boss is {0} amployees are {1}", BSUtils.array2ObjectArray(boss, out));
+							}
 						} else {
 							if (this.currentDepth < this.employeeDepth) {
 								this.currentDepth++;
@@ -356,6 +361,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 						}
 					}
 					out += employeeId.toString() + ",";
+					LOG.log(Level.WARNING, "Employee Id {0} added to list", employeeId);
 				} else {
 					LOG.log(Level.WARNING, "Employee Id {0} exists", employeeId);
 				}
@@ -367,7 +373,9 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		}
 		out = out.length() > 0 ? out.substring(0, out.length() - 1) : "";
 
-		LOG.exiting(XExcel2Impl.class.getName(), "getEmployeeIds", out);
+		LOG.logp(Level.INFO, this.getClass().getName(), "getEmployeeIds", "Ending method with output={0}, input was={1}",
+				BSUtils.array2ObjectArray(out, boss));
+		// LOG.exiting(XExcel2Impl.class.getName(), "getEmployeeIds", out);
 
 		return out;
 	}
