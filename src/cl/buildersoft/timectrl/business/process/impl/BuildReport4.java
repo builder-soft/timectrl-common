@@ -1,6 +1,7 @@
 package cl.buildersoft.timectrl.business.process.impl;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -9,6 +10,7 @@ import java.util.logging.Logger;
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
+import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.timectrl.business.beans.Employee;
@@ -23,32 +25,48 @@ import cl.buildersoft.timectrl.business.services.ParameterService;
 import cl.buildersoft.timectrl.business.services.ReportService;
 import cl.buildersoft.timectrl.business.services.impl.EmployeeServiceImpl;
 
-public class BuildReport4 extends AbstractProcess  implements ExecuteProcess {
+public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
+
 	private static final String NOT_FOUND = "' not found.";
 	private static final Logger LOG = Logger.getLogger(BuildReport4.class.getName());
-	private Boolean runFromConsole = false;
+//	private Boolean runFromConsole = false;
 	private String dsName = null;
+	private Connection conn = null;
 
 	private String[] validArguments = { "DOMAIN", "REPORT_KEY" };
+
+//	public Boolean getRunFromConsole() {
+//		return runFromConsole;
+//	}
+//
+//	public void setRunFromConsole(Boolean runFromConsole) {
+//		this.runFromConsole = runFromConsole;
+//	}
+
+	public void setConnection(Connection conn) {
+		this.conn = conn;
+	}
 
 	public static void main(String[] args) {
 		BuildReport4 br4 = new BuildReport4();
 		// buildReport.init();
+
+		br4.setDSName(args[0]);
+//		br4.runFromConsole = true;
+
+		// String key = args[1];
+		String[] target = new String[args.length - 1];
+		System.arraycopy(args, 1, target, 0, target.length);
+
 		br4.doExecute(args);
 		System.exit(0);
 	}
 
 	@Override
-	public void doExecute(String[] args) {
-//		this.init();
+	public List<String> doExecute(String[] args) {
+		// this.init();
 
-		this.dsName = args[0];
-		String key = args[1];
-		String[] target = new String[args.length - 2];
-		System.arraycopy(args, 2, target, 0, target.length);
-		
-		
-//		validateArguments(args, false);
+		// validateArguments(args, false);
 		/**
 		 * <code>
 		if (args.length < 1) {
@@ -56,32 +74,46 @@ public class BuildReport4 extends AbstractProcess  implements ExecuteProcess {
 		}
 		</code>
 		 */
-		
-		BSConnectionFactory cf = new BSConnectionFactory();
-		Connection conn = cf.getConnection(dsName);
-		
-		
-		this.runFromConsole = true;
-	
-		
 		List<String> responseList = null;
+		BSConnectionFactory cf = new BSConnectionFactory();
+		try {
+			this.conn = getPrivateConnection(cf);
+//			this.runFromConsole = true;
 
-		Long reportId = keyToReportId(conn, key);
+			Long reportId = keyToReportId(args[0]);
 
-		responseList = doBuild(conn, reportId, target);
+			responseList = doBuild(reportId, args);
 
-		if (responseList != null) {
-			for (String response : responseList) {
-				LOG.log(Level.INFO, response);
+			if (responseList != null) {
+				for (String response : responseList) {
+					LOG.log(Level.INFO, response);
+				}
 			}
+		} finally {
+			cf.closeConnection(this.conn);
 		}
+		return responseList;
 	}
 
-	private Long keyToReportId(Connection conn, String key) {
+	private Connection getPrivateConnection(BSConnectionFactory cf) {
+		Connection out = null;
+		try {
+			if (this.conn == null || this.conn.isClosed()) {
+				out = cf.getConnection(dsName);
+			} else {
+				out = this.conn;
+			}
+		} catch (SQLException e) {
+			throw new BSDataBaseException(e);
+		}
+		return out;
+	}
+
+	private Long keyToReportId(String key) {
 		BSBeanUtils bu = new BSBeanUtils();
 		Report report = new Report();
 
-		if (!bu.search(conn, report, "cKey=?", key)) {
+		if (!bu.search(this.conn, report, "cKey=?", key)) {
 			throw new BSConfigurationException("Report '" + key + NOT_FOUND);
 		}
 
@@ -117,10 +149,14 @@ public class BuildReport4 extends AbstractProcess  implements ExecuteProcess {
 	}
 	</code>
 	 */
-	private List<String> doBuild(Connection conn, Long id, String[] target) {
+	private List<String> doBuild(Long id, String[] params) {
 		List<String> out = new ArrayList<String>();
 		try {
-			out = execute2(conn, id, arrayToList(target));
+
+			String[] target = new String[params.length - 1];
+			System.arraycopy(params, 1, target, 0, params.length - 1);
+
+			out = execute2(this.conn, id, arrayToList(target));
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE, "Error at process report", e);
 		} finally {
@@ -221,7 +257,7 @@ public class BuildReport4 extends AbstractProcess  implements ExecuteProcess {
 		}
 
 		request.setAttribute("ResponseMap", responseMap);
-		request.getSession().setAttribute("ResponseMap", responseMap);
+		request.getSession(false).setAttribute("ResponseMap", responseMap);
 
 		forward(request, response, "/WEB-INF/jsp/timectrl/report/execute/show-resonse.jsp");
 </code>
@@ -231,7 +267,7 @@ public class BuildReport4 extends AbstractProcess  implements ExecuteProcess {
 	private List<String> executeReport(Connection conn, Long reportId, ReportType reportType, ReportService reportService,
 			List<ReportParameterBean> reportParameterList, List<ReportPropertyBean> reportPropertyList) {
 		List<String> responseList;
-		if (!runFromConsole && reportService.runAsDetachedThread()) {
+		if ( reportService.runAsDetachedThread()) {
 			reportService.setConnectionData(this.dsName);
 
 			reportService.setReportId(reportId);

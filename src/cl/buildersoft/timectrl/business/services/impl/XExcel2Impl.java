@@ -347,10 +347,13 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 					if (haveJunior(conn, employeeId, mysql) && boss != employeeId) {
 						if (this.employeeDepth == 0) {
 							out += getEmployeeIds(conn, employeeId);
-							if (out.trim().length() > 0) {
+
+//							LOG.log(Level.INFO, "\t\t\t\t\t\tLen={0} value={1}", BSUtils.array2ObjectArray(out.length(), out));
+
+							if (out.lastIndexOf(",") != (out.length()-1)) {
 								out += ",";
-							} else {
-								LOG.log(Level.WARNING, "Boss is {0} amployees are {1}", BSUtils.array2ObjectArray(boss, out));
+//							} else {
+//								LOG.log(Level.WARNING, "Boss is {0} employees are {1}", BSUtils.array2ObjectArray(boss, out));
 							}
 						} else {
 							if (this.currentDepth < this.employeeDepth) {
@@ -361,9 +364,9 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 						}
 					}
 					out += employeeId.toString() + ",";
-					LOG.log(Level.WARNING, "Employee Id {0} added to list", employeeId);
+//					LOG.log(Level.WARNING, "Employee Id {0} added to list", employeeId);
 				} else {
-					LOG.log(Level.WARNING, "Employee Id {0} exists", employeeId);
+//					LOG.log(Level.WARNING, "Employee Id {0} exists", employeeId);
 				}
 			}
 		} catch (SQLException e) {
@@ -371,11 +374,13 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		} finally {
 			mysql.closeSQL(rs);
 		}
+
+//		LOG.logp(Level.INFO, this.getClass().getName(), "getEmployeeIds",
+//				"Ending method (before substring) with output={0} the input was={1}", BSUtils.array2ObjectArray(out, boss));
 		out = out.length() > 0 ? out.substring(0, out.length() - 1) : "";
 
-		LOG.logp(Level.INFO, this.getClass().getName(), "getEmployeeIds", "Ending method with output={0}, input was={1}",
-				BSUtils.array2ObjectArray(out, boss));
-		// LOG.exiting(XExcel2Impl.class.getName(), "getEmployeeIds", out);
+		LOG.logp(Level.INFO, this.getClass().getName(), "getEmployeeIds",
+				"Ending method (after substring) with output={0} the input was={1}", BSUtils.array2ObjectArray(out, boss));
 
 		return out;
 	}

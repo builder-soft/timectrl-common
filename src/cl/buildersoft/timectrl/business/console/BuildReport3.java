@@ -177,7 +177,7 @@ public class BuildReport3 extends AbstractConsoleService {
 		}
 
 		request.setAttribute("ResponseMap", responseMap);
-		request.getSession().setAttribute("ResponseMap", responseMap);
+		request.getSession(false).setAttribute("ResponseMap", responseMap);
 
 		forward(request, response, "/WEB-INF/jsp/timectrl/report/execute/show-resonse.jsp");
 </code>

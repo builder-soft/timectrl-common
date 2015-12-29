@@ -37,6 +37,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 	private static final String DATE_TIME_FORMAT_CONST = "yyyy-MM-dd HH:mm:ss.S";
 	private Map<Long, IdRut> idRutMap = new HashMap<Long, IdRut>();
 	private String[] validArguments = { "DOMAIN" };
+
 	/**
 	 * <code>
 	SET vTolerance = fGetTolerance();
@@ -99,10 +100,11 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 	}
 
 	@Override
-	public void doExecute(String[] args) {
+	public List<String> doExecute(String[] args) {
 		LOG.entering(this.getClass().getName(), "doExecute", args);
 		this.init();
-
+		List<String> out = new ArrayList<String>();
+		out.add("Process Done");
 		validateArguments(args);
 		Connection conn = getConnection(getDomainByBatabase(args[0]));
 
@@ -117,83 +119,85 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		TurnDay turnDay = null;
 		Boolean businessDay = null;
 		Calendar calendar = null;
-		TurnDayService tds = new TurnDayServiceImpl(conn);
-
 		BSmySQL mysql = new BSmySQL();
-		Integer tolerance = Integer.parseInt(mysql.callFunction(conn, "fGetTolerance", null));
-		Integer hoursWorkday = Integer.parseInt(mysql.callFunction(conn, "fGetHoursWorkday", null));
 
-		List<Date> dateList = listDateUnprocessed(conn);
-		List<IdRut> employeeList = employeeList(conn);
+		try {
+			TurnDayService tds = new TurnDayServiceImpl(conn);
 
-		for (Date date : dateList) {
-			calendar = BSDateTimeUtil.date2Calendar(date);
-			LOG.log(Level.FINE, "----------" + BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
+			Integer tolerance = Integer.parseInt(mysql.callFunction(conn, "fGetTolerance", null));
+			Integer hoursWorkday = Integer.parseInt(mysql.callFunction(conn, "fGetHoursWorkday", null));
 
-			for (IdRut employee : employeeList) {
-				flexible = isFlexible(conn, mysql, date, (long) employee.getId());
-				LOG.log(Level.FINE, "Employee: {0}, Flexible: {1}, Date: {2}",
-						BSUtils.array2ObjectArray(employee, flexible, date));
+			List<Date> dateList = listDateUnprocessed(conn);
+			List<IdRut> employeeList = employeeList(conn);
 
-				if (employee.getKey().equals("386") || employee.getKey().equals("192")) {
-					LOG.log(Level.FINE, "Employee {0}", employee);
-				}
+			for (Date date : dateList) {
+				calendar = BSDateTimeUtil.date2Calendar(date);
+				LOG.log(Level.FINE, "----------" + BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
 
-				if (flexible == null) {
-					hiredDay = false;
-					workedTime = 0D;
-					attend = false;
-				} else {
-					if (flexible) {
-						startMark = getStartMark(conn, tds, employee.getKey(), tolerance, date, null, true, null);
+				for (IdRut employee : employeeList) {
+					flexible = isFlexible(conn, mysql, date, (long) employee.getId());
+					LOG.log(Level.FINE, "Employee: {0}, Flexible: {1}, Date: {2}",
+							BSUtils.array2ObjectArray(employee, flexible, date));
 
-						turnDay = getTurnDay(conn, tds, calendar, (long) employee.getId(), tolerance, true);
-						if (turnDay != null) {
-							businessDay = tds.isBusinessDay(turnDay);
-						}
-						hiredDay = true;
-
-					} else {
-						turnDay = getTurnDay(conn, tds, calendar, (long) employee.getId(), tolerance, false);
-						businessDay = tds.isBusinessDay(turnDay);
-
-						startMark = getStartMark(conn, tds, employee.getKey(), tolerance, date, businessDay, false, turnDay);
-//						hiredDay = turnDay != null;
-						hiredDay = businessDay;
-
-						/**
-						 * <code>
-						 * 
-						 * </code>
-						 */
-
+					if (employee.getKey().equals("386") || employee.getKey().equals("192")) {
+						LOG.log(Level.FINE, "Employee {0}", employee);
 					}
 
+					if (flexible == null) {
+						hiredDay = false;
+						workedTime = 0D;
+						attend = false;
+					} else {
+						if (flexible) {
+							startMark = getStartMark(conn, tds, employee.getKey(), tolerance, date, null, true, null);
+
+							turnDay = getTurnDay(conn, tds, calendar, (long) employee.getId(), tolerance, true);
+							if (turnDay != null) {
+								businessDay = tds.isBusinessDay(turnDay);
+							}
+							hiredDay = true;
+
+						} else {
+							turnDay = getTurnDay(conn, tds, calendar, (long) employee.getId(), tolerance, false);
+							businessDay = tds.isBusinessDay(turnDay);
+
+							startMark = getStartMark(conn, tds, employee.getKey(), tolerance, date, businessDay, false, turnDay);
+							// hiredDay = turnDay != null;
+							hiredDay = businessDay;
+
+							/**
+							 * <code>
+							 * 
+							 * </code>
+							 */
+
+						}
+
+					}
+					endMark = getEndMark(conn, employee.getKey(), startMark, hoursWorkday, date, tolerance, businessDay, turnDay);
+
+					if (startMark != null && endMark != null) {
+						workedTime = getWorkedTime(startMark, endMark);
+						attend = true;
+					} else {
+						workedTime = 0D;
+						attend = false;
+					}
+
+					saveToCrewProcess(conn, date, (long) employee.getId(), workedTime, attend, hiredDay);
+
 				}
-				endMark = getEndMark(conn, employee.getKey(), startMark, hoursWorkday, date, tolerance, businessDay, turnDay);
 
-				if (startMark != null && endMark != null) {
-					workedTime = getWorkedTime(startMark, endMark);
-					attend = true;
-				} else {
-					workedTime = 0D;
-					attend = false;
-				}
-
-				saveToCrewProcess(conn, date, (long) employee.getId(), workedTime, attend, hiredDay);
-
-			}
-
-			/**
-			 * <code>
+				/**
+				 * <code>
 			if (employeeList.size() == 0) {
 				saveToCrewProcess(conn, date, null, 0D, false, false);
 				saveToCrewLog(conn, date, null);
 			}</code>
-			 */
+				 */
 
-			/**
-			 * <code>
+				/**
+				 * <code>
 			try {
 				Integer seconds = 5;
 				LOG.log(Level.FINE, "Waiting {0} seconds", seconds);
@@ -202,11 +206,13 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 				LOG.log(Level.SEVERE, "InterruptedException", e);
 			}
 			</code>
-			 */
+				 */
+			}
+		} finally {
+			mysql.closeConnection(conn);
 		}
-
-		mysql.closeConnection(conn);
 		LOG.log(Level.INFO, "Process Done!");
+		return out;
 	}
 
 	@Override
@@ -214,7 +220,8 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		return this.validArguments;
 	}
 
-	/**<code>
+	/**
+	 * <code>
 	private void saveToCrewLog(Connection conn, Date date, String employeeKey) {
 		LOG.log(Level.FINE, "At save tCrewLog, parameters are Date:{0} and EmployeeKey: {1}",
 				BSUtils.array2ObjectArray(date, employeeKey));
@@ -233,7 +240,8 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		// }
 		mysql.closeSQL();
 	}
-</code>*/
+</code>
+	 */
 	private void saveToCrewProcess(Connection conn, Date date, Long employeeId, Double workedTime, Boolean attend,
 			Boolean hiredDay) {
 		LOG.entering(this.getClass().getName(), "saveToCrewProcess",
@@ -291,11 +299,14 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		return out;
 
 	}
-/** <code>
+
+	/**
+	 * <code>
 	private Boolean isBusinessDay(TurnDayService tds, TurnDay turnDay) {
 		return tds.isBusinessDay(turnDay);
 	}
-</code>*/
+</code>
+	 */
 	private Calendar getStartMark(Connection conn, TurnDayService tds, String employeeKey, Integer tolerance, Date date,
 			Boolean businessDay, Boolean flexible, TurnDay turnDay) {
 		BSmySQL mysql = new BSmySQL();
@@ -440,7 +451,8 @@ ORDER BY a.cDate DESC;
 
 		return out;
 	}
-/**<code>
+	/**
+	 * <code>
 	private Calendar getMaxDate(Connection conn) {
 		return getLimitDate(conn, true);
 	}
@@ -467,5 +479,6 @@ ORDER BY a.cDate DESC;
 		}
 		return out;
 	}
-	</code>*/
+	</code>
+	 */
 }

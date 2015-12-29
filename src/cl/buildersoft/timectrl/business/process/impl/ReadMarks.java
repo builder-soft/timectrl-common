@@ -1,6 +1,7 @@
 package cl.buildersoft.timectrl.business.process.impl;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,8 +40,9 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 	}
 
 	@Override
-	public void doExecute(String[] args) {
+	public List<String> doExecute(String[] args) {
 		// LOG.entering(ReadMarks.class.getName(), "doExecute", args);
+		List<String> out = new ArrayList<String>();
 		LOG.logp(Level.INFO, this.getClass().getName(), "doExecute", "Starting Method", args);
 		// this.init();
 		Connection conn = getConnection(getDomainByBatabase(args[0]));
@@ -115,6 +117,7 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 		 * }
 		 * </code>
 		 */
+		return out;
 	}
 
 	private void deleteMarks(_zkemProxy api) {
