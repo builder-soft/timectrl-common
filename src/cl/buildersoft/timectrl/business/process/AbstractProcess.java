@@ -214,8 +214,6 @@ public abstract class AbstractProcess {
 	private String concatenateMessage(String message) {
 		return BSDateTimeUtil.calendar2String(Calendar.getInstance(), "yyyy-M-dd hh:mm:ss") + " : " + message;
 	}
-	</code>
-	 */
 
 	public String getDSName() {
 		return this.dsName;
@@ -224,5 +222,7 @@ public abstract class AbstractProcess {
 	public void setDSName(String dsName) {
 		this.dsName= dsName;
 	}
+	</code>
+	 */
 
 }

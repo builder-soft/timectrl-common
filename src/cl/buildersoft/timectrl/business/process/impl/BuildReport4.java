@@ -27,7 +27,7 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 	private static final String NOT_FOUND = "' not found.";
 	private static final Logger LOG = Logger.getLogger(BuildReport4.class.getName());
 	// private Boolean runFromConsole = false;
-	private Connection conn = null;
+	private String dsName = null;
 
 	private String[] validArguments = { "DOMAIN", "REPORT_KEY" };
 
@@ -67,17 +67,25 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 		</code>
 		 */
 		List<String> responseList = null;
-		// BSConnectionFactory cf = new BSConnectionFactory();
-		// this.runFromConsole = true;
+		BSConnectionFactory cf = new BSConnectionFactory();
 
-		Long reportId = keyToReportId(conn, args[0]);
+		Connection conn = null;
+		try {
+			conn = cf.getConnection(dsName);
+			// this.runFromConsole = true;
 
-		responseList = doBuild(conn, reportId, args);
+			Long reportId = keyToReportId(conn, args[0]);
 
-		if (responseList != null) {
-			for (String response : responseList) {
-				LOG.log(Level.INFO, response);
+			responseList = doBuild(conn, reportId, args);
+
+			if (responseList != null) {
+				for (String response : responseList) {
+					LOG.log(Level.INFO, response);
+				}
 			}
+
+		} finally {
+			cf.closeConnection(conn);
 		}
 		return responseList;
 	}
@@ -132,8 +140,7 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 			out = execute2(conn, id, arrayToList(target));
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE, "Error at process report", e);
-		} finally {
-			new BSmySQL().closeConnection(conn);
+
 		}
 		return out;
 	}
@@ -241,7 +248,7 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 			List<ReportParameterBean> reportParameterList, List<ReportPropertyBean> reportPropertyList) {
 		List<String> responseList;
 		if (reportService.runAsDetachedThread()) {
-			reportService.setConnectionData(null);
+			reportService.setConnectionData(this.dsName);
 
 			reportService.setReportId(reportId);
 			reportService.setReportParameterList(reportParameterList);
@@ -331,14 +338,9 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 		return reportType;
 	}
 
-	public void setConn(Connection conn) {
-		this.conn = conn;
-	}
-
 	@Override
-	public void setConnection(Connection conn) {
-		this.conn = conn;
-		
+	public void setDSName(String dsName) {
+		this.dsName = dsName;
 	}
 
 }

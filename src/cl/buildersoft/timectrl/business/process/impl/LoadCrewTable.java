@@ -37,7 +37,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 	private static final String DATE_TIME_FORMAT_CONST = "yyyy-MM-dd HH:mm:ss.S";
 	private Map<Long, IdRut> idRutMap = new HashMap<Long, IdRut>();
 	private String[] validArguments = { "DOMAIN" };
-	private Connection conn=null;
+	private String dsName =null;
 
 	/**
 	 * <code>
@@ -484,8 +484,10 @@ ORDER BY a.cDate DESC;
 	 */
 
 	@Override
-	public void setConnection(Connection conn) {
-this.conn = conn;
+	public void setDSName(String dsName) {
+		this.dsName=dsName;
 		
 	}
+
+	 
 }

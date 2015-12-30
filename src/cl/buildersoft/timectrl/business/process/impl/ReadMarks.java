@@ -28,7 +28,7 @@ import cl.buildersoft.timectrl.business.services.impl.MachineServiceImpl2;
 public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 	private static final Logger LOG = Logger.getLogger(ReadMarks.class.getName());
 	private String[] validArguments = { "DOMAIN", "DELETE_MARKS_OF_MACHINE" };
-	private Connection conn = null;
+	private String dsName = null;
 
 	@Override
 	protected String[] getArguments() {
@@ -154,8 +154,8 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 	}
 
 	@Override
-	public void setConnection(Connection conn) {
-		this.conn = conn;
+	public void setDSName(String dsName) {
+		this.dsName = dsName;
 
 	}
 

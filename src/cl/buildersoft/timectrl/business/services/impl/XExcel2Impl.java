@@ -301,7 +301,8 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	}
 
 	private void resetVariables() {
-		rowOfSheet = 0;
+		this.rowOfSheet = 0;
+		this.employeeIdSet.clear();
 
 	}
 
