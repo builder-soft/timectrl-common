@@ -24,7 +24,6 @@ import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.framework.util.BSWeb;
 import cl.buildersoft.timectrl.business.beans.Employee;
-import cl.buildersoft.timectrl.business.beans.EmployeeData;
 import cl.buildersoft.timectrl.business.beans.IdRut;
 import cl.buildersoft.timectrl.business.beans.Report;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
@@ -356,10 +355,10 @@ public abstract class AbstractReportService {
 		BSBeanUtils bu = new BSBeanUtils();
 		String newValue = "";
 
-		List<EmployeeData> employeeList = (List<EmployeeData>) bu.listAll(conn, new EmployeeData());
+		List<Employee> employeeList = (List<Employee>) bu.listAll(conn, new Employee());
 		String[] idsArray = new String[employeeList.size()];
 		Integer index = 0;
-		for (EmployeeData employee : employeeList) {
+		for (Employee employee : employeeList) {
 			idsArray[index++] = employee.getId().toString();
 		}
 		newValue = BSUtils.unSplitString(idsArray, ",");
