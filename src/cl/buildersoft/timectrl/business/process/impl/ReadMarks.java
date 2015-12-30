@@ -28,6 +28,7 @@ import cl.buildersoft.timectrl.business.services.impl.MachineServiceImpl2;
 public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 	private static final Logger LOG = Logger.getLogger(ReadMarks.class.getName());
 	private String[] validArguments = { "DOMAIN", "DELETE_MARKS_OF_MACHINE" };
+	private Connection conn = null;
 
 	@Override
 	protected String[] getArguments() {
@@ -150,6 +151,12 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 			throw new BSUserException("No se indico parametro para definir el borrado de marcas al final");
 		}
 		return Boolean.parseBoolean(args[0]);
+	}
+
+	@Override
+	public void setConnection(Connection conn) {
+		this.conn = conn;
+
 	}
 
 }
