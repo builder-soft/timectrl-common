@@ -7,7 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
-import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.framework.util.BSConnectionFactory;
@@ -26,18 +25,18 @@ import cl.buildersoft.timectrl.business.services.impl.EmployeeServiceImpl;
 public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 	private static final String NOT_FOUND = "' not found.";
 	private static final Logger LOG = Logger.getLogger(BuildReport4.class.getName());
-	// private Boolean runFromConsole = false;
-	private String dsName = null;
+	private Boolean runFromConsole = false;
+	// private String dsName = null;
 
 	private String[] validArguments = { "DOMAIN", "REPORT_KEY" };
 
-	// public Boolean getRunFromConsole() {
-	// return runFromConsole;
-	// }
-	//
-	// public void setRunFromConsole(Boolean runFromConsole) {
-	// this.runFromConsole = runFromConsole;
-	// }
+	public Boolean getRunFromConsole() {
+		return runFromConsole;
+	}
+
+	public void setRunFromConsole(Boolean runFromConsole) {
+		this.runFromConsole = runFromConsole;
+	}
 
 	public static void main_(String[] args) {
 		BuildReport4 br4 = new BuildReport4();
@@ -71,7 +70,7 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 
 		Connection conn = null;
 		try {
-			conn = cf.getConnection(dsName);
+			conn = cf.getConnection(getDSName());
 			// this.runFromConsole = true;
 
 			Long reportId = keyToReportId(conn, args[0]);
@@ -247,8 +246,8 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 	private List<String> executeReport(Connection conn, Long reportId, ReportType reportType, ReportService reportService,
 			List<ReportParameterBean> reportParameterList, List<ReportPropertyBean> reportPropertyList) {
 		List<String> responseList;
-		if (reportService.runAsDetachedThread()) {
-			reportService.setConnectionData(this.dsName);
+		if (reportService.runAsDetachedThread() && !runFromConsole) {
+			reportService.setConnectionData(getDSName());
 
 			reportService.setReportId(reportId);
 			reportService.setReportParameterList(reportParameterList);
@@ -337,10 +336,10 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 		}
 		return reportType;
 	}
-
-	@Override
-	public void setDSName(String dsName) {
-		this.dsName = dsName;
-	}
-
+	/**
+	 * <code>
+	 * 
+	 * @Override public void setDSName(String dsName) { this.dsName = dsName; }
+	 *           </code>
+	 */
 }

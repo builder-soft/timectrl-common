@@ -37,7 +37,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 	private static final String DATE_TIME_FORMAT_CONST = "yyyy-MM-dd HH:mm:ss.S";
 	private Map<Long, IdRut> idRutMap = new HashMap<Long, IdRut>();
 	private String[] validArguments = { "DOMAIN" };
-	private String dsName =null;
+//	private String dsName =null;
 
 	/**
 	 * <code>
@@ -103,11 +103,12 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 	@Override
 	public List<String> doExecute(String[] args) {
 		LOG.entering(this.getClass().getName(), "doExecute", args);
-		this.init();
+//		this.init();
 		List<String> out = new ArrayList<String>();
 		out.add("Process Done");
+		this.setDSName(args[0]);
 		validateArguments(args);
-		Connection conn = getConnection(getDomainByBatabase(args[0]));
+		Connection conn = getConnection(getDomainByBatabase(args[0]) );
 
 		LOG.log(Level.INFO, "Begin Process...");
 
@@ -133,7 +134,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 
 			for (Date date : dateList) {
 				calendar = BSDateTimeUtil.date2Calendar(date);
-				LOG.log(Level.FINE, "----------" + BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
+				LOG.log(Level.INFO, "----------" + BSDateTimeUtil.date2String(date, "yyyy-MM-dd") + "----------");
 
 				for (IdRut employee : employeeList) {
 					flexible = isFlexible(conn, mysql, date, (long) employee.getId());
@@ -480,14 +481,13 @@ ORDER BY a.cDate DESC;
 		}
 		return out;
 	}
-	</code>
-	 */
 
 	@Override
 	public void setDSName(String dsName) {
 		this.dsName=dsName;
 		
 	}
-
+	</code>
+	 */
 	 
 }

@@ -9,11 +9,12 @@ public class BuildReportConsole {
 		BuildReport4 br4 = new BuildReport4();
 
 		br4.setDSName(args[0]);
+		br4.setRunFromConsole(true);
 
 		String[] target = new String[args.length - 1];
 		System.arraycopy(args, 1, target, 0, target.length);
 
-		br4.doExecute(args);
+		br4.doExecute(target);
 		System.exit(0);
 	}
 

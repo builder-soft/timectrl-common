@@ -117,8 +117,6 @@ public abstract class AbstractProcess {
 			throw new BSConfigurationException(e);
 		}
 
-		 
-
 		Enumeration<Object> propList = prop.keys();
 
 		while (propList.hasMoreElements()) {
@@ -146,8 +144,6 @@ public abstract class AbstractProcess {
 		String out = this.webInfPath + "LicenseFile.dat";
 		return out;
 	}
-
-	 
 
 	protected void validateArguments(String[] args) {
 		validateArguments(args, true);
@@ -189,11 +185,13 @@ public abstract class AbstractProcess {
 	}
 
 	protected Domain getDomainByBatabase(String database) {
-		Connection bsConn = getConnection();
+		BSConnectionFactory cf = new BSConnectionFactory();
+		Connection bsConn = cf.getConnection();
 		BSBeanUtils bu = new BSBeanUtils();
 		Domain domain = new Domain();
 
 		bu.search(bsConn, domain, "cDatabase=?", database);
+		cf.closeConnection(bsConn);
 		return domain;
 	}
 
@@ -214,15 +212,15 @@ public abstract class AbstractProcess {
 	private String concatenateMessage(String message) {
 		return BSDateTimeUtil.calendar2String(Calendar.getInstance(), "yyyy-M-dd hh:mm:ss") + " : " + message;
 	}
+	</code>
+	 */
 
 	public String getDSName() {
 		return this.dsName;
 	}
 
-	public void setDSName(String dsName) {
+	public final void setDSName(String dsName) {
 		this.dsName= dsName;
 	}
-	</code>
-	 */
 
 }
