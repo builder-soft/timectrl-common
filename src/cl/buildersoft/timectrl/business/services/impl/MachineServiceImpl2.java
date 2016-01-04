@@ -6,7 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,8 +31,32 @@ import com4j.Holder;
 
 public class MachineServiceImpl2 implements MachineService2 {
 	// private Boolean windows8compatible = null;
-
 	private static final Logger LOG = Logger.getLogger(MachineServiceImpl2.class.getName());
+	private final Map<Long, MarkType> markTypeMap = new HashMap<Long, MarkType>();
+
+	private long readMarkType(Connection conn, Holder<Integer> dwInOutMode) {
+		Long inOut = (long) dwInOutMode.value;
+		Long out = null;
+
+		MarkType markType = markTypeMap.get(inOut);
+
+		if (markType != null) {
+			out = markType.getId();
+		} else {
+			BSBeanUtils bu = new BSBeanUtils();
+			markType = new MarkType();
+			bu.search(conn, markType, "cKey=?", inOut);
+			markTypeMap.put(inOut, markType);
+			out = markType.getId();
+
+		}
+
+		// BSBeanUtils bu = new BSBeanUtils();
+		// MarkType markType = new MarkType();
+		// bu.search(conn, markType, "cKey=?", inOut);
+
+		return out;
+	}
 
 	@Override
 	public _zkemProxy connect(Connection conn, Machine machine) {
@@ -107,16 +133,6 @@ public class MachineServiceImpl2 implements MachineService2 {
 
 	private void writeToConsole(AttendanceLog attendance, Boolean found) {
 		LOG.log(Level.INFO, (found ? "Found: {0}" : "Not Found: {0}"), attendance.toString());
-	}
-
-	private long readMarkType(Connection conn, Holder<Integer> dwInOutMode) {
-		Long inOut = (long) dwInOutMode.value;
-		BSBeanUtils bu = new BSBeanUtils();
-
-		MarkType markType = new MarkType();
-		bu.search(conn, markType, "cKey=?", inOut);
-
-		return markType.getId();
 	}
 
 	private boolean readRecordFromMachine(Connection conn, _zkemProxy api, int dwMachineNumber, Holder<String> dwEnrollNumber,
@@ -553,9 +569,9 @@ public class MachineServiceImpl2 implements MachineService2 {
 
 				stmt.addBatch();
 			}
-			  stmt.executeBatch();
+			stmt.executeBatch();
 			conn.commit();
- 			 
+
 		} catch (SQLException e) {
 			try {
 				conn.rollback();

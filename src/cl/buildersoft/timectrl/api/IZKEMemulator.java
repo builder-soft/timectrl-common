@@ -72,6 +72,10 @@ public class IZKEMemulator implements _zkemProxy {
 		dwSecond.value = 19;
 		dwWorkCode.value = 1;
 
+		if (counter == 101) {
+//			dwDay.value = 32;
+		}
+
 		return counter <= maxRecords;
 	}
 
@@ -215,11 +219,13 @@ public class IZKEMemulator implements _zkemProxy {
 	}
 
 	private String cardNumber = null;
+
 	@Override
 	public boolean getStrCardNumber(Holder<String> aCardNumber) {
 		aCardNumber.value = this.cardNumber;
 		return true;
 	}
+
 	@Override
 	public boolean setStrCardNumber(Holder<String> aCardNumber) {
 		this.cardNumber = aCardNumber.value;
