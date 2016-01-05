@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
+import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.exception.BSUserException;
 import cl.buildersoft.timectrl.api._zkemProxy;
 import cl.buildersoft.timectrl.business.beans.AttendanceLog;
@@ -130,9 +131,12 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 	}
 
 	private void saveToDataBase(Connection conn, MachineService2 service, BSBeanUtils bu, List<AttendanceLog> attendanceList) {
-		service.saveAttendanceLog(conn, attendanceList);
 		/**
 		 * <code>
+		service.saveAttendanceLog(conn, attendanceList);
+</code>
+		 */
+		
 		for (AttendanceLog attendance : attendanceList) {
 			if (!service.existsAttendanceLog(conn, attendance)) {
 				try {
@@ -142,8 +146,6 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 				}
 			}
 		}
-</code>
-		 */
 	}
 
 	private Boolean deleteMarksAtEnd(String[] args) {
