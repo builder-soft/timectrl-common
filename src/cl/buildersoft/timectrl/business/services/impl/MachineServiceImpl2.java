@@ -571,14 +571,13 @@ public class MachineServiceImpl2 implements MachineService2 {
 			}
 			stmt.executeBatch();
 			conn.commit();
-
 		} catch (SQLException e) {
+			LOG.log(Level.SEVERE, e.getMessage(), e);
 			try {
 				conn.rollback();
 			} catch (SQLException e1) {
-				throw new BSDataBaseException(e);
+				throw new BSDataBaseException(e1);
 			}
-			LOG.log(Level.SEVERE, e.getMessage(), e);
 		} finally {
 			try {
 				if (!stmt.isClosed()) {
