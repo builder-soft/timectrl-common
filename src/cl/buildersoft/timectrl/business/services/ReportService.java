@@ -21,7 +21,7 @@ public interface ReportService extends Runnable {
 
 	public Boolean runAsDetachedThread();
 
-	public void setConnectionData(String driverName, String serverName, String database, String password, String username);
+	public void setConnectionData(String dsName);
 
 	public void setReportId(Long reportId);
 
@@ -31,4 +31,9 @@ public interface ReportService extends Runnable {
 
 	public void setReportParameterList(List<ReportParameterBean> reportParameterList);
 
+	public ReportPropertyBean getReportProperty(List<ReportPropertyBean> propertiesList, String propertyName);
+
+	public ReportParameterBean getReportParameter(List<ReportParameterBean> parameterList, String parameterName);
+
+	public void waitBeforeRun(Integer seconds);
 }

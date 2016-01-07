@@ -33,6 +33,7 @@ public interface MachineService2 {
 	public Boolean existsAttendanceLog(Connection conn, AttendanceLog attendance);
 
 	public void saveAttendanceLog(Connection conn, AttendanceLog attendance);
+	public void saveAttendanceLog(Connection conn, List<AttendanceLog> attendanceList);
 
 	public Employee mergeEmployee(Employee employeeDevice, Employee employeeDB, PrivilegeService ps);
 

@@ -339,6 +339,7 @@ public abstract class AbstractReportService {
 			}
 		}
 	}
+
 	protected void processEmployeeParameter(Connection conn, List<ReportParameterBean> reportParameterList) {
 		for (ReportParameterBean parameter : reportParameterList) {
 			LOG.log(Level.FINE, parameter.toString());
@@ -362,5 +363,27 @@ public abstract class AbstractReportService {
 		}
 		newValue = BSUtils.unSplitString(idsArray, ",");
 		parameter.setValue(newValue);
+	}
+
+	public ReportParameterBean getReportParameter(List<ReportParameterBean> parameterList, String parameterName) {
+		ReportParameterBean out = null;
+		for (ReportParameterBean parameter : parameterList) {
+			if (parameter.getTypeKey().equalsIgnoreCase(parameterName)) {
+				out = parameter;
+				break;
+			}
+		}
+		return out;
+	}
+
+	public ReportPropertyBean getReportProperty(List<ReportPropertyBean> propertiesList, String propertyName) {
+		ReportPropertyBean out = null;
+		for (ReportPropertyBean property : propertiesList) {
+			if (property.getPropertyTypeKey().equalsIgnoreCase(propertyName)) {
+				out = property;
+				break;
+			}
+		}
+		return out;
 	}
 }

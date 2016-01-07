@@ -1,4 +1,4 @@
-package cl.buildersoft.timectrl.business.console;
+package cl.buildersoft.timectrl.business.process.impl;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -7,59 +7,110 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
-import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
-import cl.buildersoft.framework.exception.BSUserException;
+import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.Report;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
+import cl.buildersoft.timectrl.business.process.AbstractProcess;
+import cl.buildersoft.timectrl.business.process.ExecuteProcess;
 import cl.buildersoft.timectrl.business.services.EmployeeService;
 import cl.buildersoft.timectrl.business.services.ParameterService;
 import cl.buildersoft.timectrl.business.services.ReportService;
 import cl.buildersoft.timectrl.business.services.impl.EmployeeServiceImpl;
 
-public class BuildReport3 extends AbstractConsoleService {
+public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 	private static final String NOT_FOUND = "' not found.";
-	private static final Logger LOG = Logger.getLogger(BuildReport3.class.getName());
+	private static final Logger LOG = Logger.getLogger(BuildReport4.class.getName());
 	private Boolean runFromConsole = false;
-//	private String dsName = null;
-	
+	// private String dsName = null;
 
-	public static void main(String[] args) {
-		BuildReport3 buildReport = new BuildReport3();
-		buildReport.init();
-		buildReport.mainFromConsole(args);
+	private String[] validArguments = { "DOMAIN", "REPORT_KEY" };
+
+	public Boolean getRunFromConsole() {
+		return runFromConsole;
+	}
+
+	public void setRunFromConsole(Boolean runFromConsole) {
+		this.runFromConsole = runFromConsole;
+	}
+
+	public static void main_(String[] args) {
+		BuildReport4 br4 = new BuildReport4();
+		// buildReport.init();
+
+		br4.setDSName(args[0]);
+		// br4.runFromConsole = true;
+
+		// String key = args[1];
+		String[] target = new String[args.length - 1];
+		System.arraycopy(args, 1, target, 0, target.length);
+
+		br4.doExecute(args);
 		System.exit(0);
 	}
 
-	public void mainFromConsole(String[] args) {
+	@Override
+	public List<String> doExecute(String[] args) {
+		// this.init();
+
+		// validateArguments(args, false);
+		/**
+		 * <code>
 		if (args.length < 1) {
 			throw new BSUserException("Arguments not enough");
 		}
-		this.runFromConsole = true;
-		String key = args[0];
-		String[] target = new String[args.length - 1];
-		System.arraycopy(args, 1, target, 0, target.length);
+		</code>
+		 */
 		List<String> responseList = null;
+		BSConnectionFactory cf = new BSConnectionFactory();
 
-		if (isNumeric(key)) {
-			Long id = Long.parseLong((String) key);
-			responseList = doBuild(id, target);
-		} else {
-			responseList = doBuild(key, target);
-		}
-		if (responseList != null) {
-			for (String response : responseList) {
-				LOG.log(Level.INFO, response);
+		Connection conn = null;
+		try {
+			conn = cf.getConnection(getDSName());
+			// this.runFromConsole = true;
+
+			Long reportId = keyToReportId(conn, args[0]);
+
+			responseList = doBuild(conn, reportId, args);
+
+			if (responseList != null) {
+				for (String response : responseList) {
+					LOG.log(Level.INFO, response);
+				}
 			}
+
+		} finally {
+			cf.closeConnection(conn);
 		}
+		return responseList;
 	}
 
-	public List<String> doBuild(String reportKey, String[] target) {
-		Connection conn = getConnection();
+	private Long keyToReportId(Connection conn, String key) {
+		BSBeanUtils bu = new BSBeanUtils();
+		Report report = new Report();
+
+		if (!bu.search(conn, report, "cKey=?", key)) {
+			throw new BSConfigurationException("Report '" + key + NOT_FOUND);
+		}
+
+		return report.getId();
+	}
+
+	@Override
+	protected String[] getArguments() {
+		return validArguments;
+	}
+
+	/**
+	 * <code>
+	   
+	
+	private List<String> doBuild(String reportKey, String[] target) {
+//		Connection conn = getConnection();
 
 		BSBeanUtils bu = new BSBeanUtils();
 		Report report = new Report();
@@ -68,7 +119,7 @@ public class BuildReport3 extends AbstractConsoleService {
 			throw new BSConfigurationException("Report '" + reportKey + NOT_FOUND);
 		}
 
-//		setConnection(conn);
+		// setConnection(conn);
 		List<String> out = doBuild(report.getId(), target);
 
 		BSmySQL mysql = new BSmySQL();
@@ -76,16 +127,19 @@ public class BuildReport3 extends AbstractConsoleService {
 
 		return out;
 	}
-
-	public List<String> doBuild(Long id, String[] target) {
-		Connection conn = getConnection();
+	</code>
+	 */
+	private List<String> doBuild(Connection conn, Long id, String[] params) {
 		List<String> out = new ArrayList<String>();
 		try {
+
+			String[] target = new String[params.length - 1];
+			System.arraycopy(params, 1, target, 0, params.length - 1);
+
 			out = execute2(conn, id, arrayToList(target));
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE, "Error at process report", e);
-		} finally {
-			new BSmySQL().closeConnection(conn);
+
 		}
 		return out;
 	}
@@ -99,26 +153,31 @@ public class BuildReport3 extends AbstractConsoleService {
 		return out;
 	}
 
-	@Deprecated
-	private List<String> execute(Connection conn, Long id, List<String> target) {
-		BSBeanUtils bu = new BSBeanUtils();
-		Report report = getReport(conn, id);
-		ReportType reportType = getReportType(conn, report);
-
-		ReportService reportService = getInstance(conn, report);
-
-		List<ReportPropertyBean> reportPropertyList = reportService.loadReportProperties(conn, id);
-		List<ReportParameterBean> parameters = reportService.loadParameter(conn, id);
-
-		if (parameters.size() != target.size()) {
-			throw new BSConfigurationException("Amount of parameters do not match");
-		}
-		reportService.fillParameters(parameters, target);
-
-		List<String> out = reportService.execute(conn, report.getId(), reportType, reportPropertyList, parameters);
-
-		return out;
-	}
+	/**
+	 * <code>
+	 * 
+	 * @Deprecated private List<String> execute(Connection conn, Long id,
+	 *             List<String> target) { BSBeanUtils bu = new BSBeanUtils();
+	 *             Report report = getReport(conn, id); ReportType reportType =
+	 *             getReportType(conn, report);
+	 * 
+	 *             ReportService reportService = getInstance(conn, report);
+	 * 
+	 *             List<ReportPropertyBean> reportPropertyList =
+	 *             reportService.loadReportProperties(conn, id);
+	 *             List<ReportParameterBean> parameters =
+	 *             reportService.loadParameter(conn, id);
+	 * 
+	 *             if (parameters.size() != target.size()) { throw new
+	 *             BSConfigurationException
+	 *             ("Amount of parameters do not match"); }
+	 *             reportService.fillParameters(parameters, target);
+	 * 
+	 *             List<String> out = reportService.execute(conn,
+	 *             report.getId(), reportType, reportPropertyList, parameters);
+	 * 
+	 *             return out; } </code>
+	 */
 
 	private List<String> execute2(Connection conn, Long reportId, List<String> parameters) {
 		Report report = getReport(conn, reportId);
@@ -157,8 +216,8 @@ public class BuildReport3 extends AbstractConsoleService {
 
 		// ********************************************************
 
-//		BSmySQL mysql = new BSmySQL();
-//		mysql.closeConnection(conn);
+		// BSmySQL mysql = new BSmySQL();
+		// mysql.closeConnection(conn);
 
 		if (reportService.runAsDetachedThread()) {
 			responseList.clear();
@@ -187,19 +246,8 @@ public class BuildReport3 extends AbstractConsoleService {
 	private List<String> executeReport(Connection conn, Long reportId, ReportType reportType, ReportService reportService,
 			List<ReportParameterBean> reportParameterList, List<ReportPropertyBean> reportPropertyList) {
 		List<String> responseList;
-		if (!runFromConsole && reportService.runAsDetachedThread()) {
-			// if (reportService.runAsDetachedThread()) {
-			// HttpSession session = request.getSession(false);
-			// Map<String, DomainAttribute> domainAttribute = (Map<String,
-			// DomainAttribute>) session.getAttribute("DomainAttribute");
-
+		if (reportService.runAsDetachedThread() && !runFromConsole) {
 			reportService.setConnectionData(getDSName());
-
-			// reportService.setConnectionData(domainAttribute.get("database.driver").getValue(),
-			// domainAttribute.get("database.server").getValue(),
-			// domainAttribute.get("database.database").getValue(),
-			// domainAttribute.get("database.password").getValue(),
-			// domainAttribute.get("database.username").getValue());
 
 			reportService.setReportId(reportId);
 			reportService.setReportParameterList(reportParameterList);
@@ -288,4 +336,10 @@ public class BuildReport3 extends AbstractConsoleService {
 		}
 		return reportType;
 	}
+	/**
+	 * <code>
+	 * 
+	 * @Override public void setDSName(String dsName) { this.dsName = dsName; }
+	 *           </code>
+	 */
 }

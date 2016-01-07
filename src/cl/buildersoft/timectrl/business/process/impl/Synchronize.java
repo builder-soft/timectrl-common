@@ -1,4 +1,4 @@
-package cl.buildersoft.timectrl.business.console;
+package cl.buildersoft.timectrl.business.process.impl;
 
 import java.sql.Connection;
 import java.util.HashMap;
@@ -6,25 +6,36 @@ import java.util.List;
 import java.util.Map;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
+import cl.buildersoft.framework.database.BSmySQL;
+import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.timectrl.api._zkemProxy;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.Machine;
+import cl.buildersoft.timectrl.business.process.AbstractProcess;
+import cl.buildersoft.timectrl.business.process.ExecuteProcess;
 import cl.buildersoft.timectrl.business.services.MachineService2;
 import cl.buildersoft.timectrl.business.services.PrivilegeService;
 import cl.buildersoft.timectrl.business.services.impl.MachineServiceImpl2;
 import cl.buildersoft.timectrl.business.services.impl.PrivilegeServiceImpl;
 
-public class Synchronize extends AbstractConsoleService {
+public class Synchronize extends AbstractProcess implements ExecuteProcess {
+	private String[] validArguments = { "DOMAIN" };
 
 	public static void main(String[] args) {
 		Synchronize synchronize = new Synchronize();
-		synchronize.init();
+		// synchronize.init();
 
-		synchronize.doAction();
+		synchronize.doExecute(args);
 
 	}
 
-	private void doAction() {
+	@Override
+	protected String[] getArguments() {
+		return this.validArguments;
+	}
+
+	@Override
+	public List<String> doExecute(String[] args) {
 		/**
 		 * <code>
 Buscar listdo de machines de la DB
@@ -66,7 +77,9 @@ Recorrer listado maquinas
 siguiente maquina
  </code>
 		 */
-		Connection conn = getConnection();
+		BSConnectionFactory cf = new BSConnectionFactory();
+		
+		Connection conn = cf.getConnection(args[0]);
 		Long group = null;
 		List<Machine> machineList = listMachines(conn);
 		List<Employee> employeeDBList = null;
@@ -110,7 +123,7 @@ siguiente maquina
 				if (employeeMch != null) {
 					Employee merged = machineService.mergeEmployee(employeeMch, employeeDBMap.get(key), ps);
 					saveEmployeeToDB(conn, merged);
-					machineService.updateEmployeeToDevice(conn, ps ,connMch, merged);
+					machineService.updateEmployeeToDevice(conn, ps, connMch, merged);
 					employeeMchMap.remove(key);
 				} else {
 					machineService.addEmployee(conn, ps, connMch, employeeDB);
@@ -140,6 +153,8 @@ siguiente maquina
 			}
 			machineService.disconnect(connMch);
 		}
+		cf.closeConnection(conn);
+		return null;
 	}
 
 	private void saveEmployeeToDB(Connection conn, Employee merged) {
@@ -190,4 +205,5 @@ siguiente maquina
 		BSBeanUtils bu = new BSBeanUtils();
 		return (List<Machine>) bu.listAll(conn, new Machine());
 	}
+
 }

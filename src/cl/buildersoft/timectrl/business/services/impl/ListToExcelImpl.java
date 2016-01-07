@@ -164,11 +164,6 @@ public class ListToExcelImpl extends AbstractReportService implements ReportServ
 	}
 
 	@Override
-	public void setConnectionData(String driverName, String serverName, String database, String password, String username) {
-		throw new BSProgrammerException("This report run as same thread of container");
-	}
-
-	@Override
 	public void setReportId(Long reportId) {
 		throw new BSProgrammerException("This report run as same thread of container");
 	}
@@ -192,6 +187,16 @@ public class ListToExcelImpl extends AbstractReportService implements ReportServ
 	public void run() {
 		LOG.log(Level.SEVERE, "This class dont run as single thread {0}", ListToExcelImpl.class.getName());
 
+	}
+
+	@Override
+	public void setConnectionData(String dsName) {
+		throw new BSProgrammerException("This report run as same thread of container");
+	}
+
+	@Override
+	public void waitBeforeRun(Integer seconds) {
+		LOG.log(Level.SEVERE, "This class dont run as single thread {0}", ListToExcelImpl.class.getName());
 	}
 
 }

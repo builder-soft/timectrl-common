@@ -4,6 +4,7 @@ import cl.buildersoft.framework.beans.BSBean;
 
 public class Post extends BSBean {
 	private static final long serialVersionUID = -1380650482172931587L;
+	@SuppressWarnings("unused")
 	private String TABLE = "tPost";
 	private String key = null;
 	private String name = null;

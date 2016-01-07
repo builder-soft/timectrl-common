@@ -18,8 +18,11 @@ public class EmployeeTurnServiceImpl implements EmployeeTurnService {
 	public List<EmployeeTurn> listAllEmployeeTurns(Connection conn, Long employee) {
 		BSDataUtils du = new BSDataUtils();
 
-		String sql = "SELECT r.cId, r.cTurn, r.cStartDate, r.cEndDate, t.cName AS cTurnName " + "FROM tR_EmployeeTurn AS r "
-				+ "LEFT JOIN tTurn AS t ON r.cTurn = t.cId " + "WHERE cEmployee=? ORDER BY r.cStartDate";
+		String sql = "SELECT r.cId, r.cTurn, r.cStartDate, r.cEndDate, t.cName AS cTurnName, r.cException AS cException ";
+		sql += "FROM tR_EmployeeTurn AS r ";
+		sql += "LEFT JOIN tTurn AS t ON r.cTurn = t.cId ";
+		sql += "WHERE cEmployee=? ORDER BY r.cStartDate";
+
 		ResultSet turnsRS = du.queryResultSet(conn, sql, employee);
 
 		List<EmployeeTurn> out = new ArrayList<EmployeeTurn>();
@@ -35,6 +38,7 @@ public class EmployeeTurnServiceImpl implements EmployeeTurnService {
 				employeeTurn.setTurnName(turnsRS.getString("cTurnName"));
 				employeeTurn.setStartDate(BSDateTimeUtil.date2Calendar(turnsRS.getDate("cStartDate")));
 				employeeTurn.setEndDate(BSDateTimeUtil.date2Calendar(turnsRS.getDate("cEndDate")));
+				employeeTurn.setException(turnsRS.getBoolean("cException"));
 				out.add(employeeTurn);
 
 			}
@@ -42,23 +46,23 @@ public class EmployeeTurnServiceImpl implements EmployeeTurnService {
 			throw new BSDataBaseException(e);
 		} finally {
 			du.closeSQL(turnsRS);
+			du.closeSQL();
 		}
 
 		return out;
 	}
 
-	// }
-
 	@Override
 	public void appendNew(Connection conn, EmployeeTurn employeeTurn) {
-		String sql = "INSERT INTO tR_EmployeeTurn (cEmployee, cTurn, cStartDate, cEndDate) ";
-		sql += "VALUES(?,?,?,?);";
+		String sql = "INSERT INTO tR_EmployeeTurn (cEmployee, cTurn, cStartDate, cEndDate, cException) ";
+		sql += "VALUES(?,?,?,?,?);";
 
 		List<Object> params = new ArrayList<Object>();
 		params.add(employeeTurn.getEmployee());
 		params.add(employeeTurn.getTurn());
 		params.add(employeeTurn.getStartDate());
 		params.add(employeeTurn.getEndDate());
+		params.add(employeeTurn.getException());
 
 		BSDataUtils du = new BSDataUtils();
 		du.update(conn, sql, params);

@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -16,6 +18,7 @@ import cl.buildersoft.timectrl.business.beans.Post;
 import cl.buildersoft.timectrl.business.services.EmployeeService;
 
 public class EmployeeServiceImpl extends BSHttpServlet implements EmployeeService {
+	private static final Logger LOG = Logger.getLogger(EmployeeServiceImpl.class.getName());
 	private static final String IS_BOSS = "cId IN (SELECT DISTINCT(cBoss) FROM tEmployee WHERE NOT cBoss IS NULL)";
 	private static final long serialVersionUID = 9126047546816667626L;
 
@@ -29,7 +32,10 @@ public class EmployeeServiceImpl extends BSHttpServlet implements EmployeeServic
 		} else {
 			Object idAsAttribute = request.getAttribute("cId");
 			if (idAsAttribute == null) {
-				throw new BSProgrammerException("No hay parametro de ID de empleado");
+				String errorMsg = "There is not Parameter or Attribute of Employee Id";
+				BSProgrammerException e = new BSProgrammerException(errorMsg);
+				LOG.logp(Level.SEVERE, EmployeeServiceImpl.class.getName(), "getEmployee", errorMsg);
+				throw e;
 			} else {
 				employeeId = idAsAttribute.toString();
 			}

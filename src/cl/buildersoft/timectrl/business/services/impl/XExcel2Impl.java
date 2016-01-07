@@ -44,6 +44,7 @@ import cl.buildersoft.timectrl.business.services.ReportService;
 
 /** Este es el reporte a Excel que enlaza dos hojas en la misma planilla */
 public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
+	private static final Logger LOG = Logger.getLogger(XExcel2Impl.class.getName());
 	private static final int ROWS_VERIFY_WIDTH = 10;
 	private static final String FORMAT_DDMMYYYY = "dd-MM-yyyy";
 	private static final int SUMMARY_COL_FIRST = 0;
@@ -56,7 +57,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	protected Integer rowOfSheet = 0;
 	protected Integer employeeDepth = 0;
 	protected Integer currentDepth = null;
-	private static final Logger LOG = Logger.getLogger(XExcel2Impl.class.getName());
 	private Set<Long> employeeIdSet = new HashSet<Long>();
 
 	private void relationPages(XSSFWorkbook workBook) {
@@ -265,19 +265,20 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 	@Override
 	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
-			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportInputParameterList) {
+			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportParameterList) {
 		List<String> out = new ArrayList<String>();
 
 		readProperties(conn, reportPropertyList);
 
 		configOutputPathAndFile();
-		processBossAndEmployeeParameter(conn, reportInputParameterList, idReport);
+		processBossAndEmployeeParameter(conn, reportParameterList, idReport);
 
-		List<Object> params = getReportParams(conn, reportInputParameterList);
+		List<Object> params = getReportParams(conn, reportParameterList);
 
 		XSSFWorkbook workbook = new XSSFWorkbook();
 		super.configStyles(workbook);
-		createSummarySheet(conn, workbook, params, getTitleSummary(conn, reportInputParameterList));
+		resetVariables();
+		createSummarySheet(conn, workbook, params, getTitleSummary(conn, reportParameterList));
 		createDetailSheet(conn, workbook, params);
 
 		try {
@@ -297,6 +298,12 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		out.add(this.outputFileAndPath);
 
 		return out;
+	}
+
+	private void resetVariables() {
+		this.rowOfSheet = 0;
+		this.employeeIdSet.clear();
+
 	}
 
 	private void processBossAndEmployeeParameter(Connection conn, List<ReportParameterBean> reportInputParameterList,
@@ -341,26 +348,53 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 					employeeIdSet.add(employeeId);
 					if (haveJunior(conn, employeeId, mysql) && boss != employeeId) {
 						if (this.employeeDepth == 0) {
-							out += getEmployeeIds(conn, employeeId) + ",";
+							out += getEmployeeIds(conn, employeeId);
+
+							// LOG.log(Level.INFO,
+							// "\t\t\t\t\t\tLen={0} value={1}",
+							// BSUtils.array2ObjectArray(out.length(), out));
+
+							if (out.lastIndexOf(",") != (out.length() - 1)) {
+								out += ",";
+								// } else {
+								// LOG.log(Level.WARNING,
+								// "Boss is {0} employees are {1}",
+								// BSUtils.array2ObjectArray(boss, out));
+							}
 						} else {
 							if (this.currentDepth < this.employeeDepth) {
 								this.currentDepth++;
 								out += getEmployeeIds(conn, employeeId) + ",";
 								this.currentDepth--;
-
 							}
+
 						}
 					}
+
 					out += employeeId.toString() + ",";
-				}else{
-					LOG.log(Level.WARNING, "Employee Id {0} exists", employeeId);
+					// LOG.log(Level.WARNING, "Employee Id {0} added to list",
+					// employeeId);
+				} else {
+					// LOG.log(Level.WARNING, "Employee Id {0} exists",
+					// employeeId);
+
 				}
 			}
-			mysql.closeSQL(rs);
 		} catch (SQLException e) {
 			throw new BSDataBaseException(e);
+		} finally {
+			mysql.closeSQL(rs);
 		}
-		return out.length() > 0 ? out.substring(0, out.length() - 1) : "";
+
+		// LOG.logp(Level.INFO, this.getClass().getName(), "getEmployeeIds",
+		// "Ending method (before substring) with output={0} the input was={1}",
+		// BSUtils.array2ObjectArray(out, boss));
+		out = out.length() > 0 ? out.substring(0, out.length() - 1) : "";
+
+		LOG.logp(Level.INFO, this.getClass().getName(), "getEmployeeIds",
+				"Ending method (after substring) with output={0} the input was={1}", BSUtils.array2ObjectArray(out, boss));
+
+		return out;
 	}
 
 	private boolean haveJunior(Connection conn, Long employee, BSmySQL mysql) {

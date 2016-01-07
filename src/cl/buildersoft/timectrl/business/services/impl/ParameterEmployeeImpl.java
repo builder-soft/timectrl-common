@@ -2,16 +2,10 @@ package cl.buildersoft.timectrl.business.services.impl;
 
 import java.sql.Connection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import cl.buildersoft.framework.beans.BSBean;
-import cl.buildersoft.framework.database.BSBeanUtils;
-import cl.buildersoft.timectrl.business.beans.Area;
-import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.services.AreaService;
-import cl.buildersoft.timectrl.business.services.EmployeeService;
 import cl.buildersoft.timectrl.business.services.ParameterService;
 
 public class ParameterEmployeeImpl implements ParameterService {

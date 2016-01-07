@@ -28,11 +28,8 @@ public class LicenseValidationUtil {
 	public Boolean licenseValidation(Connection conn, String fileContent) {
 		Boolean success = true;
 		Set<String> serialsSet = readSerialsFromDB(conn);
-		// new BSmySQL().closeConnection(conn);
 
 		if (serialsSet.size() > 0) {
-			// String fileContent = readFile(request);
-
 			fileContent = decrypt(fileContent);
 
 			Integer poundPosition = fileContent.indexOf("#");
@@ -89,7 +86,7 @@ public class LicenseValidationUtil {
 
 		File file = new File(pathFile);
 		if (!file.exists()) {
-			throw new BSConfigurationException("No se encontró el archivo '" + pathFile + "'");
+			throw new BSConfigurationException("File not found '" + pathFile + "'");
 		}
 		try {
 			FileReader reader = new FileReader(file);
@@ -113,16 +110,6 @@ public class LicenseValidationUtil {
 
 	private String showList(Set<String> serialsSet) {
 		return showList((String[]) serialsSet.toArray(new String[] {}));
-		/**
-		 * <code>
-		String out = "";
-		for (String s : serialsSet) {
-			out += s + ",";
-		}
-		out = repairString(out);
-		return out;
-		</code>
-		 */
 	}
 
 	private String showList(String[] serialsArray) {

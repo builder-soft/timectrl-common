@@ -24,8 +24,10 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
-import cl.buildersoft.framework.util.BSDataUtils;
+ 
+import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.framework.util.BSUtils;
+ 
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.IdRut;
 import cl.buildersoft.timectrl.business.beans.Report;
@@ -53,12 +55,11 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 	private String destiny = null;
 	private String manpowerMail = null;
 
-	private String driverName = null;
-	private String serverName = null;
-	private String database = null;
-	private String passwordDB = null;
-	private String usernameDB = null;
+
+	private String dsName = null;
 	private Long reportId = null;
+	private Integer waitBeforeRun = 0;
+
 	private ReportType reportType = null;
 	private List<ReportPropertyBean> reportPropertyList = null;
 	private List<ReportParameterBean> reportParameterList = null;
@@ -67,30 +68,38 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 
 	@Override
 	public void run() {
+		BSConnectionFactory cf = new BSConnectionFactory();
+		Connection conn = null;
 		try {
-			BSmySQL mysql = new BSmySQL();
-
+			Thread.sleep(this.waitBeforeRun * 1000);
 			long start = System.currentTimeMillis();
 
-			String myClassName = SendReportByMailImpl.class.getName();
-			LOG.log(Level.INFO, "Start thread of class {0}", myClassName);
-			Connection conn = mysql.getConnection(this.driverName, this.serverName, this.database, this.passwordDB,
-					this.usernameDB);
+
+			String thisClassName = SendReportByMailImpl.class.getName();
+			LOG.log(Level.INFO, "Start thread of class {0}", thisClassName);
+
+			conn = cf.getConnection(this.dsName);
+
 			execute(conn, this.reportId, this.reportType, reportPropertyList, reportParameterList);
 
 			long end = System.currentTimeMillis();
 
 			LOG.log(Level.INFO, "End thread of class {0}. It ended in {1} miliseconds.",
-					BSUtils.array2ObjectArray(myClassName, end - start));
+					BSUtils.array2ObjectArray(thisClassName, end - start));
 
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE, e.getMessage(), e);
+		} finally {
+			cf.closeConnection(conn);
 		}
 
+ 
 	}
 
-	public List<String> execute(Connection conn, Long idReport, ReportType reportType,
+ 
+	public synchronized List<String> execute(Connection conn, Long idReport, ReportType reportType,
 			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportParameterList) {
+ 
 		readProperties(conn, reportPropertyList);
 
 		DestinyEnum destiny = getDestiny(reportPropertyList);
@@ -127,7 +136,14 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 
 			break;
 		case MANPOWER:
+ 
 			fileList = executeReport(conn, idReport, reportType, reportPropertyList, reportParameterList);
+			if (fileList != null && fileList.size() >= 1) {
+				LOG.log(Level.INFO, "File was created in {0}", fileList.get(0));
+			} else {
+				LOG.log(Level.SEVERE, "Can not created correcty report file.");
+			}
+ 
 			out = sendMail(fileList, manpowerMail);
 
 			deleteTempFiles(fileList);
@@ -193,8 +209,11 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 			file = new File(fileName);
 			if (!file.delete()) {
 				LOG.log(Level.SEVERE, "Cant delete file '{0}'", fileName);
+			} else {
+				LOG.log(Level.INFO, "File {0} was deleted", fileName);
 			}
 		}
+
 	}
 
 	private List<String> executeReport(Connection conn, Long idReport, ReportType reportType,
@@ -215,6 +234,8 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 		out = subReportService.execute(conn, subReport.getId(), getReportType(conn, subReport), subReportPropertyList,
 				subReportInputParameterList);
 
+		LOG.log(Level.INFO, "File created was {0}", out.toString());
+
 		return out;
 	}
 
@@ -226,6 +247,8 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 
 	}
 
+	/**
+	 * <code>
 	private String getOutputFileName(String extension) {
 		return "File-{Random}" + extension;
 	}
@@ -235,6 +258,11 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 		return value.substring(value.lastIndexOf("."));
 	}
 
+	private ReportPropertyBean getOutputFile(List<ReportPropertyBean> subReportPropertyList) {
+		return getProperty(subReportPropertyList, "OUTPUT_FILE");
+	}
+</code>
+	 */
 	private String getTempPath() {
 		String out = System.getProperty("java.io.tmpdir");
 		if (out == null) {
@@ -246,10 +274,7 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 		return out;
 	}
 
-	private ReportPropertyBean getOutputFile(List<ReportPropertyBean> subReportPropertyList) {
-		return getProperty(subReportPropertyList, "OUTPUT_FILE");
-	}
-
+ 
 	private ReportPropertyBean getOutputPath(List<ReportPropertyBean> subReportPropertyList) {
 		return getProperty(subReportPropertyList, "OUTPUT_PATH");
 	}
@@ -312,6 +337,7 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 		// session.setDebug(true);
 		MimeMessage message = new MimeMessage(session);
 
+		Transport transport = null;
 		try {
 			message.setFrom(new InternetAddress(this.usernameMail));
 			String[] toArray = stringToArray(to);
@@ -336,12 +362,11 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 			multipart.addBodyPart(messageBodyPart);
 			if (pathAndFileNameList != null && pathAndFileNameList.size() > 0) {
 				for (String filePath : pathAndFileNameList) {
-
 					MimeBodyPart attachPart = new MimeBodyPart();
 					try {
 						attachPart.attachFile(filePath);
 					} catch (IOException ex) {
-						ex.printStackTrace();
+						LOG.log(Level.SEVERE, ex.getMessage(), ex);
 					}
 					multipart.addBodyPart(attachPart);
 
@@ -350,20 +375,30 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 				}
 				message.setContent(multipart);
 			}
-
-			Transport transport = session.getTransport("smtp");
+ 			transport = session.getTransport("smtp");
 			transport.connect(this.server, this.usernameMail, this.passwordMail);
+ 
 			transport.sendMessage(message, message.getAllRecipients());
-			transport.close();
 		} catch (AddressException e) {
-			throw new BSConfigurationException(e);
+			LOG.log(Level.SEVERE, "File " + pathAndFileNameList.toString() + " can't sended to " + to + "", e);
+			// throw new BSConfigurationException(e);
 		} catch (MessagingException e) {
-			throw new BSConfigurationException(e);
+			LOG.log(Level.SEVERE, "File " + pathAndFileNameList.toString() + " can't sended to " + to + "", e);
+			// throw new BSConfigurationException(e);
+		} finally {
+			if (transport != null) {
+				try {
+					transport.close();
+				} catch (MessagingException e) {
+					LOG.log(Level.SEVERE, e.getMessage(), e);
+				}
+			}
 		}
 		return out;
 	}
 
 	private String[] stringToArray(String to) {
+		LOG.log(Level.FINE, "Mail to {0}", to);
 		to = to.replaceAll(",", ";");
 		String[] out = to.split(";");
 		return out;
@@ -414,19 +449,15 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 	protected String parseCustomVariable(String key) {
 		return null;
 	}
-
+ 
 	@Override
 	public Boolean runAsDetachedThread() {
 		return true;
 	}
 
 	@Override
-	public void setConnectionData(String driverName, String serverName, String database, String passwordDB, String usernameDB) {
-		this.driverName = driverName;
-		this.serverName = serverName;
-		this.database = database;
-		this.passwordDB = passwordDB;
-		this.usernameDB = usernameDB;
+	public void setConnectionData(String dsName) {
+		this.dsName = dsName;
 
 	}
 
@@ -451,4 +482,11 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 		this.reportParameterList = reportParameterList;
 	}
 
+	@Override
+	public void waitBeforeRun(Integer seconds) {
+		this.waitBeforeRun = waitBeforeRun;
+
+	}
+
+ 
 }

@@ -4,7 +4,6 @@ import cl.buildersoft.framework.beans.BSBean;
 
 public class ReportType extends BSBean {
 	private static final long serialVersionUID = 925612356427887115L;
-	@SuppressWarnings("unused")
 	private String TABLE = "tReportType";
 	private String key = null;
 	private String name = null;

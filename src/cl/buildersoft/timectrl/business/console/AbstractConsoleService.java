@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -14,8 +13,7 @@ import java.util.logging.Logger;
 
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.util.BSConfig;
-import cl.buildersoft.framework.util.BSDataUtils;
-import cl.buildersoft.framework.util.BSDateTimeUtil;
+import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.util.LicenseValidationUtil;
 
@@ -27,14 +25,11 @@ public abstract class AbstractConsoleService {
 	// + File.separator + FILE_NAME;
 	// private final Boolean VALIDATE_LICENSE = false;
 	private Connection conn = null;
-	private String driver = null;
-	private String serverName = null;
-	private String database = null;
-	private String user = null;
-	private String password = null;
-	private String webPath = null;
+
+	private String dsName = null;
+
 	private String logPath = null;
-	private String port = null;
+	private String webPath = null;
 	private String validateLicense = null;
 
 	protected void init() {
@@ -63,19 +58,23 @@ public abstract class AbstractConsoleService {
 			throw new BSConfigurationException(e);
 		}
 
-		readProperties(prop);
-		validateProperties();
+		// readProperties(prop);
+		// validateProperties();
 		// getAppPath();
 
-		Enumeration<Object> propList = prop.keys();
-		while (propList.hasMoreElements()) {
-			Object o = propList.nextElement();
-			LOG.log(Level.CONFIG, "{0} : {1}", BSUtils.array2ObjectArray(o.toString(), prop.getProperty(o.toString())));
-		}
+		logPropertyValues(prop);
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void logPropertyValues(Properties prop) {
+		Enumeration<Object> propList = prop.keys();
+		while (propList.hasMoreElements()) {
+			Object o = propList.nextElement();
+			LOG.log(Level.CONFIG, "{0} : {1}", BSUtils.array2ObjectArray(o.toString(), prop.getProperty(o.toString())));
 		}
 	}
 
@@ -89,31 +88,6 @@ public abstract class AbstractConsoleService {
 		return out;
 	}
 
-	private void readProperties(Properties prop) {
-		this.webPath = prop.getProperty("webPath");
-		this.logPath = prop.getProperty("logPath");
-		this.database = prop.getProperty("database");
-		this.driver = prop.getProperty("driver");
-		this.password = prop.getProperty("password");
-		this.serverName = prop.getProperty("server");
-		this.user = prop.getProperty("user");
-		this.port = prop.getProperty("port");
-		this.validateLicense = prop.getProperty("validateLicense");
-	}
-
-	private void validateProperties() {
-		validateVariable(this.webPath, "webPath");
-		validateVariable(this.logPath, "logPath");
-		validateVariable(this.database, "database");
-		validateVariable(this.driver, "driver");
-		validateVariable(this.password, "password");
-		validateVariable(this.serverName, "serverName");
-		validateVariable(this.user, "user");
-		validateVariable(this.port, "port");
-		validateVariable(this.validateLicense, "validateLicense");
-
-	}
-
 	private void validateVariable(String value, String name) {
 		if (value == null) {
 			String msg = "La variable '" + name + "' no se ha configurado apropiadamente, revise el archivo '" + FILE_NAME + "'";
@@ -123,8 +97,8 @@ public abstract class AbstractConsoleService {
 
 	protected Connection getConnection() {
 		if (this.conn == null) {
-			BSDataUtils du = new BSDataUtils();
-			this.conn = du.getConnection(this.driver, this.serverName + ":" + this.port, this.database, this.password, this.user);
+			BSConnectionFactory cf = new BSConnectionFactory();
+			this.conn = cf.getConnection(this.dsName);
 		}
 		return this.conn;
 	}
@@ -151,4 +125,13 @@ public abstract class AbstractConsoleService {
 		}
 		return out;
 	}
+
+	public String getDSName() {
+		return dsName;
+	}
+
+	public void setDSName(String dsName) {
+		this.dsName = dsName;
+	}
+
 }
