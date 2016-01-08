@@ -517,7 +517,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 			if (rs.next())
 				attendance.setId(rs.getLong(1));
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.log(Level.SEVERE, "Error at executing SP pSaveAttendanceLog", e);
 		} finally {
 			mysql.closeSQL(rs);
 			mysql.closeSQL();
