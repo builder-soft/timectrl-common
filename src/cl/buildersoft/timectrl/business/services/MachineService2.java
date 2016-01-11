@@ -6,8 +6,6 @@ import java.util.List;
 import cl.buildersoft.timectrl.api.IZKEMException;
 import cl.buildersoft.timectrl.api._zkemProxy;
 import cl.buildersoft.timectrl.business.beans.AttendanceLog;
-import cl.buildersoft.timectrl.business.beans.Employee;
-import cl.buildersoft.timectrl.business.beans.Fingerprint;
 import cl.buildersoft.timectrl.business.beans.Machine;
 import cl.buildersoft.timectrl.business.services.impl.EmployeeAndFingerprint;
 
@@ -22,7 +20,7 @@ public interface MachineService2 {
 
 	public void addEmployees(Connection conn, PrivilegeService ps, _zkemProxy api, List<EmployeeAndFingerprint> employees);
 
-	public void addEmployee(Connection conn, PrivilegeService ps, _zkemProxy api, Employee employee, Fingerprint fingerprint);
+	public void addEmployee(Connection conn, PrivilegeService ps, _zkemProxy api, EmployeeAndFingerprint eaf);
 
 	public void deleteEmployees(_zkemProxy api, String[] employees);
 
@@ -40,8 +38,7 @@ public interface MachineService2 {
 
 	public EmployeeAndFingerprint mergeEmployee(EmployeeAndFingerprint employeeDevice, EmployeeAndFingerprint employeeDB, PrivilegeService ps);
 
-	public void updateEmployeeToDevice(Connection conn, PrivilegeService ps, _zkemProxy api, Employee employee,
-			Fingerprint fingerprint);
+	public void updateEmployeeToDevice(Connection conn, PrivilegeService ps, _zkemProxy api, EmployeeAndFingerprint eaf);
 
 	public Long getDefaultGroup(Connection conn);
 }

@@ -125,10 +125,10 @@ siguiente maquina
 				if (eafMch != null) {
 					EmployeeAndFingerprint merged = machineService.mergeEmployee(eafMch, eafDBMap.get(key), ps);
 					saveEmployeeToDB(conn, merged);
-					machineService.updateEmployeeToDevice(conn, ps, connMch, merged.getEmployee(), merged.getFingerprint());
+					machineService.updateEmployeeToDevice(conn, ps, connMch, merged);
 					eafMchMap.remove(key);
 				} else {
-					machineService.addEmployee(conn, ps, connMch, eafDB.getEmployee(), eafDB.getFingerprint());
+					machineService.addEmployee(conn, ps, connMch, eafDB);
 				}
 				// Retirar empleado de Map->DB
 				eafDBMap.remove(key);
