@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
-import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.timectrl.api._zkemProxy;
 import cl.buildersoft.timectrl.business.beans.Employee;
