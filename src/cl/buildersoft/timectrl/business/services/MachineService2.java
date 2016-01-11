@@ -7,7 +7,9 @@ import cl.buildersoft.timectrl.api.IZKEMException;
 import cl.buildersoft.timectrl.api._zkemProxy;
 import cl.buildersoft.timectrl.business.beans.AttendanceLog;
 import cl.buildersoft.timectrl.business.beans.Employee;
+import cl.buildersoft.timectrl.business.beans.Fingerprint;
 import cl.buildersoft.timectrl.business.beans.Machine;
+import cl.buildersoft.timectrl.business.services.impl.EmployeeAndFingerprint;
 
 public interface MachineService2 {
 	public _zkemProxy connect(Connection conn, Machine machine);
@@ -16,11 +18,11 @@ public interface MachineService2 {
 
 	public List<AttendanceLog> listAttendence(Connection conn, _zkemProxy api, Machine machine) throws IZKEMException;
 
-	public List<Employee> listEmployees(Connection conn, _zkemProxy api);
+	public List<EmployeeAndFingerprint> listEmployees(Connection conn, _zkemProxy api);
 
-	public void addEmployees(Connection conn, PrivilegeService ps, _zkemProxy api, List<Employee> employees);
+	public void addEmployees(Connection conn, PrivilegeService ps, _zkemProxy api, List<EmployeeAndFingerprint> employees);
 
-	public void addEmployee(Connection conn, PrivilegeService ps, _zkemProxy api, Employee employee);
+	public void addEmployee(Connection conn, PrivilegeService ps, _zkemProxy api, Employee employee, Fingerprint fingerprint);
 
 	public void deleteEmployees(_zkemProxy api, String[] employees);
 
@@ -33,11 +35,13 @@ public interface MachineService2 {
 	public Boolean existsAttendanceLog(Connection conn, AttendanceLog attendance);
 
 	public void saveAttendanceLog(Connection conn, AttendanceLog attendance);
+
 	public void saveAttendanceLog(Connection conn, List<AttendanceLog> attendanceList);
 
-	public Employee mergeEmployee(Employee employeeDevice, Employee employeeDB, PrivilegeService ps);
+	public EmployeeAndFingerprint mergeEmployee(EmployeeAndFingerprint employeeDevice, EmployeeAndFingerprint employeeDB, PrivilegeService ps);
 
-	public void updateEmployeeToDevice(Connection conn, PrivilegeService ps, _zkemProxy api, Employee employee);
+	public void updateEmployeeToDevice(Connection conn, PrivilegeService ps, _zkemProxy api, Employee employee,
+			Fingerprint fingerprint);
 
 	public Long getDefaultGroup(Connection conn);
 }

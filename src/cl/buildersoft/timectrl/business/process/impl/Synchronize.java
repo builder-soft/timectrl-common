@@ -1,6 +1,7 @@
 package cl.buildersoft.timectrl.business.process.impl;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +11,13 @@ import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.timectrl.api._zkemProxy;
 import cl.buildersoft.timectrl.business.beans.Employee;
+import cl.buildersoft.timectrl.business.beans.Fingerprint;
 import cl.buildersoft.timectrl.business.beans.Machine;
 import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.process.ExecuteProcess;
 import cl.buildersoft.timectrl.business.services.MachineService2;
 import cl.buildersoft.timectrl.business.services.PrivilegeService;
+import cl.buildersoft.timectrl.business.services.impl.EmployeeAndFingerprint;
 import cl.buildersoft.timectrl.business.services.impl.MachineServiceImpl2;
 import cl.buildersoft.timectrl.business.services.impl.PrivilegeServiceImpl;
 
@@ -78,16 +81,16 @@ siguiente maquina
  </code>
 		 */
 		BSConnectionFactory cf = new BSConnectionFactory();
-		
+
 		Connection conn = cf.getConnection(args[0]);
 		Long group = null;
 		List<Machine> machineList = listMachines(conn);
-		List<Employee> employeeDBList = null;
-		List<Employee> employeeMchList = null;
-		Map<String, Employee> employeeDBMap = null;
-		Map<String, Employee> employeeMchMap = null;
-		Employee employeeMch = null;
-		Employee employeeDB = null;
+		List<EmployeeAndFingerprint> eafDBList = null;
+		List<EmployeeAndFingerprint> eafMchList = null;
+		Map<String, EmployeeAndFingerprint> eafDBMap = null;
+		Map<String, EmployeeAndFingerprint> eafMchMap = null;
+		EmployeeAndFingerprint eafMch = null;
+		EmployeeAndFingerprint eafDB = null;
 		String[] keys = null;
 		MachineService2 machineService = new MachineServiceImpl2();
 		_zkemProxy connMch = null;
@@ -95,20 +98,20 @@ siguiente maquina
 
 		for (Machine machine : machineList) {
 			group = machine.getGroup();
-			employeeDBList = listEmployeeByGroup(conn, group);
-			employeeDBMap = listToEmployeeMap(employeeDBList);
+			eafDBList = listEmployeeByGroup(conn, group);
+			eafDBMap = listToEmployeeMap(eafDBList);
 
 			connMch = connectMachine(conn, machine, machineService);
 
 			// Cargar listado de empleados en un Map<key, employee>MACHINE
-			employeeMchList = machineService.listEmployees(conn, connMch);
-			employeeMchMap = listToEmployeeMap(employeeMchList);
+			eafMchList = machineService.listEmployees(conn, connMch);
+			eafMchMap = listToEmployeeMap(eafMchList);
 
 			// Cargar solo los key desde map->DB en un arreglo
-			keys = listKeysFromList(employeeDBList);
+			keys = listKeysFromList(eafDBList);
 			for (String key : keys) {
-				employeeMch = employeeMchMap.get(key);
-				employeeDB = employeeDBMap.get(key);
+				eafMch = eafMchMap.get(key);
+				eafDB = eafDBMap.get(key);
 
 				/**
 				 * <code>
@@ -120,16 +123,16 @@ siguiente maquina
   Sigue
 </code>
 				 */
-				if (employeeMch != null) {
-					Employee merged = machineService.mergeEmployee(employeeMch, employeeDBMap.get(key), ps);
+				if (eafMch != null) {
+					EmployeeAndFingerprint merged = machineService.mergeEmployee(eafMch, eafDBMap.get(key), ps);
 					saveEmployeeToDB(conn, merged);
-					machineService.updateEmployeeToDevice(conn, ps, connMch, merged);
-					employeeMchMap.remove(key);
+					machineService.updateEmployeeToDevice(conn, ps, connMch, merged.getEmployee(), merged.getFingerprint());
+					eafMchMap.remove(key);
 				} else {
-					machineService.addEmployee(conn, ps, connMch, employeeDB);
+					machineService.addEmployee(conn, ps, connMch, eafDB.getEmployee(), eafDB.getFingerprint());
 				}
 				// Retirar empleado de Map->DB
-				employeeDBMap.remove(key);
+				eafDBMap.remove(key);
 			}
 			/**
 			 * <code>			
@@ -142,13 +145,13 @@ siguiente maquina
    continuar
 <code>
 			 */
-			for (Map.Entry<String, Employee> employeeEntry : employeeMchMap.entrySet()) {
-				employeeMch = employeeEntry.getValue();
-				employeeMch.setGroup(group);
-				if (existsInDatabase(conn, employeeMch)) {
-					machineService.deleteEmployee(connMch, employeeMch.getKey());
+			for (Map.Entry<String, EmployeeAndFingerprint> eafEntry : eafMchMap.entrySet()) {
+				eafMch = eafEntry.getValue();
+				eafMch.getEmployee().setGroup(group);
+				if (existsInDatabase(conn, eafMch.getEmployee())) {
+					machineService.deleteEmployee(connMch, eafMch.getEmployee().getKey());
 				} else {
-					saveToDatabase(conn, employeeMch);
+					saveToDatabase(conn, eafMch);
 				}
 			}
 			machineService.disconnect(connMch);
@@ -157,14 +160,18 @@ siguiente maquina
 		return null;
 	}
 
-	private void saveEmployeeToDB(Connection conn, Employee merged) {
+	private void saveEmployeeToDB(Connection conn, EmployeeAndFingerprint merged) {
 		BSBeanUtils bu = new BSBeanUtils();
-		bu.update(conn, merged);
+
+		bu.update(conn, merged.getEmployee());
+		bu.update(conn, merged.getFingerprint());
 	}
 
-	private void saveToDatabase(Connection conn, Employee employee) {
+	private void saveToDatabase(Connection conn, EmployeeAndFingerprint eaf) {
 		BSBeanUtils bu = new BSBeanUtils();
-		bu.save(conn, employee);
+
+		bu.save(conn, eaf.getEmployee());
+		bu.save(conn, eaf.getFingerprint());
 	}
 
 	private boolean existsInDatabase(Connection conn, Employee employeeMch) {
@@ -173,11 +180,11 @@ siguiente maquina
 		return bu.search(conn, employee, "cKey=?", employeeMch.getKey());
 	}
 
-	private String[] listKeysFromList(List<Employee> employeeDBList) {
-		String[] out = new String[employeeDBList.size()];
+	private String[] listKeysFromList(List<EmployeeAndFingerprint> eafDBList) {
+		String[] out = new String[eafDBList.size()];
 		Integer i = 0;
-		for (Employee employee : employeeDBList) {
-			out[i++] = employee.getKey();
+		for (EmployeeAndFingerprint eaf : eafDBList) {
+			out[i++] = eaf.getEmployee().getKey();
 		}
 		return out;
 	}
@@ -186,18 +193,36 @@ siguiente maquina
 		return machineService.connect(conn, machine);
 	}
 
-	private Map<String, Employee> listToEmployeeMap(List<Employee> employeeList) {
-		Map<String, Employee> out = new HashMap<String, Employee>();
-		for (Employee employee : employeeList) {
-			out.put(employee.getKey(), employee);
+	private Map<String, EmployeeAndFingerprint> listToEmployeeMap(List<EmployeeAndFingerprint> eafList) {
+		Map<String, EmployeeAndFingerprint> out = new HashMap<String, EmployeeAndFingerprint>();
+		for (EmployeeAndFingerprint eaf : eafList) {
+			out.put(eaf.getEmployee().getKey(), eaf);
 		}
 		return out;
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<Employee> listEmployeeByGroup(Connection conn, Long group) {
+	private List<EmployeeAndFingerprint> listEmployeeByGroup(Connection conn, Long group) {
 		BSBeanUtils bu = new BSBeanUtils();
-		return (List<Employee>) bu.list(conn, new Employee(), "cGroup=?", group);
+
+		List<EmployeeAndFingerprint> out = new ArrayList<EmployeeAndFingerprint>();
+		EmployeeAndFingerprint eaf = null;
+		Fingerprint fingerprint = null;
+
+		List<Employee> employeeList = (List<Employee>) bu.list(conn, new Employee(), "cGroup=?", group);
+
+		for (Employee employee : employeeList) {
+			fingerprint = new Fingerprint();
+			bu.search(conn, fingerprint, "cEmployee=?", employee.getId());
+
+			eaf = new EmployeeAndFingerprint();
+			eaf.setEmployee(employee);
+			eaf.setFingerprint(fingerprint);
+
+			out.add(eaf);
+		}
+
+		return out;
 	}
 
 	@SuppressWarnings("unchecked")

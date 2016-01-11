@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.exception.BSProgrammerException;
+import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.framework.util.BSHttpServlet;
 import cl.buildersoft.timectrl.business.beans.Area;
 import cl.buildersoft.timectrl.business.beans.Employee;
@@ -56,18 +57,23 @@ public class EmployeeServiceImpl extends BSHttpServlet implements EmployeeServic
 
 	@Override
 	public Employee getEmployee(HttpServletRequest request, Long id) {
-		return getEmployee(getConnection(request), id);
+		BSConnectionFactory cf = new BSConnectionFactory();
+		Connection conn = cf.getConnection(request);
+		Employee out = getEmployee(conn, id);
+		cf.closeConnection(conn);
+		return out;
 	}
 
 	@Override
 	public Employee getEmployeeByKey(HttpServletRequest request, String key) {
 		BSBeanUtils bu = new BSBeanUtils();
 		Employee employee = new Employee();
-		Connection conn = getConnection(request);
-		// Connection conn = bu.getConnection(request);
+
+		BSConnectionFactory cf = new BSConnectionFactory();
+		Connection conn = cf.getConnection(request);
 
 		bu.search(conn, employee, "cKey=?", key);
-
+		cf.closeConnection(conn);
 		return employee;
 	}
 

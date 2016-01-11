@@ -16,10 +16,12 @@ public class Employee extends BSBean {
 	private Long area = null;
 	private Long privilege = null;
 	private Boolean enabled = null;
-	private String fingerPrint = null;
-	private Integer flag = null;
-	private Integer fingerIndex = null;
-	private String cardNumber = null;
+
+	/**
+	 * private String fingerPrint = null; private Integer flag = null; private
+	 * Integer fingerIndex = null; private String cardNumber = null;
+	 */
+
 	private Long group = null;
 	private String mail = null;
 
@@ -91,38 +93,6 @@ public class Employee extends BSBean {
 		this.enabled = enabled;
 	}
 
-	public String getFingerPrint() {
-		return fingerPrint;
-	}
-
-	public void setFingerPrint(String fingerPrint) {
-		this.fingerPrint = fingerPrint;
-	}
-
-	public Integer getFlag() {
-		return flag;
-	}
-
-	public void setFlag(Integer flag) {
-		this.flag = flag;
-	}
-
-	public Integer getFingerIndex() {
-		return fingerIndex;
-	}
-
-	public void setFingerIndex(Integer fingerIndex) {
-		this.fingerIndex = fingerIndex;
-	}
-
-	public String getCardNumber() {
-		return cardNumber;
-	}
-
-	public void setCardNumber(String cardNumber) {
-		this.cardNumber = cardNumber;
-	}
-
 	public Long getGroup() {
 		return group;
 	}
@@ -131,19 +101,17 @@ public class Employee extends BSBean {
 		this.group = group;
 	}
 
-	@Override
-	public String toString() {
-		return "Employee [key=" + key + ", rut=" + rut + ", name=" + name + ", post=" + post + ", area=" + area + ", privilege="
-				+ privilege + ", enabled=" + enabled + ", fingerPrint=" + fingerPrint + ", flag=" + flag + ", fingerIndex="
-				+ fingerIndex + ", cardNumber=" + cardNumber + ", group=" + group + ", getId()=" + getId() + "]";
-	}
-
 	public String getMail() {
 		return mail;
 	}
 
 	public void setMail(String mail) {
 		this.mail = mail;
+	}
+
+	@Override
+	public String toString() {
+		return "Employee [Id=" + getId() + ", key=" + key + ", rut=" + rut + ", name=" + name + ", enabled=" + enabled + "]";
 	}
 
 }
