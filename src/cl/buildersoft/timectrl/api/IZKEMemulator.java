@@ -84,7 +84,7 @@ public class IZKEMemulator implements _zkemProxy {
 			Holder<String> password, Holder<Integer> privilege, Holder<Boolean> enabled) {
 		this.counter++;
 
-		dwEnrollNumber.value = "13" + this.counter;
+		dwEnrollNumber.value =   dwEnrollNumber.value != null && dwEnrollNumber.value.length()>0 ? dwEnrollNumber.value:  "13" + this.counter;
 		name.value = "Juan Perez " + this.counter;
 		password.value = "xxxxxxxxxxxx";
 		privilege.value = 1;

@@ -145,16 +145,16 @@ public class MachineServiceImpl2 implements MachineService2 {
 	@Override
 	public List<EmployeeAndFingerprint> listEmployees(Connection conn, _zkemProxy api) {
 		List<EmployeeAndFingerprint> out = new ArrayList<EmployeeAndFingerprint>();
-		EmployeeAndFingerprint employee = null;
+		EmployeeAndFingerprint eaf = new EmployeeAndFingerprint();
 		Integer dwMachineNumber = 1;
 		api.enableDevice(dwMachineNumber, false);
 
 		api.readAllUserID(dwMachineNumber);
 		PrivilegeService ps = new PrivilegeServiceImpl();
-		while (employee != null) {
-			employee = readEmployeeFromDevice(conn, ps, api, null);
-			if (employee != null) {
-				out.add(employee);
+		while (eaf != null) {
+			eaf = readEmployeeFromDevice(conn, ps, api, null);
+			if (eaf != null) {
+				out.add(eaf);
 			}
 		}
 
@@ -351,6 +351,9 @@ public class MachineServiceImpl2 implements MachineService2 {
 	public void syncEmployees(Connection conn, _zkemProxy api, String[] keys) {
 		BSBeanUtils bu = new BSBeanUtils();
 		EmployeeAndFingerprint eafDB = new EmployeeAndFingerprint();
+		eafDB.setEmployee(new Employee());
+		eafDB.setFingerprint(new Fingerprint());
+		
 		EmployeeAndFingerprint eafDev = null;
 		Integer dwMachineNumber = 1;
 		PrivilegeService ps = new PrivilegeServiceImpl();
