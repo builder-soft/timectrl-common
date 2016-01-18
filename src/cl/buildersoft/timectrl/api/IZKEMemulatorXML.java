@@ -36,7 +36,6 @@ public class IZKEMemulatorXML implements _zkemProxy {
 	public IZKEMemulatorXML() {
 		BSConfig config = new BSConfig();
 		this.filePathEmu = config.fixPath(System.getenv("BS_PATH")) + FILENAME;
-
 	}
 
 	@Override
@@ -83,6 +82,7 @@ public class IZKEMemulatorXML implements _zkemProxy {
 		Attribute serie = this.rootElement.attribute("Serie");
 		if (serie == null) {
 			serie = DocumentHelper.createAttribute(this.rootElement, "Serie", "");
+			this.rootElement.add(serie);
 		}
 		if (serie.getValue().trim().length() == 0) {
 			serieValue = getRandom();
@@ -97,7 +97,7 @@ public class IZKEMemulatorXML implements _zkemProxy {
 	}
 
 	private void saveDocument() {
-		XMLWriter writer;
+		XMLWriter writer = null;
 		try {
 			writer = new XMLWriter(new FileWriter(filePathEmu));
 			writer.write(this.rootElement.getDocument());
@@ -109,7 +109,11 @@ public class IZKEMemulatorXML implements _zkemProxy {
 
 	private String getRandom() {
 		SecureRandom secureRandom = new SecureRandom();
-		return new BigInteger(130, secureRandom).toString(32);
+
+		String out = new BigInteger(130, secureRandom).toString(32);
+
+		out = out.length() > 20 ? out.substring(0, 20) : out;
+		return out;
 	}
 
 	@Override
@@ -119,7 +123,6 @@ public class IZKEMemulatorXML implements _zkemProxy {
 
 	@Override
 	public boolean beginBatchUpdate(int dwMachineNumber, int updateFlag) {
-
 		return true;
 	}
 
@@ -153,6 +156,8 @@ public class IZKEMemulatorXML implements _zkemProxy {
 	public boolean ssR_GetAllUserInfo(int dwMachineNumber, Holder<String> dwEnrollNumber, Holder<String> name,
 			Holder<String> password, Holder<Integer> privilege, Holder<Boolean> enabled) {
 
+		Element employee = (Element) this.attendances.selectSingleNode("Employee[" + (++currentEmployee) + "]");
+		
 		dwEnrollNumber.value = dwEnrollNumber.value != null && dwEnrollNumber.value.length() > 0 ? dwEnrollNumber.value : "13";
 		name.value = "Juan Perez ";
 		password.value = "xxxxxxxxxxxx";
