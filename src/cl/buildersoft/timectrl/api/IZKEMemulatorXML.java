@@ -29,7 +29,7 @@ public class IZKEMemulatorXML implements _zkemProxy {
 	String errorDescr = null;
 
 	Element attendances = null;
-	Element employess = null;
+	Element employees = null;
 	Integer currentAttendance = 0;
 	Integer currentEmployee = 0;
 
@@ -71,7 +71,7 @@ public class IZKEMemulatorXML implements _zkemProxy {
 
 	@Override
 	public boolean readAllUserID(int dwMachineNumber) {
-		this.employess = this.rootElement.element("Employees");
+		this.employees = this.rootElement.element("Employees");
 		return true;
 	}
 
@@ -156,14 +156,26 @@ public class IZKEMemulatorXML implements _zkemProxy {
 	public boolean ssR_GetAllUserInfo(int dwMachineNumber, Holder<String> dwEnrollNumber, Holder<String> name,
 			Holder<String> password, Holder<Integer> privilege, Holder<Boolean> enabled) {
 
-		Element employee = (Element) this.attendances.selectSingleNode("Employee[" + (++currentEmployee) + "]");
-		
-		dwEnrollNumber.value = dwEnrollNumber.value != null && dwEnrollNumber.value.length() > 0 ? dwEnrollNumber.value : "13";
+		Element employee = (Element) this.employees.selectSingleNode("Employee[" + (++currentEmployee) + "]");
+		if (employee != null) {
+			dwEnrollNumber.value = employee.attributeValue("EnrollNumber");
+			name.value = employee.attributeValue("Name");
+			password.value = employee.attributeValue("Password");
+			privilege.value = Integer.parseInt(employee.attributeValue("Privilege"));
+			enabled.value = "1".equals(employee.attributeValue("Enabled"));
+		}
+		return employee != null;
+	}
+
+	@Override
+	public boolean ssR_GetUserInfo(int machineNumber, Holder<String> enrollNumber, Holder<String> name, Holder<String> password,
+			Holder<Integer> privilege, Holder<Boolean> enabled) {
+
+		enrollNumber.value = "13";
 		name.value = "Juan Perez ";
 		password.value = "xxxxxxxxxxxx";
 		privilege.value = 1;
 		enabled.value = true;
-
 		return true;
 	}
 
@@ -182,18 +194,6 @@ public class IZKEMemulatorXML implements _zkemProxy {
 
 	@Override
 	public boolean setUserTmpExStr(int dwMachineNumber, String dwEnrollNumber, int dwFingerIndex, int flag, String tmpData) {
-		return true;
-	}
-
-	@Override
-	public boolean ssR_GetUserInfo(int machineNumber, Holder<String> enrollNumber, Holder<String> name, Holder<String> password,
-			Holder<Integer> privilege, Holder<Boolean> enabled) {
-
-		enrollNumber.value = "13";
-		name.value = "Juan Perez ";
-		password.value = "xxxxxxxxxxxx";
-		privilege.value = 1;
-		enabled.value = true;
 		return true;
 	}
 
