@@ -33,6 +33,8 @@ public class IZKEMemulatorXML implements _zkemProxy {
 	Integer currentAttendance = 0;
 	Integer currentEmployee = 0;
 
+	private String cardNumber = null;
+	
 	public IZKEMemulatorXML() {
 		BSConfig config = new BSConfig();
 		this.filePathEmu = config.fixPath(System.getenv("BS_PATH")) + FILENAME;
@@ -55,7 +57,6 @@ public class IZKEMemulatorXML implements _zkemProxy {
 			errorDescr = e.getMessage();
 			out = false;
 		}
-
 		return out;
 	}
 
@@ -171,12 +172,15 @@ public class IZKEMemulatorXML implements _zkemProxy {
 	public boolean ssR_GetUserInfo(int machineNumber, Holder<String> enrollNumber, Holder<String> name, Holder<String> password,
 			Holder<Integer> privilege, Holder<Boolean> enabled) {
 
-		enrollNumber.value = "13";
-		name.value = "Juan Perez ";
-		password.value = "xxxxxxxxxxxx";
-		privilege.value = 1;
-		enabled.value = true;
-		return true;
+		Element employee = (Element) this.employees.selectSingleNode("EnrollNumber='" + enrollNumber.value + "'");
+		if (employee != null) {
+//			enrollNumber.value = employee.attributeValue("EnrollNumber");
+			name.value = employee.attributeValue("Name");
+			password.value = employee.attributeValue("Password");
+			privilege.value = Integer.parseInt(employee.attributeValue("Privilege"));
+			enabled.value = "1".equals(employee.attributeValue("Enabled"));
+		}
+		return employee != null;
 	}
 
 	@Override
@@ -185,7 +189,7 @@ public class IZKEMemulatorXML implements _zkemProxy {
 		Boolean out = false;
 		if (dwFingerIndex == 2) {
 			flag.value = 1;
-			tmpData.value = "abscdefghijklm0987654321";
+			tmpData.value = getRandom();
 			tmpLength.value = tmpData.value.length();
 			out = true;
 		}
@@ -277,8 +281,6 @@ public class IZKEMemulatorXML implements _zkemProxy {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
-	private String cardNumber = null;
 
 	@Override
 	public boolean getStrCardNumber(Holder<String> aCardNumber) {
