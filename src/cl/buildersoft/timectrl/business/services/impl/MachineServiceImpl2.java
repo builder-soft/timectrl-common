@@ -353,7 +353,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 		EmployeeAndFingerprint eafDB = new EmployeeAndFingerprint();
 		eafDB.setEmployee(new Employee());
 		eafDB.setFingerprint(new Fingerprint());
-		
+
 		EmployeeAndFingerprint eafDev = null;
 		Integer dwMachineNumber = 1;
 		PrivilegeService ps = new PrivilegeServiceImpl();
@@ -366,12 +366,14 @@ public class MachineServiceImpl2 implements MachineService2 {
 				eafDev.getEmployee().setGroup(getDefaultGroup(conn));
 				bu.save(conn, eafDev.getEmployee());
 			} else {
+				bu.search(conn, eafDB.getFingerprint(), "cEmployee=?", eafDB.getEmployee().getId());
 				EmployeeAndFingerprint employeeMerged = mergeEmployee(eafDev, eafDB, ps);
 
 				updateEmployeeToDevice(conn, ps, api, employeeMerged);
 				api.refreshData(dwMachineNumber);
 
 				bu.save(conn, employeeMerged.getEmployee());
+
 				bu.save(conn, employeeMerged.getFingerprint());
 
 			}
@@ -392,6 +394,8 @@ public class MachineServiceImpl2 implements MachineService2 {
 		Fingerprint fingerprintDB = employeeAndFingerprinDB.getFingerprint();
 		Employee employeeDev = employeeAndFingerprinDevice.getEmployee();
 		Fingerprint fingerprintDev = employeeAndFingerprinDevice.getFingerprint();
+
+		outFingerprint.setId(fingerprintDB.getId());
 
 		outEmployee.setEnabled(employeeDB.getEnabled() == null ? employeeDev.getEnabled() : employeeDB.getEnabled());
 
@@ -431,14 +435,18 @@ public class MachineServiceImpl2 implements MachineService2 {
 	@Override
 	public void updateEmployeeToDevice(Connection conn, PrivilegeService ps, _zkemProxy api, EmployeeAndFingerprint eaf) {
 		Integer dwMachineNumber = 1;
-		String password = "";
+//		String password = "";
 		Holder<String> cardNumber = new Holder<String>();
 
 		cardNumber.value = eaf.getFingerprint().getCardNumber();
 		api.setStrCardNumber(cardNumber);
 
-		api.ssR_SetUserInfo(dwMachineNumber, eaf.getEmployee().getKey(), eaf.getEmployee().getName(), password,
-				getPrivilegeIdToKey(conn, ps, eaf.getEmployee().getPrivilege()), eaf.getEmployee().getEnabled());
+	
+		saveEmployeeToDevice(conn, ps, api, dwMachineNumber, eaf);
+		// TODO: Esto no graba el fingerprint del empleado.
+		
+//		api.ssR_SetUserInfo(dwMachineNumber, eaf.getEmployee().getKey(), eaf.getEmployee().getName(), password,
+//				getPrivilegeIdToKey(conn, ps, eaf.getEmployee().getPrivilege()), eaf.getEmployee().getEnabled());
 
 	}
 

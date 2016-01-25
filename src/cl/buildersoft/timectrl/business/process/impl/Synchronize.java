@@ -5,9 +5,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.util.BSConnectionFactory;
+import cl.buildersoft.framework.util.BSUtils;
+import cl.buildersoft.framework.util.crud.BSTableConfig;
 import cl.buildersoft.timectrl.api._zkemProxy;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.Fingerprint;
@@ -21,6 +25,7 @@ import cl.buildersoft.timectrl.business.services.impl.MachineServiceImpl2;
 import cl.buildersoft.timectrl.business.services.impl.PrivilegeServiceImpl;
 
 public class Synchronize extends AbstractProcess implements ExecuteProcess {
+	private final static Logger LOG = Logger.getLogger(Synchronize.class.getName());
 	private String[] validArguments = { "DOMAIN" };
 
 	public static void main(String[] args) {
@@ -79,6 +84,10 @@ Recorrer listado maquinas
 siguiente maquina
  </code>
 		 */
+		validateArguments(args);
+		Long startTime = System.currentTimeMillis();
+		LOG.log(Level.INFO, "Starting process syncronize for domain {0}", args[0]);
+
 		BSConnectionFactory cf = new BSConnectionFactory();
 
 		Connection conn = cf.getConnection(args[0]);
@@ -95,15 +104,20 @@ siguiente maquina
 		_zkemProxy connMch = null;
 		PrivilegeService ps = new PrivilegeServiceImpl();
 
+		LOG.log(Level.INFO, "There are {0} machines", machineList.size());
+
 		for (Machine machine : machineList) {
 			group = machine.getGroup();
 			eafDBList = listEmployeeByGroup(conn, group);
+			LOG.log(Level.INFO, "There are {0} employees in group Id {1}", BSUtils.array2ObjectArray(eafDBList.size(), group));
 			eafDBMap = listToEmployeeMap(eafDBList);
 
+			LOG.log(Level.INFO, "Connecting to machine {0}", machine);
 			connMch = connectMachine(conn, machine, machineService);
 
 			// Cargar listado de empleados en un Map<key, employee>MACHINE
 			eafMchList = machineService.listEmployees(conn, connMch);
+			LOG.log(Level.INFO, "Machine have {0} employees", eafMchList.size());
 			eafMchMap = listToEmployeeMap(eafMchList);
 
 			// Cargar solo los key desde map->DB en un arreglo
@@ -156,6 +170,9 @@ siguiente maquina
 			machineService.disconnect(connMch);
 		}
 		cf.closeConnection(conn);
+
+		LOG.log(Level.INFO, "Ending process syncronize for domain, it was in {0}ms", System.currentTimeMillis() - startTime);
+
 		return null;
 	}
 
