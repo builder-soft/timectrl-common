@@ -34,7 +34,7 @@ public class IZKEMemulatorXML implements _zkemProxy {
 	Integer currentEmployee = 0;
 
 	private String cardNumber = null;
-	
+
 	public IZKEMemulatorXML() {
 		BSConfig config = new BSConfig();
 		this.filePathEmu = config.fixPath(System.getenv("BS_PATH")) + FILENAME;
@@ -157,6 +157,9 @@ public class IZKEMemulatorXML implements _zkemProxy {
 	public boolean ssR_GetAllUserInfo(int dwMachineNumber, Holder<String> dwEnrollNumber, Holder<String> name,
 			Holder<String> password, Holder<Integer> privilege, Holder<Boolean> enabled) {
 
+		if (this.employees == null) {
+			readAllUserID(dwMachineNumber);
+		}
 		Element employee = (Element) this.employees.selectSingleNode("Employee[" + (++currentEmployee) + "]");
 		if (employee != null) {
 			dwEnrollNumber.value = employee.attributeValue("EnrollNumber");
@@ -174,7 +177,7 @@ public class IZKEMemulatorXML implements _zkemProxy {
 
 		Element employee = (Element) this.employees.selectSingleNode("EnrollNumber='" + enrollNumber.value + "'");
 		if (employee != null) {
-//			enrollNumber.value = employee.attributeValue("EnrollNumber");
+			// enrollNumber.value = employee.attributeValue("EnrollNumber");
 			name.value = employee.attributeValue("Name");
 			password.value = employee.attributeValue("Password");
 			privilege.value = Integer.parseInt(employee.attributeValue("Privilege"));
