@@ -16,6 +16,7 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSDataBaseException;
+import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.api.ClassFactory;
 import cl.buildersoft.timectrl.api.IZKEMException;
 import cl.buildersoft.timectrl.api._zkemProxy;
@@ -27,7 +28,6 @@ import cl.buildersoft.timectrl.business.beans.MarkType;
 import cl.buildersoft.timectrl.business.beans.Privilege;
 import cl.buildersoft.timectrl.business.services.MachineService2;
 import cl.buildersoft.timectrl.business.services.PrivilegeService;
-
 import com4j.Holder;
 
 public class MachineServiceImpl2 implements MachineService2 {
@@ -62,6 +62,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 		Boolean connected = api.connect_Net(machine.getIp(), machine.getPort().shortValue());
 		if (connected) {
 			machine.setLastAccess(new Timestamp(System.currentTimeMillis()));
+			machine.setSerial(readSerial(api));
 			bu.update(conn, machine);
 		} else {
 			throw new BSConfigurationException("No se pudo conectar con la maquina " + machine.getName() + "[" + machine.getIp()
@@ -214,6 +215,15 @@ public class MachineServiceImpl2 implements MachineService2 {
 			out.setEmployee(employee);
 			out.setFingerprint(fingerprint);
 		}
+
+		if (out != null) {
+			String nameTemp = out.getEmployee() != null ? out.getEmployee().getName() : "null";
+			String fingerprintTemp = out.getFingerprint() != null ? out.getFingerprint().getFingerprint() : "null";
+
+			Object[] values = BSUtils.array2ObjectArray(nameTemp, fingerprintTemp);
+
+			LOG.log(Level.INFO, "Reading employee from device Name {0} and fingerprint {1}", values);
+		}
 		return out;
 	}
 
@@ -302,7 +312,9 @@ public class MachineServiceImpl2 implements MachineService2 {
 
 		api.enableDevice(dwMachineNumber, false);
 		for (String key : keys) {
-			api.ssR_DeleteEnrollData(dwMachineNumber, key, 0);
+			deleteEnrollData(api, key, dwMachineNumber);
+			// deleteEmployee(api, key);
+			// api.ssR_DeleteEnrollData(dwMachineNumber, key, 0);
 		}
 		api.enableDevice(dwMachineNumber, true);
 	}
@@ -313,10 +325,16 @@ public class MachineServiceImpl2 implements MachineService2 {
 
 		api.enableDevice(dwMachineNumber, false);
 
-		api.ssR_DeleteEnrollData(dwMachineNumber, key, 12);
+		deleteEnrollData(api, key, dwMachineNumber);
 
 		api.enableDevice(dwMachineNumber, true);
 
+	}
+
+	private void deleteEnrollData(_zkemProxy api, String key, Integer dwMachineNumber) {
+		if (!api.ssR_DeleteEnrollData(dwMachineNumber, key, 12)) {
+			LOG.log(Level.INFO, "It could not be deleted employee with key {0} at machine {1}", key);
+		}
 	}
 
 	@Override
@@ -435,18 +453,19 @@ public class MachineServiceImpl2 implements MachineService2 {
 	@Override
 	public void updateEmployeeToDevice(Connection conn, PrivilegeService ps, _zkemProxy api, EmployeeAndFingerprint eaf) {
 		Integer dwMachineNumber = 1;
-//		String password = "";
+		// String password = "";
 		Holder<String> cardNumber = new Holder<String>();
 
 		cardNumber.value = eaf.getFingerprint().getCardNumber();
 		api.setStrCardNumber(cardNumber);
 
-	
 		saveEmployeeToDevice(conn, ps, api, dwMachineNumber, eaf);
 		// TODO: Esto no graba el fingerprint del empleado.
-		
-//		api.ssR_SetUserInfo(dwMachineNumber, eaf.getEmployee().getKey(), eaf.getEmployee().getName(), password,
-//				getPrivilegeIdToKey(conn, ps, eaf.getEmployee().getPrivilege()), eaf.getEmployee().getEnabled());
+
+		// api.ssR_SetUserInfo(dwMachineNumber, eaf.getEmployee().getKey(),
+		// eaf.getEmployee().getName(), password,
+		// getPrivilegeIdToKey(conn, ps, eaf.getEmployee().getPrivilege()),
+		// eaf.getEmployee().getEnabled());
 
 	}
 

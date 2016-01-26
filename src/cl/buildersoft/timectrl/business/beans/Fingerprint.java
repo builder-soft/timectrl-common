@@ -5,7 +5,7 @@ import cl.buildersoft.framework.beans.BSBean;
 public class Fingerprint extends BSBean {
 	private static final long serialVersionUID = 6729666154838467937L;
 	@SuppressWarnings("unused")
-	private String TABLE = "tFingerPrint";
+	private String TABLE = "tFingerprint";
 
 	private Long employee = null;
 	private String fingerprint = null;

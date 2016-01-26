@@ -18,9 +18,11 @@ import cl.buildersoft.timectrl.business.beans.Fingerprint;
 import cl.buildersoft.timectrl.business.beans.Machine;
 import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.process.ExecuteProcess;
+import cl.buildersoft.timectrl.business.services.EmployeeService;
 import cl.buildersoft.timectrl.business.services.MachineService2;
 import cl.buildersoft.timectrl.business.services.PrivilegeService;
 import cl.buildersoft.timectrl.business.services.impl.EmployeeAndFingerprint;
+import cl.buildersoft.timectrl.business.services.impl.EmployeeServiceImpl;
 import cl.buildersoft.timectrl.business.services.impl.MachineServiceImpl2;
 import cl.buildersoft.timectrl.business.services.impl.PrivilegeServiceImpl;
 
@@ -84,8 +86,9 @@ Recorrer listado maquinas
 siguiente maquina
  </code>
 		 */
-		validateArguments(args);
 		Long startTime = System.currentTimeMillis();
+		validateArguments(args);
+
 		LOG.log(Level.INFO, "Starting process syncronize for domain {0}", args[0]);
 
 		BSConnectionFactory cf = new BSConnectionFactory();
@@ -222,11 +225,15 @@ siguiente maquina
 		BSBeanUtils bu = new BSBeanUtils();
 
 		List<EmployeeAndFingerprint> out = new ArrayList<EmployeeAndFingerprint>();
-		EmployeeAndFingerprint eaf = null;
-		Fingerprint fingerprint = null;
+//		EmployeeAndFingerprint eaf = null;
+//		Fingerprint fingerprint = null;
 
 		List<Employee> employeeList = (List<Employee>) bu.list(conn, new Employee(), "cGroup=?", group);
 
+		EmployeeService es = new EmployeeServiceImpl();
+	out = 	es.fillFingerprint(conn, employeeList);
+		
+		/*
 		for (Employee employee : employeeList) {
 			fingerprint = new Fingerprint();
 			bu.search(conn, fingerprint, "cEmployee=?", employee.getId());
@@ -237,7 +244,7 @@ siguiente maquina
 
 			out.add(eaf);
 		}
-
+*/
 		return out;
 	}
 

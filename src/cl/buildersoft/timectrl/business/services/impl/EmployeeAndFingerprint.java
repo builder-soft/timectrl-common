@@ -5,8 +5,8 @@ import cl.buildersoft.timectrl.business.beans.Fingerprint;
 
 public class EmployeeAndFingerprint {
 
-	Employee employee = null;
-	Fingerprint fingerprint = null;
+	private Employee employee = null;
+	private	Fingerprint fingerprint = null;
 
 	public Employee getEmployee() {
 		return employee;
@@ -22,5 +22,11 @@ public class EmployeeAndFingerprint {
 
 	public void setFingerprint(Fingerprint fingerprint) {
 		this.fingerprint = fingerprint;
+	}
+
+	@Override
+	public String toString() {
+		return "EmployeeAndFingerprint [employeeId=" + employee.getId() + ", Name=" + employee.getName() + ", Key="
+				+ employee.getKey() + ", Fingerprint.employee=" + fingerprint.getEmployee() + ", fingerprint.id=" + fingerprint.getId() + "]";
 	}
 }
