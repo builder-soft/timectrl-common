@@ -11,6 +11,7 @@ import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.framework.exception.BSUserException;
+import cl.buildersoft.framework.util.BSFactory;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.Report;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
@@ -25,8 +26,8 @@ public class BuildReport3 extends AbstractConsoleService {
 	private static final String NOT_FOUND = "' not found.";
 	private static final Logger LOG = Logger.getLogger(BuildReport3.class.getName());
 	private Boolean runFromConsole = false;
-//	private String dsName = null;
-	
+
+	// private String dsName = null;
 
 	public static void main(String[] args) {
 		BuildReport3 buildReport = new BuildReport3();
@@ -68,7 +69,7 @@ public class BuildReport3 extends AbstractConsoleService {
 			throw new BSConfigurationException("Report '" + reportKey + NOT_FOUND);
 		}
 
-//		setConnection(conn);
+		// setConnection(conn);
 		List<String> out = doBuild(report.getId(), target);
 
 		BSmySQL mysql = new BSmySQL();
@@ -157,8 +158,8 @@ public class BuildReport3 extends AbstractConsoleService {
 
 		// ********************************************************
 
-//		BSmySQL mysql = new BSmySQL();
-//		mysql.closeConnection(conn);
+		// BSmySQL mysql = new BSmySQL();
+		// mysql.closeConnection(conn);
 
 		if (reportService.runAsDetachedThread()) {
 			responseList.clear();
@@ -243,6 +244,10 @@ public class BuildReport3 extends AbstractConsoleService {
 
 	@SuppressWarnings("unchecked")
 	private ReportService getInstance(String javaClassName) {
+		BSFactory f = new BSFactory();
+		return (ReportService) f.getInstance(javaClassName);
+		/**
+		 * <code>
 		ReportService instance = null;
 		try {
 			Class<ReportService> javaClass = (Class<ReportService>) Class.forName(javaClassName);
@@ -252,12 +257,18 @@ public class BuildReport3 extends AbstractConsoleService {
 			throw new BSProgrammerException(e);
 		}
 		return instance;
+		</code>
+		 */
 	}
 
 	public ParameterService getInstanceOfParameter(ReportParameterBean reportParameter) {
+		BSFactory f = new BSFactory();
+		return (ParameterService) f.getInstance(reportParameter.getTypeSource());
+		/**
+		 * <code>
+		 * 
 		ParameterService instance = null;
 		try {
-			@SuppressWarnings("unchecked")
 			Class<ParameterService> javaClass = (Class<ParameterService>) Class.forName(reportParameter.getTypeSource());
 			instance = (ParameterService) javaClass.newInstance();
 		} catch (Exception e) {
@@ -265,7 +276,8 @@ public class BuildReport3 extends AbstractConsoleService {
 			throw new BSProgrammerException(e);
 		}
 		return instance;
-
+		</code>
+		 */
 	}
 
 	private Report getReport(Connection conn, Long reportId) {
