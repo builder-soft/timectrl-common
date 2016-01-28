@@ -44,12 +44,38 @@ public class EventLogServiceImpl implements EventLogService {
 
 	@Override
 	public List<EventBean> list(Connection conn, Calendar startDate, Calendar endDate) {
+		List<Object> params = BSUtils.array2List(BSDateTimeUtil.calendar2Date(startDate), BSDateTimeUtil.calendar2Date(endDate));
+		return executeSP(conn, "pListEventsByDates", params);
+
+	}
+
+	@Override
+	public List<EventBean> list(Connection conn, Calendar startDate, Calendar endDate, Long eventType, Long userId) {
+		List<Object> params = BSUtils.array2List(BSDateTimeUtil.calendar2Date(startDate), BSDateTimeUtil.calendar2Date(endDate),
+				eventType, userId);
+		return executeSP(conn, "pListEventsByDatesUserAndEventType", params);
+	}
+
+	@Override
+	public List<EventBean> listByEventType(Connection conn, Calendar startDate, Calendar endDate, Long eventType) {
+		List<Object> params = BSUtils.array2List(BSDateTimeUtil.calendar2Date(startDate), BSDateTimeUtil.calendar2Date(endDate),
+				eventType);
+		return executeSP(conn, "pListEventsByDatesAndEventType", params);
+	}
+
+	@Override
+	public List<EventBean> listByUser(Connection conn, Calendar startDate, Calendar endDate, Long userId) {
+		List<Object> params = BSUtils.array2List(BSDateTimeUtil.calendar2Date(startDate), BSDateTimeUtil.calendar2Date(endDate),
+				userId);
+		return executeSP(conn, "pListEventsByDatesAndUser", params);
+	}
+
+	private List<EventBean> executeSP(Connection conn, String spName, List<Object> params) {
 		BSmySQL mysql = new BSmySQL();
 
-		List<Object> params = BSUtils.array2List(BSDateTimeUtil.calendar2Date(startDate), BSDateTimeUtil.calendar2Date(endDate));
 		LOG.log(Level.FINE, "Parameters for search are: {0}", params);
 		List<EventBean> out = new ArrayList<EventBean>();
-		ResultSet rs = mysql.callSingleSP(conn, "pListEventsByDates", params);
+		ResultSet rs = mysql.callSingleSP(conn, spName, params);
 
 		rsToList(rs, out);
 
@@ -62,7 +88,7 @@ public class EventLogServiceImpl implements EventLogService {
 	private void rsToList(ResultSet rs, List<EventBean> out) {
 		try {
 			EventBean eventBean = null;
-			
+
 			while (rs.next()) {
 				eventBean = new EventBean();
 
@@ -73,34 +99,15 @@ public class EventLogServiceImpl implements EventLogService {
 				eventBean.setUserName(rs.getString("cUserName"));
 				eventBean.setWhat(rs.getString("cWhat"));
 
-			
 				eventBean.setWhen(BSDateTimeUtil.timestamp2Calendar(rs.getTimestamp("cWhen")));
 
 				out.add(eventBean);
- 
+
 			}
 		} catch (SQLException e) {
 			throw new BSDataBaseException(e);
 		}
 
-	}
-
-	@Override
-	public List<EventBean> list(Connection conn, Calendar startDate, Calendar endDate, Long eventType, Long userId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<EventBean> listByEventType(Connection conn, Calendar startDate, Calendar endDate, Long eventType) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<EventBean> listByUser(Connection conn, Calendar startDate, Calendar endDate, Long user) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }
