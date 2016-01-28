@@ -5,7 +5,7 @@ import cl.buildersoft.timectrl.business.services.impl.EventLogServiceImpl;
 
 public class ServiceFactory extends BSFactory {
 
-	public static EventLogService creteEventLogService() {
+	public static EventLogService createEventLogService() {
 		return new EventLogServiceImpl();
 	}
 

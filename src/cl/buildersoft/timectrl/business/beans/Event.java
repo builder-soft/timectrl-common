@@ -48,8 +48,7 @@ public class Event extends BSBean {
 
 	@Override
 	public String toString() {
-		return "Event [Id=" + getId() + ", TABLE=" + TABLE + ", eventType=" + eventType + ", when=" + when + ", user=" + user
-				+ ", what=" + what + "]";
+		return "Event [Id=" + getId() + ", eventType=" + eventType + ", when=" + when + ", user=" + user + ", what=" + what + "]";
 	}
 
 }
