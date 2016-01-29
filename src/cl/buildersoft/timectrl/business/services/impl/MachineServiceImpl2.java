@@ -209,6 +209,14 @@ public class MachineServiceImpl2 implements MachineService2 {
 					fingerprint.setFlag(flag.value);
 					fingerprint.setFingerprint(fingerPrint.value);
 					break;
+				} else {
+					Holder<Integer> lastErrorHold = new Holder<Integer>();
+					api.getLastError(lastErrorHold);
+					LOG.log(Level.SEVERE, "Problems reading fingerprint, employee {0}. LastError: {1}",
+							BSUtils.array2ObjectArray(name.value, lastErrorHold.value));
+					// writeLastErrorToLog(api, "Reading fingerprint",
+					// name.value);
+					// LOG.log(Level.SEVERE, "Last Error was {0}");
 				}
 			}
 
@@ -271,7 +279,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 
 		if (api.beginBatchUpdate(dwMachineNumber, updateFlag)) {
 			saveEmployeeToDevice(conn, ps, api, dwMachineNumber, eaf);
-			api.refreshData(dwMachineNumber);
+			// api.refreshData(dwMachineNumber);
 
 		}
 		api.batchUpdate(dwMachineNumber);
@@ -289,8 +297,8 @@ public class MachineServiceImpl2 implements MachineService2 {
 		String password = "";
 		int privilege = getPrivilegeIdToKey(conn, ps, employee.getPrivilege());
 		boolean enabled = employee.getEnabled();
-		String fingerPrint = eaf.getFingerprint().getFingerprint();
-		fingerPrint = (fingerPrint == null ? "" : fingerPrint);
+		String fingerprint = eaf.getFingerprint().getFingerprint();
+		fingerprint = (fingerprint == null ? "" : fingerprint);
 		Integer flag = eaf.getFingerprint().getFlag();
 		flag = (flag == null ? 0 : flag);
 		Integer dwFingerIndex = eaf.getFingerprint().getFingerIndex();
@@ -302,8 +310,25 @@ public class MachineServiceImpl2 implements MachineService2 {
 		api.setStrCardNumber(cardNumber);
 
 		if (api.ssR_SetUserInfo(dwMachineNumber, dwEnrollNumber, name, password, privilege, enabled)) {
-			api.setUserTmpExStr(dwMachineNumber, dwEnrollNumber, dwFingerIndex, flag, fingerPrint);
+			if (!api.setUserTmpExStr(dwMachineNumber, dwEnrollNumber, dwFingerIndex, flag, fingerprint)) {
+				Holder<Integer> lastErrorHold = new Holder<Integer>();
+				api.getLastError(lastErrorHold);
+				LOG.log(Level.SEVERE, "Problems writing fingerprint to machine, employee {0}. LastError: {1}",
+						BSUtils.array2ObjectArray(name, lastErrorHold.value));
+				
+				LOG.log(Level.SEVERE,
+						"The pameters for writing fingerprint was: dwMachineNumber={0}\ndwEnrollNumber={1}\ndwFingerIndex={2}\nflag={3}\nfingerprint={4}",
+						BSUtils.array2ObjectArray(dwMachineNumber, dwEnrollNumber, dwFingerIndex, flag, fingerprint));
+			}
+		} else {
+			Holder<Integer> lastErrorHold = new Holder<Integer>();
+			api.getLastError(lastErrorHold);
+			LOG.log(Level.SEVERE, "Problems saving employee info to machine, employee {0}. LastError: {1}",
+					BSUtils.array2ObjectArray(name, lastErrorHold.value));
+			// writeLastErrorToLog(api, "Saving employee info to machine",
+			// name);
 		}
+
 	}
 
 	@Override
