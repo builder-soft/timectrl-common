@@ -30,7 +30,13 @@ public class EventLogServiceImpl implements EventLogService {
 		EventType eventType = new EventType();
 
 		if (!bu.search(conn, eventType, "cKey=?", eventTypeKey)) {
-			throw new BSConfigurationException("Event type not found, it was " + eventTypeKey);
+			eventType.setKey(eventTypeKey);
+			eventType.setName(eventTypeKey);
+			bu.insert(conn, eventType);
+
+			LOG.log(Level.WARNING,
+					"Record not found in table tEventType. The record is created with key {0}, this description should be updated.",
+					eventTypeKey);
 		}
 
 		event.setEventType(eventType.getId());
@@ -97,7 +103,7 @@ public class EventLogServiceImpl implements EventLogService {
 				eventBean.setUser(rs.getLong("cUser"));
 				eventBean.setUserMail(rs.getString("cUserMail"));
 				eventBean.setUserName(rs.getString("cUserName"));
-				eventBean.setWhat(rs.getString("cWhat"));
+				eventBean.setWhat(replaceEnterByBR(rs.getString("cWhat")));
 
 				eventBean.setWhen(BSDateTimeUtil.timestamp2Calendar(rs.getTimestamp("cWhen")));
 
@@ -108,6 +114,10 @@ public class EventLogServiceImpl implements EventLogService {
 			throw new BSDataBaseException(e);
 		}
 
+	}
+
+	private String replaceEnterByBR(String str) {
+		return str.replaceAll("(\r\n|\n)", "<br/>");
 	}
 
 }
