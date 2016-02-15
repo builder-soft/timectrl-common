@@ -36,8 +36,7 @@ public abstract class ClassFactory {
 		_zkemProxy out = null;
 
 		if (emulate) {
-			out = new IZKEMemulator();
-			((IZKEMemulator) out).maxRecords = 5000;
+			out = new IZKEMemulatorXML();			
 		} else {
 			out = COM4J.createInstance(cl.buildersoft.timectrl.api._zkemProxy.class, CLS_ID);
 		}

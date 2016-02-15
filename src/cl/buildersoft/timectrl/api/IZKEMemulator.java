@@ -72,8 +72,9 @@ public class IZKEMemulator implements _zkemProxy {
 		dwSecond.value = 19;
 		dwWorkCode.value = 1;
 
+
 		if (counter == 101) {
-//			dwDay.value = 32;
+			// dwDay.value = 32;
 		}
 
 		return counter <= maxRecords;
@@ -84,7 +85,8 @@ public class IZKEMemulator implements _zkemProxy {
 			Holder<String> password, Holder<Integer> privilege, Holder<Boolean> enabled) {
 		this.counter++;
 
-		dwEnrollNumber.value = "13" + this.counter;
+		dwEnrollNumber.value = dwEnrollNumber.value != null && dwEnrollNumber.value.length() > 0 ? dwEnrollNumber.value : "13"
+				+ this.counter;
 		name.value = "Juan Perez " + this.counter;
 		password.value = "xxxxxxxxxxxx";
 		privilege.value = 1;
@@ -112,6 +114,18 @@ public class IZKEMemulator implements _zkemProxy {
 	}
 
 	@Override
+	public boolean ssR_GetUserInfo(int machineNumber, Holder<String> enrollNumber, Holder<String> name, Holder<String> password,
+			Holder<Integer> privilege, Holder<Boolean> enabled) {
+
+		enrollNumber.value = "13" + this.counter;
+		name.value = "Juan Perez " + this.counter;
+		password.value = "xxxxxxxxxxxx";
+		privilege.value = 1;
+		enabled.value = true;
+		return true;
+	}
+
+	@Override
 	public <T> EventCookie advise(Class<T> arg0, T arg1) {
 		// TODO Auto-generated method stub
 		return null;
@@ -120,7 +134,6 @@ public class IZKEMemulator implements _zkemProxy {
 	@Override
 	public void dispose() {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -162,7 +175,6 @@ public class IZKEMemulator implements _zkemProxy {
 	@Override
 	public void setName(String arg0) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -184,19 +196,6 @@ public class IZKEMemulator implements _zkemProxy {
 
 	@Override
 	public boolean readGeneralLogData(int machine) {
-		return true;
-	}
-
-	@Override
-	public boolean ssR_GetUserInfo(int machineNumber, Holder<String> enrollNumber, Holder<String> name, Holder<String> password,
-			Holder<Integer> privilege, Holder<Boolean> enabled) {
-
-		enrollNumber.value = "13" + this.counter;
-		name.value = "Juan Perez " + this.counter;
-		password.value = "xxxxxxxxxxxx";
-		privilege.value = 1;
-		enabled.value = true;
-
 		return true;
 	}
 
@@ -231,5 +230,4 @@ public class IZKEMemulator implements _zkemProxy {
 		this.cardNumber = aCardNumber.value;
 		return true;
 	}
-
 }
