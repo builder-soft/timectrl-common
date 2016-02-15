@@ -344,22 +344,20 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 			while (rs.next()) {
 				Long employeeId = rs.getLong(1);
 
+ 
 				if (!employeeIdSet.contains(employeeId)) {
 					employeeIdSet.add(employeeId);
 					if (haveJunior(conn, employeeId, mysql) && boss != employeeId) {
 						if (this.employeeDepth == 0) {
 							out += getEmployeeIds(conn, employeeId);
 
-							// LOG.log(Level.INFO,
-							// "\t\t\t\t\t\tLen={0} value={1}",
-							// BSUtils.array2ObjectArray(out.length(), out));
+//							LOG.log(Level.INFO, "\t\t\t\t\t\tLen={0} value={1}", BSUtils.array2ObjectArray(out.length(), out));
+ 
 
-							if (out.lastIndexOf(",") != (out.length() - 1)) {
+							if (out.lastIndexOf(",") != (out.length()-1)) {
 								out += ",";
-								// } else {
-								// LOG.log(Level.WARNING,
-								// "Boss is {0} employees are {1}",
-								// BSUtils.array2ObjectArray(boss, out));
+//							} else {
+//								LOG.log(Level.WARNING, "Boss is {0} employees are {1}", BSUtils.array2ObjectArray(boss, out));
 							}
 						} else {
 							if (this.currentDepth < this.employeeDepth) {
@@ -367,17 +365,14 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 								out += getEmployeeIds(conn, employeeId) + ",";
 								this.currentDepth--;
 							}
-
 						}
 					}
-
+ 
 					out += employeeId.toString() + ",";
-					// LOG.log(Level.WARNING, "Employee Id {0} added to list",
-					// employeeId);
+//					LOG.log(Level.WARNING, "Employee Id {0} added to list", employeeId);
 				} else {
-					// LOG.log(Level.WARNING, "Employee Id {0} exists",
-					// employeeId);
-
+//					LOG.log(Level.WARNING, "Employee Id {0} exists", employeeId);
+ 
 				}
 			}
 		} catch (SQLException e) {
@@ -385,16 +380,17 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		} finally {
 			mysql.closeSQL(rs);
 		}
+ 
 
-		// LOG.logp(Level.INFO, this.getClass().getName(), "getEmployeeIds",
-		// "Ending method (before substring) with output={0} the input was={1}",
-		// BSUtils.array2ObjectArray(out, boss));
+//		LOG.logp(Level.INFO, this.getClass().getName(), "getEmployeeIds",
+//				"Ending method (before substring) with output={0} the input was={1}", BSUtils.array2ObjectArray(out, boss));
 		out = out.length() > 0 ? out.substring(0, out.length() - 1) : "";
 
 		LOG.logp(Level.INFO, this.getClass().getName(), "getEmployeeIds",
 				"Ending method (after substring) with output={0} the input was={1}", BSUtils.array2ObjectArray(out, boss));
 
 		return out;
+ 
 	}
 
 	private boolean haveJunior(Connection conn, Long employee, BSmySQL mysql) {

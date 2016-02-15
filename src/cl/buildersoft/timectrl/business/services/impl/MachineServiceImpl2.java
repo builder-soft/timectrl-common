@@ -16,21 +16,21 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSDataBaseException;
+import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.api.ClassFactory;
 import cl.buildersoft.timectrl.api.IZKEMException;
 import cl.buildersoft.timectrl.api._zkemProxy;
 import cl.buildersoft.timectrl.business.beans.AttendanceLog;
 import cl.buildersoft.timectrl.business.beans.Employee;
+import cl.buildersoft.timectrl.business.beans.Fingerprint;
 import cl.buildersoft.timectrl.business.beans.Machine;
 import cl.buildersoft.timectrl.business.beans.MarkType;
 import cl.buildersoft.timectrl.business.beans.Privilege;
 import cl.buildersoft.timectrl.business.services.MachineService2;
 import cl.buildersoft.timectrl.business.services.PrivilegeService;
-
 import com4j.Holder;
 
 public class MachineServiceImpl2 implements MachineService2 {
-	// private Boolean windows8compatible = null;
 	private static final Logger LOG = Logger.getLogger(MachineServiceImpl2.class.getName());
 	private final Map<Long, MarkType> markTypeMap = new HashMap<Long, MarkType>();
 
@@ -51,10 +51,6 @@ public class MachineServiceImpl2 implements MachineService2 {
 
 		}
 
-		// BSBeanUtils bu = new BSBeanUtils();
-		// MarkType markType = new MarkType();
-		// bu.search(conn, markType, "cKey=?", inOut);
-
 		return out;
 	}
 
@@ -66,6 +62,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 		Boolean connected = api.connect_Net(machine.getIp(), machine.getPort().shortValue());
 		if (connected) {
 			machine.setLastAccess(new Timestamp(System.currentTimeMillis()));
+			machine.setSerial(readSerial(api));
 			bu.update(conn, machine);
 		} else {
 			throw new BSConfigurationException("No se pudo conectar con la maquina " + machine.getName() + "[" + machine.getIp()
@@ -92,8 +89,6 @@ public class MachineServiceImpl2 implements MachineService2 {
 		Holder<Integer> dwMinute = new Holder<Integer>(0);
 		Holder<Integer> dwSecond = new Holder<Integer>(0);
 		Holder<Integer> dwWorkCode = new Holder<Integer>(0);
-		// Timestamp date = null;
-		// Calendar calendar = null;
 
 		api.enableDevice(dwMachineNumber, false);
 		if (api.readGeneralLogData(dwMachineNumber)) {
@@ -141,48 +136,26 @@ public class MachineServiceImpl2 implements MachineService2 {
 			Holder<Integer> dwWorkCode) {
 
 		Boolean out = null;
-		/**
-		 * <code>
-		if (this.windows8compatible == null) {
-			BSConfig config = new BSConfig();
-			this.windows8compatible = config.getBoolean(conn, "W8COMPATIBLE");
-			this.windows8compatible = false;
-		}
-</code>
-		 */
-		// if (!windows8compatible) {
+
 		out = api.ssR_GetGeneralLogData(dwMachineNumber, dwEnrollNumber, dwVerifyMode, dwInOutMode, dwYear, dwMonth, dwDay,
 				dwHour, dwMinute, dwSecond, dwWorkCode);
-		/**
-		 * <code>
-		} else {
-			Holder<Integer> dwTMachineNumber = new Holder<Integer>();
-			Holder<Integer> dwEMachineNumber = new Holder<Integer>();
-			Holder<Integer> dwEnrollNumberI = new Holder<Integer>();
 
-			out = api.getGeneralLogData(dwMachineNumber, dwTMachineNumber, dwEnrollNumberI, dwEMachineNumber,
-					dwVerifyMode, dwInOutMode, dwYear, dwMonth, dwDay, dwHour, dwMinute);
-
-			dwEnrollNumber.value = "" + dwEnrollNumberI.value;
-		}
-		</code>
-		 */
 		return out;
 	}
 
 	@Override
-	public List<Employee> listEmployees(Connection conn, _zkemProxy api) {
-		List<Employee> out = new ArrayList<Employee>();
-		Employee employee = new Employee();
+	public List<EmployeeAndFingerprint> listEmployees(Connection conn, _zkemProxy api) {
+		List<EmployeeAndFingerprint> out = new ArrayList<EmployeeAndFingerprint>();
+		EmployeeAndFingerprint eaf = new EmployeeAndFingerprint();
 		Integer dwMachineNumber = 1;
 		api.enableDevice(dwMachineNumber, false);
 
 		api.readAllUserID(dwMachineNumber);
 		PrivilegeService ps = new PrivilegeServiceImpl();
-		while (employee != null) {
-			employee = readEmployeeFromDevice(conn, ps, api, null);
-			if (employee != null) {
-				out.add(employee);
+		while (eaf != null) {
+			eaf = readEmployeeFromDevice(conn, ps, api, null);
+			if (eaf != null) {
+				out.add(eaf);
 			}
 		}
 
@@ -191,19 +164,11 @@ public class MachineServiceImpl2 implements MachineService2 {
 		return out;
 	}
 
-	/**
-	 * <code>
-	 * 
-	 * @Deprecated private boolean readUserinfo(IZKEM api, Integer
-	 *             dwMachineNumber, Holder<String> dwEnrollNumber,
-	 *             Holder<String> name, Holder<String> password, Holder<Integer>
-	 *             privilege, Holder<Boolean> enabled) { return
-	 *             api.ssR_GetAllUserInfo(dwMachineNumber, dwEnrollNumber, name,
-	 *             password, privilege, enabled); } </code>
-	 */
-
-	private Employee readEmployeeFromDevice(Connection conn, PrivilegeService ps, _zkemProxy api, String enrollNumber) {
-		Employee out = null;
+	private EmployeeAndFingerprint readEmployeeFromDevice(Connection conn, PrivilegeService ps, _zkemProxy api,
+			String enrollNumber) {
+		Employee employee = null;
+		Fingerprint fingerprint = null;
+		EmployeeAndFingerprint out = null;
 
 		int dwMachineNumber = 1;
 		Holder<String> dwEnrollNumber = new Holder<String>(enrollNumber == null ? "" : enrollNumber);
@@ -222,26 +187,50 @@ public class MachineServiceImpl2 implements MachineService2 {
 		}
 
 		if (found) {
-			out = new Employee();
-			out.setEnabled(enabled.value);
-			out.setKey(dwEnrollNumber.value);
-			out.setName(name.value);
-			out.setPrivilege(getPrivilegeKeyToId(conn, ps, privilege.value));
+			employee = new Employee();
+			fingerprint = new Fingerprint();
+			out = new EmployeeAndFingerprint();
+
+			employee.setEnabled(enabled.value);
+			employee.setKey(dwEnrollNumber.value);
+			employee.setName(name.value);
+
+			employee.setPrivilege(getPrivilegeKeyToId(conn, ps, privilege.value));
 
 			api.getStrCardNumber(cardNumber);
-			out.setCardNumber(cardNumber.value);
+			fingerprint.setCardNumber(cardNumber.value);
 
 			for (int dwFingerIndex = 0; dwFingerIndex < 10; dwFingerIndex++) {
 				Holder<Integer> flag = new Holder<Integer>();
 				Holder<String> fingerPrint = new Holder<String>();
 				Holder<Integer> length = new Holder<Integer>();
-				if (api.getUserTmpExStr(dwMachineNumber, out.getKey(), dwFingerIndex, flag, fingerPrint, length)) {
-					out.setFingerIndex(dwFingerIndex);
-					out.setFlag(flag.value);
-					out.setFingerPrint(fingerPrint.value);
+				if (api.getUserTmpExStr(dwMachineNumber, employee.getKey(), dwFingerIndex, flag, fingerPrint, length)) {
+					fingerprint.setFingerIndex(dwFingerIndex);
+					fingerprint.setFlag(flag.value);
+					fingerprint.setFingerprint(fingerPrint.value);
 					break;
+				} else {
+					Holder<Integer> lastErrorHold = new Holder<Integer>();
+					api.getLastError(lastErrorHold);
+					LOG.log(Level.SEVERE, "Problems reading fingerprint, employee {0}. LastError: {1}",
+							BSUtils.array2ObjectArray(name.value, lastErrorHold.value));
+					// writeLastErrorToLog(api, "Reading fingerprint",
+					// name.value);
+					// LOG.log(Level.SEVERE, "Last Error was {0}");
 				}
 			}
+
+			out.setEmployee(employee);
+			out.setFingerprint(fingerprint);
+		}
+
+		if (out != null) {
+			String nameTemp = out.getEmployee() != null ? out.getEmployee().getName() : "null";
+			String fingerprintTemp = out.getFingerprint() != null ? out.getFingerprint().getFingerprint() : "null";
+
+			Object[] values = BSUtils.array2ObjectArray(nameTemp, fingerprintTemp);
+
+			LOG.log(Level.INFO, "Reading employee from device Name {0} and fingerprint {1}", values);
 		}
 		return out;
 	}
@@ -265,14 +254,15 @@ public class MachineServiceImpl2 implements MachineService2 {
 	}
 
 	@Override
-	public void addEmployees(Connection conn, PrivilegeService ps, _zkemProxy api, List<Employee> employees) {
+	public void addEmployees(Connection conn, PrivilegeService ps, _zkemProxy api,
+			List<EmployeeAndFingerprint> employeeAndFingerprintList) {
 		Integer dwMachineNumber = 1;
 		Integer updateFlag = 1;
 		api.enableDevice(dwMachineNumber, false);
 
 		if (api.beginBatchUpdate(dwMachineNumber, updateFlag)) {
-			for (Employee employee : employees) {
-				saveEmployeeToDevice(conn, ps, api, dwMachineNumber, employee);
+			for (EmployeeAndFingerprint employeeAndFingerprint : employeeAndFingerprintList) {
+				saveEmployeeToDevice(conn, ps, api, dwMachineNumber, employeeAndFingerprint);
 				api.refreshData(dwMachineNumber);
 			}
 		}
@@ -282,14 +272,14 @@ public class MachineServiceImpl2 implements MachineService2 {
 	}
 
 	@Override
-	public void addEmployee(Connection conn, PrivilegeService ps, _zkemProxy api, Employee employee) {
+	public void addEmployee(Connection conn, PrivilegeService ps, _zkemProxy api, EmployeeAndFingerprint eaf) {
 		Integer dwMachineNumber = 1;
 		Integer updateFlag = 1;
 		api.enableDevice(dwMachineNumber, false);
 
 		if (api.beginBatchUpdate(dwMachineNumber, updateFlag)) {
-			saveEmployeeToDevice(conn, ps, api, dwMachineNumber, employee);
-			api.refreshData(dwMachineNumber);
+			saveEmployeeToDevice(conn, ps, api, dwMachineNumber, eaf);
+			// api.refreshData(dwMachineNumber);
 
 		}
 		api.batchUpdate(dwMachineNumber);
@@ -298,27 +288,47 @@ public class MachineServiceImpl2 implements MachineService2 {
 	}
 
 	private void saveEmployeeToDevice(Connection conn, PrivilegeService ps, _zkemProxy api, Integer dwMachineNumber,
-			Employee employee) {
+			EmployeeAndFingerprint eaf) {
+
+		Employee employee = eaf.getEmployee();
+
 		String dwEnrollNumber = employee.getKey();
 		String name = employee.getName();
 		String password = "";
 		int privilege = getPrivilegeIdToKey(conn, ps, employee.getPrivilege());
 		boolean enabled = employee.getEnabled();
-		String fingerPrint = employee.getFingerPrint();
-		fingerPrint = (fingerPrint == null ? "" : fingerPrint);
-		Integer flag = employee.getFlag();
+		String fingerprint = eaf.getFingerprint().getFingerprint();
+		fingerprint = (fingerprint == null ? "" : fingerprint);
+		Integer flag = eaf.getFingerprint().getFlag();
 		flag = (flag == null ? 0 : flag);
-		Integer dwFingerIndex = employee.getFingerIndex();
+		Integer dwFingerIndex = eaf.getFingerprint().getFingerIndex();
 		dwFingerIndex = (dwFingerIndex == null ? 0 : dwFingerIndex);
 
 		Holder<String> cardNumber = new Holder<String>();
-		cardNumber.value = employee.getCardNumber();
+		cardNumber.value = eaf.getFingerprint().getCardNumber();
 
 		api.setStrCardNumber(cardNumber);
 
 		if (api.ssR_SetUserInfo(dwMachineNumber, dwEnrollNumber, name, password, privilege, enabled)) {
-			api.setUserTmpExStr(dwMachineNumber, dwEnrollNumber, dwFingerIndex, flag, fingerPrint);
+			if (!api.setUserTmpExStr(dwMachineNumber, dwEnrollNumber, dwFingerIndex, flag, fingerprint)) {
+				Holder<Integer> lastErrorHold = new Holder<Integer>();
+				api.getLastError(lastErrorHold);
+				LOG.log(Level.SEVERE, "Problems writing fingerprint to machine, employee {0}. LastError: {1}",
+						BSUtils.array2ObjectArray(name, lastErrorHold.value));
+				
+				LOG.log(Level.SEVERE,
+						"The pameters for writing fingerprint was: dwMachineNumber={0}\ndwEnrollNumber={1}\ndwFingerIndex={2}\nflag={3}\nfingerprint={4}",
+						BSUtils.array2ObjectArray(dwMachineNumber, dwEnrollNumber, dwFingerIndex, flag, fingerprint));
+			}
+		} else {
+			Holder<Integer> lastErrorHold = new Holder<Integer>();
+			api.getLastError(lastErrorHold);
+			LOG.log(Level.SEVERE, "Problems saving employee info to machine, employee {0}. LastError: {1}",
+					BSUtils.array2ObjectArray(name, lastErrorHold.value));
+			// writeLastErrorToLog(api, "Saving employee info to machine",
+			// name);
 		}
+
 	}
 
 	@Override
@@ -327,7 +337,9 @@ public class MachineServiceImpl2 implements MachineService2 {
 
 		api.enableDevice(dwMachineNumber, false);
 		for (String key : keys) {
-			api.ssR_DeleteEnrollData(dwMachineNumber, key, 0);
+			deleteEnrollData(api, key, dwMachineNumber);
+			// deleteEmployee(api, key);
+			// api.ssR_DeleteEnrollData(dwMachineNumber, key, 0);
 		}
 		api.enableDevice(dwMachineNumber, true);
 	}
@@ -338,10 +350,16 @@ public class MachineServiceImpl2 implements MachineService2 {
 
 		api.enableDevice(dwMachineNumber, false);
 
-		api.ssR_DeleteEnrollData(dwMachineNumber, key, 12);
+		deleteEnrollData(api, key, dwMachineNumber);
 
 		api.enableDevice(dwMachineNumber, true);
 
+	}
+
+	private void deleteEnrollData(_zkemProxy api, String key, Integer dwMachineNumber) {
+		if (!api.ssR_DeleteEnrollData(dwMachineNumber, key, 12)) {
+			LOG.log(Level.INFO, "It could not be deleted employee with key {0} at machine {1}", key);
+		}
 	}
 
 	@Override
@@ -375,83 +393,104 @@ public class MachineServiceImpl2 implements MachineService2 {
 	 * */
 	public void syncEmployees(Connection conn, _zkemProxy api, String[] keys) {
 		BSBeanUtils bu = new BSBeanUtils();
-		Employee employeeDB = new Employee();
-		Employee employeeDevice = null;
+		EmployeeAndFingerprint eafDB = new EmployeeAndFingerprint();
+		eafDB.setEmployee(new Employee());
+		eafDB.setFingerprint(new Fingerprint());
+
+		EmployeeAndFingerprint eafDev = null;
 		Integer dwMachineNumber = 1;
 		PrivilegeService ps = new PrivilegeServiceImpl();
 
-		/**
-		 * <code>
-		Holder<String> dwEnrollNumber = new Holder<String>("");
-		Holder<String> name = new Holder<String>("");
-		Holder<String> password = new Holder<String>("");
-		Holder<Integer> privilege = new Holder<Integer>(0);
-		Holder<Boolean> enabled = new Holder<Boolean>(false);
-		Holder<Integer> fingerIndex = new Holder<Integer>(0);
-		</code>
-		 */
-
 		api.enableDevice(dwMachineNumber, false);
-		// api.readAllUserID(dwMachineNumber);
-		// PrivilegeService ps = new PrivilegeServiceImpl();
+
 		for (String key : keys) {
-			employeeDevice = readEmployeeFromDevice(conn, ps, api, key);
-			if (!bu.search(conn, employeeDB, "cKey=?", key)) {
-				employeeDevice.setGroup(getDefaultGroup(conn));
-				bu.save(conn, employeeDevice);
+			eafDev = readEmployeeFromDevice(conn, ps, api, key);
+			if (!bu.search(conn, eafDB.getEmployee(), "cKey=?", key)) {
+				eafDev.getEmployee().setGroup(getDefaultGroup(conn));
+				bu.save(conn, eafDev.getEmployee());
 			} else {
-				Employee employeeMerged = mergeEmployee(employeeDevice, employeeDB, ps);
+				bu.search(conn, eafDB.getFingerprint(), "cEmployee=?", eafDB.getEmployee().getId());
+				EmployeeAndFingerprint employeeMerged = mergeEmployee(eafDev, eafDB, ps);
 
 				updateEmployeeToDevice(conn, ps, api, employeeMerged);
 				api.refreshData(dwMachineNumber);
-				bu.save(conn, employeeMerged);
+
+				bu.save(conn, employeeMerged.getEmployee());
+
+				bu.save(conn, employeeMerged.getFingerprint());
+
 			}
 		}
 		api.enableDevice(dwMachineNumber, true);
 	}
 
 	@Override
-	public Employee mergeEmployee(Employee employeeDevice, Employee employeeDB, PrivilegeService ps) {
-		//
-		// }
-		// public Employee mergeEmployee(Employee employeeDevice, Employee
-		// employeeDB) {
-		Employee employee = new Employee();
+	public EmployeeAndFingerprint mergeEmployee(EmployeeAndFingerprint employeeAndFingerprinDevice,
+			EmployeeAndFingerprint employeeAndFingerprinDB, PrivilegeService ps) {
 
-		employee.setEnabled(employeeDB.getEnabled() == null ? employeeDevice.getEnabled() : employeeDB.getEnabled());
-		employee.setFingerIndex(employeeDB.getFingerIndex() == null ? employeeDevice.getFingerIndex() : employeeDB
+		EmployeeAndFingerprint out = new EmployeeAndFingerprint();
+
+		Employee outEmployee = new Employee();
+		Fingerprint outFingerprint = new Fingerprint();
+
+		Employee employeeDB = employeeAndFingerprinDB.getEmployee();
+		Fingerprint fingerprintDB = employeeAndFingerprinDB.getFingerprint();
+		Employee employeeDev = employeeAndFingerprinDevice.getEmployee();
+		Fingerprint fingerprintDev = employeeAndFingerprinDevice.getFingerprint();
+
+		outFingerprint.setId(fingerprintDB.getId());
+
+		outEmployee.setEnabled(employeeDB.getEnabled() == null ? employeeDev.getEnabled() : employeeDB.getEnabled());
+
+		outFingerprint.setFingerIndex(fingerprintDB.getFingerIndex() == null ? fingerprintDev.getFingerIndex() : fingerprintDB
 				.getFingerIndex());
-		employee.setFingerPrint(employeeDB.getFingerPrint() == null ? employeeDevice.getFingerPrint() : employeeDB
-				.getFingerPrint());
-		employee.setFlag(employeeDB.getFlag() == null ? employeeDevice.getFlag() : employeeDB.getFlag());
-		employee.setId(employeeDB.getId());
-		employee.setKey(employeeDB.getKey() == null ? employeeDevice.getKey() : employeeDB.getKey());
-		employee.setName(employeeDB.getName() == null ? employeeDevice.getName() : employeeDB.getName());
-		employee.setPost(employeeDB.getPost() == null ? employeeDevice.getPost() : employeeDB.getPost());
 
-		employee.setPrivilege(employeeDB.getPrivilege() == null ? employeeDevice.getPrivilege() : employeeDB.getPrivilege());
+		outFingerprint.setFingerprint(fingerprintDB.getFingerprint() == null ? fingerprintDev.getFingerprint() : fingerprintDB
+				.getFingerprint());
 
-		employee.setRut(employeeDB.getRut() == null ? employeeDevice.getRut() : employeeDB.getRut());
+		outFingerprint.setFlag(fingerprintDB.getFlag() == null ? fingerprintDev.getFlag() : fingerprintDB.getFlag());
 
-		employee.setCardNumber(employeeDB.getCardNumber() == null ? employeeDevice.getCardNumber() : employeeDB.getCardNumber());
+		outEmployee.setId(employeeDB.getId());
+		outFingerprint.setEmployee(employeeDB.getId());
 
-		employee.setArea(employeeDB.getArea());
-		employee.setGroup(employeeDB.getGroup());
+		outEmployee.setKey(employeeDB.getKey() == null ? employeeDev.getKey() : employeeDB.getKey());
 
-		return employee;
+		outEmployee.setName(employeeDB.getName() == null ? employeeDev.getName() : employeeDB.getName());
+
+		outEmployee.setPost(employeeDB.getPost() == null ? employeeDev.getPost() : employeeDB.getPost());
+
+		outEmployee.setPrivilege(employeeDB.getPrivilege() == null ? employeeDev.getPrivilege() : employeeDB.getPrivilege());
+
+		outEmployee.setRut(employeeDB.getRut() == null ? employeeDev.getRut() : employeeDB.getRut());
+
+		outFingerprint.setCardNumber(fingerprintDB.getCardNumber() == null ? fingerprintDev.getCardNumber() : fingerprintDB
+				.getCardNumber());
+
+		outEmployee.setArea(employeeDB.getArea());
+		outEmployee.setGroup(employeeDB.getGroup());
+
+		out.setEmployee(outEmployee);
+		out.setFingerprint(outFingerprint);
+
+		return out;
 	}
 
 	@Override
-	public void updateEmployeeToDevice(Connection conn, PrivilegeService ps, _zkemProxy api, Employee employee) {
+	public void updateEmployeeToDevice(Connection conn, PrivilegeService ps, _zkemProxy api, EmployeeAndFingerprint eaf) {
 		Integer dwMachineNumber = 1;
-		String password = "";
+		// String password = "";
 		Holder<String> cardNumber = new Holder<String>();
 
-		cardNumber.value = employee.getCardNumber();
+		cardNumber.value = eaf.getFingerprint().getCardNumber();
 		api.setStrCardNumber(cardNumber);
 
-		api.ssR_SetUserInfo(dwMachineNumber, employee.getKey(), employee.getName(), password,
-				getPrivilegeIdToKey(conn, ps, employee.getPrivilege()), employee.getEnabled());
+		saveEmployeeToDevice(conn, ps, api, dwMachineNumber, eaf);
+		// TODO: Esto no graba el fingerprint del empleado.
+
+		// api.ssR_SetUserInfo(dwMachineNumber, eaf.getEmployee().getKey(),
+		// eaf.getEmployee().getName(), password,
+		// getPrivilegeIdToKey(conn, ps, eaf.getEmployee().getPrivilege()),
+		// eaf.getEmployee().getEnabled());
 
 	}
 
@@ -486,21 +525,6 @@ public class MachineServiceImpl2 implements MachineService2 {
 			params.clear();
 		}
 
-		/**
-		 * <code>
-		String sql = "SELECT count(cId) FROM tAttendanceLog WHERE cEmployeeKey=? AND cMachine=? AND cDate=? AND cMarkType=?";
-		List<Object> params = new ArrayList<Object>();
-		params.add(attendance.getEmployeeKey());
-		params.add(attendance.getMachine());
-//		params.add(attendance.getDate());
-		params.add(attendance.getMarkType());
-
-		BSmySQL mysql = new BSmySQL();
-		String count = mysql.queryField(conn, sql, params);
-
-		return Integer.parseInt(count) > 0;
-	</code>
-		 */
 		return out;
 	}
 
@@ -517,7 +541,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 			if (rs.next())
 				attendance.setId(rs.getLong(1));
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.log(Level.SEVERE, "Error at executing SP pSaveAttendanceLog", e);
 		} finally {
 			mysql.closeSQL(rs);
 			mysql.closeSQL();
@@ -548,14 +572,12 @@ public class MachineServiceImpl2 implements MachineService2 {
 
 	@Override
 	public void saveAttendanceLog(Connection conn, List<AttendanceLog> attendanceList) {
-		// List<Object> params = new ArrayList<Object>();
 		CallableStatement stmt = null;
 		try {
 			stmt = conn.prepareCall("call pSaveAttendanceLog2(?,?,?,?,?,?,?,?,?)");
 			conn.setAutoCommit(false);
 
 			for (AttendanceLog attendance : attendanceList) {
-				// setParameters(attendance, params);
 				Integer i = 1;
 				stmt.setString(i++, attendance.getEmployeeKey());
 				stmt.setLong(i++, attendance.getMachine());

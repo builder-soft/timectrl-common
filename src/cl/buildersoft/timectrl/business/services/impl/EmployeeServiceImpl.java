@@ -1,6 +1,7 @@
 package cl.buildersoft.timectrl.business.services.impl;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -11,9 +12,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.exception.BSProgrammerException;
+import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.framework.util.BSHttpServlet;
 import cl.buildersoft.timectrl.business.beans.Area;
 import cl.buildersoft.timectrl.business.beans.Employee;
+import cl.buildersoft.timectrl.business.beans.Fingerprint;
 import cl.buildersoft.timectrl.business.beans.Post;
 import cl.buildersoft.timectrl.business.services.EmployeeService;
 
@@ -56,18 +59,23 @@ public class EmployeeServiceImpl extends BSHttpServlet implements EmployeeServic
 
 	@Override
 	public Employee getEmployee(HttpServletRequest request, Long id) {
-		return getEmployee(getConnection(request), id);
+		BSConnectionFactory cf = new BSConnectionFactory();
+		Connection conn = cf.getConnection(request);
+		Employee out = getEmployee(conn, id);
+		cf.closeConnection(conn);
+		return out;
 	}
 
 	@Override
 	public Employee getEmployeeByKey(HttpServletRequest request, String key) {
 		BSBeanUtils bu = new BSBeanUtils();
 		Employee employee = new Employee();
-		Connection conn = getConnection(request);
-		// Connection conn = bu.getConnection(request);
+
+		BSConnectionFactory cf = new BSConnectionFactory();
+		Connection conn = cf.getConnection(request);
 
 		bu.search(conn, employee, "cKey=?", key);
-
+		cf.closeConnection(conn);
 		return employee;
 	}
 
@@ -127,6 +135,25 @@ public class EmployeeServiceImpl extends BSHttpServlet implements EmployeeServic
 	public List<Employee> listEmployeeByArea(Connection conn, Long areaId) {
 		BSBeanUtils bu = new BSBeanUtils();
 		return (List<Employee>) bu.list(conn, new Employee(), "cArea = ?", areaId);
+	}
+
+	@Override
+	public List<EmployeeAndFingerprint> fillFingerprint(Connection conn, List<Employee> employeeList) {
+		Fingerprint fingerprint = null;
+		BSBeanUtils bu = new BSBeanUtils();
+		List<EmployeeAndFingerprint> out = new ArrayList<EmployeeAndFingerprint>();
+		for (Employee employee : employeeList) {
+			fingerprint = new Fingerprint();
+			EmployeeAndFingerprint eaf = new EmployeeAndFingerprint();
+			bu.search(conn, fingerprint, "cEmployee=?", employee.getId());
+
+			eaf.setEmployee(employee);
+			eaf.setFingerprint(fingerprint);
+
+			out.add(eaf);
+
+		}
+		return out;
 	}
 
 }

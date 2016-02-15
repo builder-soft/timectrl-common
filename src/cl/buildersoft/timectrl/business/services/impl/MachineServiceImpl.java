@@ -202,9 +202,9 @@ public class MachineServiceImpl implements MachineService {
 				Holder<String> fingerPrint = new Holder<String>();
 				Holder<Integer> length = new Holder<Integer>();
 				if (api.getUserTmpExStr(dwMachineNumber, out.getKey(), dwFingerIndex, flag, fingerPrint, length)) {
-					out.setFingerIndex(dwFingerIndex);
-					out.setFlag(flag.value);
-					out.setFingerPrint(fingerPrint.value);
+//					out.setFingerIndex(dwFingerIndex);
+//					out.setFlag(flag.value);
+//					out.setFingerPrint(fingerPrint.value);
 					break;
 				}
 			}
@@ -244,11 +244,11 @@ public class MachineServiceImpl implements MachineService {
 		String password = "";
 		int privilege = employee.getPrivilege().intValue();
 		boolean enabled = employee.getEnabled();
-		String fingerPrint = employee.getFingerPrint();
+		String fingerPrint = null; // employee.getFingerPrint();
 		fingerPrint = (fingerPrint == null ? "" : fingerPrint);
-		Integer flag = employee.getFlag();
+		Integer flag = null; //employee.getFlag();
 		flag = (flag == null ? 0 : flag);
-		Integer dwFingerIndex = employee.getFingerIndex();
+		Integer dwFingerIndex = null; //employee.getFingerIndex();
 		dwFingerIndex = (dwFingerIndex == null ? 0 : dwFingerIndex);
 		if (api.ssR_SetUserInfo(dwMachineNumber, dwEnrollNumber, name, password, privilege, enabled)) {
 			api.setUserTmpExStr(dwMachineNumber, dwEnrollNumber, dwFingerIndex, flag, fingerPrint);
@@ -333,11 +333,11 @@ public class MachineServiceImpl implements MachineService {
 		Employee employee = new Employee();
 
 		employee.setEnabled(employeeDB.getEnabled() == null ? employeeDevice.getEnabled() : employeeDB.getEnabled());
-		employee.setFingerIndex(employeeDB.getFingerIndex() == null ? employeeDevice.getFingerIndex() : employeeDB
-				.getFingerIndex());
-		employee.setFingerPrint(employeeDB.getFingerPrint() == null ? employeeDevice.getFingerPrint() : employeeDB
-				.getFingerPrint());
-		employee.setFlag(employeeDB.getFlag() == null ? employeeDevice.getFlag() : employeeDB.getFlag());
+//		employee.setFingerIndex(employeeDB.getFingerIndex() == null ? employeeDevice.getFingerIndex() : employeeDB
+//				.getFingerIndex());
+//		employee.setFingerPrint(employeeDB.getFingerPrint() == null ? employeeDevice.getFingerPrint() : employeeDB
+//				.getFingerPrint());
+//		employee.setFlag(employeeDB.getFlag() == null ? employeeDevice.getFlag() : employeeDB.getFlag());
 		employee.setId(employeeDB.getId() == null ? employeeDevice.getId() : employeeDB.getId());
 		employee.setKey(employeeDB.getKey() == null ? employeeDevice.getKey() : employeeDB.getKey());
 		employee.setName(employeeDB.getName() == null ? employeeDevice.getName() : employeeDB.getName());

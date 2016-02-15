@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import cl.buildersoft.timectrl.business.beans.Area;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.Post;
+import cl.buildersoft.timectrl.business.services.impl.EmployeeAndFingerprint;
 
 public interface EmployeeService {
 	public Employee getEmployee(Connection conn, Long id);
@@ -27,6 +28,8 @@ public interface EmployeeService {
 	public List<Employee> listEmployeeByBoss(Connection conn, Long bossId);
 
 	public List<Employee> listEmployeeByArea(Connection conn, Long areaId);
+
+	public List<EmployeeAndFingerprint> fillFingerprint(Connection conn, List<Employee> employeeList);
 
 	public void sortByName(List<Employee> employeeList);
 
