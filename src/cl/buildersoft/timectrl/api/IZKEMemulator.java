@@ -72,7 +72,6 @@ public class IZKEMemulator implements _zkemProxy {
 		dwSecond.value = 19;
 		dwWorkCode.value = 1;
 
-
 		if (counter == 101) {
 			// dwDay.value = 32;
 		}

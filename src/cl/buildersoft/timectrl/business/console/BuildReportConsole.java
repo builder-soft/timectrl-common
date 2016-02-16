@@ -3,8 +3,6 @@ package cl.buildersoft.timectrl.business.console;
 import cl.buildersoft.timectrl.business.process.impl.BuildReport4;
 
 public class BuildReportConsole {
-
-	
 	public static void main(String[] args) {
 		BuildReport4 br4 = new BuildReport4();
 

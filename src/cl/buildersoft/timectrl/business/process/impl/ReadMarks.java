@@ -75,7 +75,7 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 					LOG.log(Level.INFO, "There are {0} marks.", attendanceLog.size());
 
 					Long start = System.currentTimeMillis();
-					saveToDataBase(conn, service, bu, attendanceLog);
+					saveToDataBase(conn, service, attendanceLog);
 					Long end = System.currentTimeMillis();
 					LOG.log(Level.INFO, "Insert record was in {0} miliseconds", (end - start));
 				} catch (Exception e) {
@@ -130,7 +130,7 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 
 	}
 
-	private void saveToDataBase(Connection conn, MachineService2 service, BSBeanUtils bu, List<AttendanceLog> attendanceList) {
+	private void saveToDataBase(Connection conn, MachineService2 service,   List<AttendanceLog> attendanceList) {
 		/**
 		 * <code>
 		service.saveAttendanceLog(conn, attendanceList);

@@ -20,7 +20,7 @@ public class ParameterListBoss implements ParameterService {
 		out.put("BOSS_LIST", es.listBoss(conn));
 
 		BSBeanUtils bu = new BSBeanUtils();
-		List<Post> posts = (List<Post>) bu.listAll(conn, new Post(), "cName");
+		List<Post> posts = (List<Post>) bu.listAll(conn, new Post());
 		out.put("POST_LIST", posts);
 
 		return out;

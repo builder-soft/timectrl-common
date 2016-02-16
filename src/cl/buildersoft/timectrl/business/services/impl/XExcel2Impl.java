@@ -323,7 +323,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 
 		this.currentDepth = 1;
 		String employeeIds = getEmployeeIds(conn, Long.parseLong(bossParam.getValue()));
-		LOG.log(Level.INFO, "Length of employee list is {0}", employeeIds.length());
 		out.setJavaType("STRING");
 		out.setName("EmployeesId");
 		out.setReport(idReport);
@@ -344,7 +343,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 			while (rs.next()) {
 				Long employeeId = rs.getLong(1);
 
- 
 				if (!employeeIdSet.contains(employeeId)) {
 					employeeIdSet.add(employeeId);
 					if (haveJunior(conn, employeeId, mysql) && boss != employeeId) {
@@ -352,7 +350,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 							out += getEmployeeIds(conn, employeeId);
 
 //							LOG.log(Level.INFO, "\t\t\t\t\t\tLen={0} value={1}", BSUtils.array2ObjectArray(out.length(), out));
- 
 
 							if (out.lastIndexOf(",") != (out.length()-1)) {
 								out += ",";
@@ -367,12 +364,10 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 							}
 						}
 					}
- 
 					out += employeeId.toString() + ",";
 //					LOG.log(Level.WARNING, "Employee Id {0} added to list", employeeId);
 				} else {
 //					LOG.log(Level.WARNING, "Employee Id {0} exists", employeeId);
- 
 				}
 			}
 		} catch (SQLException e) {
@@ -380,7 +375,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		} finally {
 			mysql.closeSQL(rs);
 		}
- 
 
 //		LOG.logp(Level.INFO, this.getClass().getName(), "getEmployeeIds",
 //				"Ending method (before substring) with output={0} the input was={1}", BSUtils.array2ObjectArray(out, boss));
@@ -390,7 +384,6 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 				"Ending method (after substring) with output={0} the input was={1}", BSUtils.array2ObjectArray(out, boss));
 
 		return out;
- 
 	}
 
 	private boolean haveJunior(Connection conn, Long employee, BSmySQL mysql) {

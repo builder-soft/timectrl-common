@@ -21,13 +21,10 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
-import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
- 
 import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.framework.util.BSUtils;
- 
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.IdRut;
 import cl.buildersoft.timectrl.business.beans.Report;
@@ -55,7 +52,6 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 	private String destiny = null;
 	private String manpowerMail = null;
 
-
 	private String dsName = null;
 	private Long reportId = null;
 	private Integer waitBeforeRun = 0;
@@ -73,7 +69,6 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 		try {
 			Thread.sleep(this.waitBeforeRun * 1000);
 			long start = System.currentTimeMillis();
-
 
 			String thisClassName = SendReportByMailImpl.class.getName();
 			LOG.log(Level.INFO, "Start thread of class {0}", thisClassName);
@@ -93,13 +88,10 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 			cf.closeConnection(conn);
 		}
 
- 
 	}
 
- 
 	public synchronized List<String> execute(Connection conn, Long idReport, ReportType reportType,
 			List<ReportPropertyBean> reportPropertyList, List<ReportParameterBean> reportParameterList) {
- 
 		readProperties(conn, reportPropertyList);
 
 		DestinyEnum destiny = getDestiny(reportPropertyList);
@@ -136,14 +128,12 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 
 			break;
 		case MANPOWER:
- 
 			fileList = executeReport(conn, idReport, reportType, reportPropertyList, reportParameterList);
 			if (fileList != null && fileList.size() >= 1) {
 				LOG.log(Level.INFO, "File was created in {0}", fileList.get(0));
 			} else {
 				LOG.log(Level.SEVERE, "Can not created correcty report file.");
 			}
- 
 			out = sendMail(fileList, manpowerMail);
 
 			deleteTempFiles(fileList);
@@ -274,7 +264,6 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 		return out;
 	}
 
- 
 	private ReportPropertyBean getOutputPath(List<ReportPropertyBean> subReportPropertyList) {
 		return getProperty(subReportPropertyList, "OUTPUT_PATH");
 	}
@@ -375,9 +364,8 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 				}
 				message.setContent(multipart);
 			}
- 			transport = session.getTransport("smtp");
+			transport = session.getTransport("smtp");
 			transport.connect(this.server, this.usernameMail, this.passwordMail);
- 
 			transport.sendMessage(message, message.getAllRecipients());
 		} catch (AddressException e) {
 			LOG.log(Level.SEVERE, "File " + pathAndFileNameList.toString() + " can't sended to " + to + "", e);
@@ -449,7 +437,7 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 	protected String parseCustomVariable(String key) {
 		return null;
 	}
- 
+
 	@Override
 	public Boolean runAsDetachedThread() {
 		return true;
@@ -488,5 +476,4 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 
 	}
 
- 
 }

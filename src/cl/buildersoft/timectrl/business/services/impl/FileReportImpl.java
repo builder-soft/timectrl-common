@@ -25,8 +25,7 @@ import cl.buildersoft.timectrl.business.beans.ReportType;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
 public class FileReportImpl extends AbstractReportService implements ReportService {
-	private final static Logger LOG = Logger.getLogger(FileReportImpl.class.getName());
-	private String jasperPath = null;
+	private final static Logger LOG = Logger.getLogger(FileReportImpl.class.getName());	private String jasperPath = null;
 	private String jasperFile = null;
 	private String outputPath = null;
 	private String outputFile = null;
@@ -176,4 +175,5 @@ public class FileReportImpl extends AbstractReportService implements ReportServi
 		LOG.log(Level.SEVERE, "This class dont run as single thread {0}", FileReportImpl.class.getName());
 		
 	}
+
 }
