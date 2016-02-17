@@ -294,7 +294,7 @@ public abstract class AbstractReportService {
 		sql = "SELECT tEmployee.cId AS UserId, tEmployee.cKey AS cKey, tEmployee.cRut AS SSN, tEmployee.cName AS Name, tArea.cCostCenter AS DEFAULTDEPTID, tEmployee.cUsername AS cUsername, cMail ";
 		sql += "FROM tEmployee ";
 		sql += "LEFT JOIN tArea ON tEmployee.cArea = tArea.cId ";
-		sql += allEmployee ? "" : "WHERE tEmployee.cId IN (" + BSUtils.getCommas(employeeIdArray) + ") ";
+		sql += allEmployee ? "" : "WHERE tEmployee.cId IN (" + BSUtils.getCommas(employeeIdArray) + ") AND tEmployee.cEnabled=TRUE";
 		// sql += getOrderSQL(conn);
 
 		if (!allEmployee) {
