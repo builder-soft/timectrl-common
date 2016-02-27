@@ -35,7 +35,7 @@ public class LicenseValidationUtil {
 			Integer poundPosition = fileContent.indexOf("#");
 			String serials = fileContent.substring(0, poundPosition);
 			String dateExpired = fileContent.substring(poundPosition + 1);
-			LOG.log(Level.FINE, "Serials: {0} Expiration Date: {1}", array2ObjectArray(serials, dateExpired));
+			LOG.log(Level.INFO, "Serials: {0} Expiration Date: {1}", array2ObjectArray(serials, dateExpired));
 
 			String[] serialsArray = serials.split(",");
 
