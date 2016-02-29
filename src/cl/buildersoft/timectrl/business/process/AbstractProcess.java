@@ -22,14 +22,15 @@ import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.util.LicenseValidationUtil;
 
 public abstract class AbstractProcess {
-	private final static String FILE_NAME = "Process.properties";
+	static private final Logger LOG = Logger.getLogger(AbstractProcess.class.getName());
+	static private final Level LEVEL_FOR_THIS_CLASS = Level.FINE;
+
+	static private final String FILE_NAME = "license.properties";
 	// private String logPath = null;
 	private String dsName = null;
-	private String validateLicense = null;
+	private Boolean validateLicense = null;
 	private Connection conn = null;
 	private String webInfPath = null;
-
-	private static final Logger LOG = Logger.getLogger(AbstractProcess.class.getName());
 
 	// private final static Logger LOGGER =
 	// Logger.getLogger(AbstractProcess.class.getName());
@@ -44,11 +45,11 @@ public abstract class AbstractProcess {
 	 */
 	abstract protected String[] getArguments();
 
-	public void AbstractProcessBuilder(Connection conn) {
+	private void AbstractProcessBuilder(Connection conn) {
 		this.conn = conn;
 	}
 
-	public void AbstractProcessBuilder() {
+	private void AbstractProcessBuilder() {
 		init();
 		this.conn = getConnection();
 		Boolean success = licenseValidation(this.conn);
@@ -88,20 +89,24 @@ public abstract class AbstractProcess {
 		return conn;
 	}
 
-	public void init() {
+	protected void init() {
 		BSConfig config = new BSConfig();
 		this.webInfPath = System.getenv("BS_PATH");
 
-		LOG.log(Level.CONFIG, "Value of 'BS_PATH' is {0}", this.webInfPath);
+		LOG.log(LEVEL_FOR_THIS_CLASS, "Value of 'BS_PATH' is {0}", this.webInfPath);
 
 		if (this.webInfPath == null) {
 			throw new BSConfigurationException("Undefined enviroment variable BS_PATH");
 		}
+
 		this.webInfPath = config.fixPath(this.webInfPath);
 		String propertyFileName = this.webInfPath + FILE_NAME;
 		Properties prop = new Properties();
+		// String file = this.webInfPath+ "license.properties";
+
 		InputStream inputStream;
 		try {
+			LOG.log(LEVEL_FOR_THIS_CLASS, "Reading file {0}", propertyFileName);
 			inputStream = new FileInputStream(propertyFileName);
 		} catch (FileNotFoundException e) {
 			LOG.log(Level.SEVERE, "File not found '" + propertyFileName + "'", e);
@@ -115,22 +120,29 @@ public abstract class AbstractProcess {
 			throw new BSConfigurationException(e);
 		}
 
-		Enumeration<Object> propList = prop.keys();
+		Enumeration propList = prop.keys();
 
 		while (propList.hasMoreElements()) {
 			Object o = propList.nextElement();
-			LOG.log(Level.CONFIG, "Property: {0}= {1}", BSUtils.array2ObjectArray(o.toString(), prop.getProperty(o.toString())));
+			LOG.log(LEVEL_FOR_THIS_CLASS, "Property: {0}={1}",
+					BSUtils.array2ObjectArray(o.toString(), prop.getProperty(o.toString())));
 		}
-		try {
-			Thread.sleep(100);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+
+		// ----------------------
+
+		this.validateLicense = Boolean.parseBoolean(prop.get("bsframework.license.validate." + dsName).toString());
+
+		// try {
+		// Thread.sleep(100);
+		// } catch (InterruptedException e) {
+		// e.printStackTrace();
+		// }
 	}
 
 	protected Boolean licenseValidation(Connection conn) {
 		Boolean out = true;
-		if (Boolean.parseBoolean(this.validateLicense)) {
+
+		if (this.validateLicense) {
 			LicenseValidationUtil lv = new LicenseValidationUtil();
 			out = lv.licenseValidation(conn, lv.readFile(getLicenseFileDatPath()));
 		}
@@ -139,7 +151,7 @@ public abstract class AbstractProcess {
 
 	private String getLicenseFileDatPath() {
 		// BSConfig config = new BSConfig();
-		String out = this.webInfPath + "LicenseFile.dat";
+		String out = this.webInfPath + "license."+dsName+".dat";
 		return out;
 	}
 
@@ -218,7 +230,7 @@ public abstract class AbstractProcess {
 	}
 
 	public final void setDSName(String dsName) {
-		this.dsName= dsName;
+		this.dsName = dsName;
 	}
 
 }

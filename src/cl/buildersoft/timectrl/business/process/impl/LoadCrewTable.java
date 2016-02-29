@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
+import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSUtils;
@@ -110,6 +111,11 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		validateArguments(args);
 		Connection conn = getConnection(getDomainByBatabase(args[0]) );
 
+		init();
+		if(!licenseValidation(conn)){
+			throw new BSConfigurationException("License validation fail");
+		}		
+		
 		LOG.log(Level.INFO, "Begin Process...");
 
 		Boolean flexible = null;
@@ -436,7 +442,7 @@ and a.cemployeekey='192'
 ORDER BY a.cDate DESC;
 </code>
 		 */
-		LOG.log(Level.CONFIG, "SQL for get Dates is: {0}", sql);
+		LOG.log(Level.INFO, "SQL for get Dates is: {0}", sql);
 
 		ResultSet rs = mysql.queryResultSet(conn, sql, null);
 
