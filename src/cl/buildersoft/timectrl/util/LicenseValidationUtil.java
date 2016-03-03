@@ -35,7 +35,7 @@ public class LicenseValidationUtil {
 			Integer poundPosition = fileContent.indexOf("#");
 			String serials = fileContent.substring(0, poundPosition);
 			String dateExpired = fileContent.substring(poundPosition + 1);
-			LOG.log(Level.FINE, "Serials: {0} Expiration Date: {1}", array2ObjectArray(serials, dateExpired));
+			LOG.log(Level.FINEST, "Serials: {0} For Date: {1}", array2ObjectArray(serials, dateExpired));
 
 			String[] serialsArray = serials.split(",");
 
@@ -54,7 +54,7 @@ public class LicenseValidationUtil {
 				}
 			} else {
 				LOG.log(Level.WARNING,
-						"No coinciden las series registradas con las del archivo de licencia:\nLI:[{0}] \nDB:[{1}]",
+						"No match series with the registered license file:\nLI:[{0}] \nDB:[{1}]",
 						BSUtils.array2ObjectArray(showList(serialsArray), showList(serialsSet)));
 				success = false;
 			}
@@ -84,6 +84,7 @@ public class LicenseValidationUtil {
 	public String readFile(String pathFile) {
 		String out = null;
 
+		LOG.log(Level.FINEST, "Reading license file {0}", pathFile);
 		File file = new File(pathFile);
 		if (!file.exists()) {
 			throw new BSConfigurationException("File not found '" + pathFile + "'");

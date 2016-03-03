@@ -9,12 +9,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
+import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.framework.util.BSUtils;
-import cl.buildersoft.framework.util.crud.BSTableConfig;
 import cl.buildersoft.timectrl.api._zkemProxy;
 import cl.buildersoft.timectrl.business.beans.Employee;
-import cl.buildersoft.timectrl.business.beans.Fingerprint;
 import cl.buildersoft.timectrl.business.beans.Machine;
 import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.process.ExecuteProcess;
@@ -89,11 +88,19 @@ siguiente maquina
 		Long startTime = System.currentTimeMillis();
 		validateArguments(args);
 
-		LOG.log(Level.INFO, "Starting process syncronize for domain {0}", args[0]);
 
 		BSConnectionFactory cf = new BSConnectionFactory();
 
 		Connection conn = cf.getConnection(args[0]);
+
+		this.setDSName(args[0]);
+		init();
+		if (!licenseValidation(conn)) {
+			throw new BSConfigurationException("License validation fail for domain "+ args[0]);
+		}
+
+		LOG.log(Level.INFO, "Starting process syncronize for domain {0}", args[0]);
+
 		Long group = null;
 		List<Machine> machineList = listMachines(conn);
 		List<EmployeeAndFingerprint> eafDBList = null;
@@ -225,26 +232,24 @@ siguiente maquina
 		BSBeanUtils bu = new BSBeanUtils();
 
 		List<EmployeeAndFingerprint> out = new ArrayList<EmployeeAndFingerprint>();
-//		EmployeeAndFingerprint eaf = null;
-//		Fingerprint fingerprint = null;
+		// EmployeeAndFingerprint eaf = null;
+		// Fingerprint fingerprint = null;
 
 		List<Employee> employeeList = (List<Employee>) bu.list(conn, new Employee(), "cGroup=?", group);
 
 		EmployeeService es = new EmployeeServiceImpl();
-	out = 	es.fillFingerprint(conn, employeeList);
-		
+		out = es.fillFingerprint(conn, employeeList);
+
 		/*
-		for (Employee employee : employeeList) {
-			fingerprint = new Fingerprint();
-			bu.search(conn, fingerprint, "cEmployee=?", employee.getId());
-
-			eaf = new EmployeeAndFingerprint();
-			eaf.setEmployee(employee);
-			eaf.setFingerprint(fingerprint);
-
-			out.add(eaf);
-		}
-*/
+		 * for (Employee employee : employeeList) { fingerprint = new
+		 * Fingerprint(); bu.search(conn, fingerprint, "cEmployee=?",
+		 * employee.getId());
+		 * 
+		 * eaf = new EmployeeAndFingerprint(); eaf.setEmployee(employee);
+		 * eaf.setFingerprint(fingerprint);
+		 * 
+		 * out.add(eaf); }
+		 */
 		return out;
 	}
 

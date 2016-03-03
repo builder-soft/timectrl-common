@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
+import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.util.BSDateTimeUtil;
 import cl.buildersoft.framework.util.BSUtils;
@@ -110,6 +111,11 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		validateArguments(args);
 		Connection conn = getConnection(getDomainByBatabase(args[0]) );
 
+		init();
+		if(!licenseValidation(conn)){
+			throw new BSConfigurationException("License validation fail");
+		}		
+		
 		LOG.log(Level.INFO, "Begin Process...");
 
 		Boolean flexible = null;
@@ -351,7 +357,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		sql += "WHERE DATE(cDate) = ? AND b.cid IS NULL AND NOT c.cId IS NULL;";
 
 		sql = "SELECT DISTINCT c.cId FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog AND b.cid IS NULL LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey AND NOT c.cId IS NULL WHERE DATE(cDate) = ?  AND c.cId IS NOT NULL ORDER BY c.cId;";
-		sql = "SELECT cId FROM tEmployee ORDER BY cKey;";
+		sql = "SELECT cId FROM tEmployee WHERE cEnabled=TRUE ORDER BY cKey;";
 
 		LOG.log(Level.FINEST, "SQL for get Employees by Date is: {0}", sql);
 
@@ -361,7 +367,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		List<IdRut> out = new ArrayList<IdRut>();
 		String key = null;
 		try {
-			sql = "SELECT cKey FROM tEmployee WHERE cId=?";
+			sql = "SELECT cKey FROM tEmployee WHERE cId=? AND cEnabled=TRUE";
 			while (rs.next()) {
 				employeeId = rs.getLong(1);
 				idRut = idRutMap.get(employeeId);
@@ -420,7 +426,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		sql = "select DISTINCT DATE(a.cDate) AS cDate from tAttendanceLog as a left join tcrewprocess as b on date(a.cdate) = b.cdate and b.cid is null ORDER BY a.cDate DESC;";
 		sql = "select DISTINCT DATE(a.cDate) from tAttendanceLog as a left join tcrewprocess as b on date(a.cdate) = b.cdate and b.cid is null left join temployee as c on a.cemployeeKey = c.ckey where c.cid is not null ORDER BY a.cDate DESC;";
 		sql = "select DISTINCT DATE(a.cDate) from tAttendanceLog as a left join tcrewprocess as b on date(a.cdate) = date(b.cdate) left join temployee as c on a.cemployeeKey = c.ckey where c.cid is not null and b.cid is null ORDER BY a.cDate DESC;";
-		sql = "select DISTINCT DATE(a.cDate) from tAttendanceLog as a left join temployee as c on a.cemployeeKey = c.ckey where date(a.cdate) not in (select distinct(cdate) from tcrewprocess) and c.cid is not null ORDER BY a.cDate DESC;";
+		sql = "select DISTINCT DATE(a.cDate) from tAttendanceLog as a left join temployee as c on a.cemployeeKey = c.ckey where date(a.cdate) not in (select distinct(cdate) from tcrewprocess) and c.cid is not null AND c.cEnabled=TRUE ORDER BY a.cDate DESC;";
 
 		/**
 		 * <code>
@@ -436,7 +442,7 @@ and a.cemployeekey='192'
 ORDER BY a.cDate DESC;
 </code>
 		 */
-		LOG.log(Level.CONFIG, "SQL for get Dates is: {0}", sql);
+		LOG.log(Level.INFO, "SQL for get Dates is: {0}", sql);
 
 		ResultSet rs = mysql.queryResultSet(conn, sql, null);
 

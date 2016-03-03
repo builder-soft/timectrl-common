@@ -335,7 +335,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 		LOG.logp(Level.INFO, this.getClass().getName(), "getEmployeeIds", "Starting method with Boss={0}", boss.toString());
 		String out = "";
 
-		String sql = "SELECT cId FROM tEmployee WHERE cBoss=?";
+		String sql = "SELECT cId FROM tEmployee WHERE cBoss=? AND cEnabled=TRUE";
 		BSmySQL mysql = new BSmySQL();
 		ResultSet rs = mysql.queryResultSet(conn, sql, boss);
 
@@ -387,7 +387,7 @@ public class XExcel2Impl extends ListToXExcelImpl implements ReportService {
 	}
 
 	private boolean haveJunior(Connection conn, Long employee, BSmySQL mysql) {
-		String sql = "SELECT COUNT(cId) FROM tEmployee WHERE cBoss=?";
+		String sql = "SELECT COUNT(cId) FROM tEmployee WHERE cBoss=? AND cEnabled=TRUE";
 		String count = mysql.queryField(conn, sql, employee);
 		return Integer.parseInt(count) > 0;
 	}

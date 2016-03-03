@@ -22,7 +22,7 @@ import cl.buildersoft.timectrl.business.services.EmployeeService;
 
 public class EmployeeServiceImpl extends BSHttpServlet implements EmployeeService {
 	private static final Logger LOG = Logger.getLogger(EmployeeServiceImpl.class.getName());
-	private static final String IS_BOSS = "cId IN (SELECT DISTINCT(cBoss) FROM tEmployee WHERE NOT cBoss IS NULL)";
+	private static final String IS_BOSS = "cId IN (SELECT DISTINCT(cBoss) FROM tEmployee WHERE NOT cBoss IS NULL AND cEnabled=TRUE)";
 	private static final long serialVersionUID = 9126047546816667626L;
 
 	@Override

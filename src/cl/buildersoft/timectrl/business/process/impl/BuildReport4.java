@@ -38,7 +38,7 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 		this.runFromConsole = runFromConsole;
 	}
 
-	public static void main_(String[] args) {
+	private static void main_(String[] args) {
 		BuildReport4 br4 = new BuildReport4();
 		// buildReport.init();
 
@@ -71,7 +71,15 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 		Connection conn = null;
 		try {
 			conn = cf.getConnection(getDSName());
+			
+			init();
+			
+			if(!licenseValidation(conn)){
+				throw new BSConfigurationException("License validation fail");
+			}
 			// this.runFromConsole = true;
+			
+//			licenseValidation(conn);
 
 			Long reportId = keyToReportId(conn, args[0]);
 

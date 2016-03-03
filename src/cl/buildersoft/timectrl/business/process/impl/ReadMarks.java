@@ -45,12 +45,19 @@ public class ReadMarks extends AbstractProcess implements ExecuteProcess {
 	public List<String> doExecute(String[] args) {
 		// LOG.entering(ReadMarks.class.getName(), "doExecute", args);
 		List<String> out = new ArrayList<String>();
-		LOG.logp(Level.INFO, this.getClass().getName(), "doExecute", "Starting Method", args);
 		// this.init();
+		validateArguments(args);
+		
+		this.setDSName(args[0]);
 		Connection conn = getConnection(getDomainByBatabase(args[0]));
 
-		validateArguments(args);
+		init();
+		if(!licenseValidation(conn)){
+			throw new BSConfigurationException("License validation fail");
+		}
+		
 
+		LOG.logp(Level.INFO, this.getClass().getName(), "doExecute", "Starting Method", args);
 		Boolean deleteMarksAtEnd = deleteMarksAtEnd(args);
 		BSBeanUtils bu = new BSBeanUtils();
 		@SuppressWarnings("unchecked")
