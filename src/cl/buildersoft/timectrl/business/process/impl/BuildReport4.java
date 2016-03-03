@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import cl.buildersoft.framework.beans.User;
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.framework.util.BSConnectionFactory;
+import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.Report;
 import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
@@ -18,8 +20,10 @@ import cl.buildersoft.timectrl.business.beans.ReportType;
 import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.process.ExecuteProcess;
 import cl.buildersoft.timectrl.business.services.EmployeeService;
+import cl.buildersoft.timectrl.business.services.EventLogService;
 import cl.buildersoft.timectrl.business.services.ParameterService;
 import cl.buildersoft.timectrl.business.services.ReportService;
+import cl.buildersoft.timectrl.business.services.ServiceFactory;
 import cl.buildersoft.timectrl.business.services.impl.EmployeeServiceImpl;
 
 public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
@@ -69,21 +73,27 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 		BSConnectionFactory cf = new BSConnectionFactory();
 
 		Connection conn = null;
+		Connection connFramework = null;
 		try {
 			conn = cf.getConnection(getDSName());
-			
+			connFramework = cf.getConnection();
+
 			init();
-			
-			if(!licenseValidation(conn)){
+
+			if (!licenseValidation(conn)) {
 				throw new BSConfigurationException("License validation fail");
 			}
 			// this.runFromConsole = true;
-			
-//			licenseValidation(conn);
+
+			// licenseValidation(conn);
 
 			Long reportId = keyToReportId(conn, args[0]);
 
 			responseList = doBuild(conn, reportId, args);
+
+			EventLogService el = ServiceFactory.createEventLogService();
+			el.writeEntry(conn, getUser(connFramework, "SYSTEM").getId(), "BUILD_REPORT",
+					"Ejecuta reporte %s. Los parametros fueron: [%s].", args[0], BSUtils.unSplitString(args, ", "));
 
 			if (responseList != null) {
 				for (String response : responseList) {
@@ -93,6 +103,7 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 
 		} finally {
 			cf.closeConnection(conn);
+			cf.closeConnection(connFramework);
 		}
 		return responseList;
 	}
@@ -344,10 +355,13 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 		}
 		return reportType;
 	}
-	/**
-	 * <code>
-	 * 
-	 * @Override public void setDSName(String dsName) { this.dsName = dsName; }
-	 *           </code>
-	 */
+
+	private User getUser(Connection conn, String userKey) {
+		BSBeanUtils bu = new BSBeanUtils();
+		User user = new User();
+		bu.search(conn, user, "cMail=?", userKey);
+
+		return user;
+	}
+
 }
