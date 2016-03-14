@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import cl.buildersoft.framework.beans.User;
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
@@ -18,8 +19,10 @@ import cl.buildersoft.timectrl.business.beans.ReportParameterBean;
 import cl.buildersoft.timectrl.business.beans.ReportPropertyBean;
 import cl.buildersoft.timectrl.business.beans.ReportType;
 import cl.buildersoft.timectrl.business.services.EmployeeService;
+import cl.buildersoft.timectrl.business.services.EventLogService;
 import cl.buildersoft.timectrl.business.services.ParameterService;
 import cl.buildersoft.timectrl.business.services.ReportService;
+import cl.buildersoft.timectrl.business.services.ServiceFactory;
 import cl.buildersoft.timectrl.business.services.impl.EmployeeServiceImpl;
 
 public class BuildReport3 extends AbstractConsoleService {
@@ -83,11 +86,13 @@ public class BuildReport3 extends AbstractConsoleService {
 		List<String> out = new ArrayList<String>();
 		try {
 			out = execute2(conn, id, arrayToList(target));
+
 		} catch (Exception e) {
 			LOG.log(Level.SEVERE, "Error at process report", e);
 		} finally {
 			new BSmySQL().closeConnection(conn);
 		}
+
 		return out;
 	}
 
@@ -166,6 +171,7 @@ public class BuildReport3 extends AbstractConsoleService {
 			responseList.add("La solicitud se esta procesando de manera desatendida.");
 		}
 
+		
 		return responseList;
 
 		/**
@@ -185,6 +191,7 @@ public class BuildReport3 extends AbstractConsoleService {
 		 */
 	}
 
+	
 	private List<String> executeReport(Connection conn, Long reportId, ReportType reportType, ReportService reportService,
 			List<ReportParameterBean> reportParameterList, List<ReportPropertyBean> reportPropertyList) {
 		List<String> responseList;
