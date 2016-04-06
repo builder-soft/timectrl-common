@@ -40,7 +40,7 @@ public class LicenseValidationFilter implements Filter {
 	public void init(FilterConfig filterConfig) throws ServletException {
 		if (activeFilter == null) {
 			this.activeFilter = new HashMap<String, Boolean>();
-			LOG.log(Level.FINEST, "Loading license list");
+			LOG.log(Level.FINE, "Loading license list");
 			ServletContext context = filterConfig.getServletContext();
 			BSConfig config = new BSConfig();
 
@@ -70,7 +70,7 @@ public class LicenseValidationFilter implements Filter {
 	}
 
 	public void destroy() {
-		LOG.log(Level.FINEST, "Clearing license list");
+		LOG.log(Level.FINE, "Clearing license list");
 		this.activeFilter.clear();
 		this.activeFilter = null;
 	}

@@ -35,7 +35,7 @@ public class LicenseValidationUtil {
 			Integer poundPosition = fileContent.indexOf("#");
 			String serials = fileContent.substring(0, poundPosition);
 			String dateExpired = fileContent.substring(poundPosition + 1);
-			LOG.log(Level.FINEST, "Serials: {0} For Date: {1}", array2ObjectArray(serials, dateExpired));
+			LOG.log(Level.FINE, "Serials: {0} For Date: {1}", array2ObjectArray(serials, dateExpired));
 
 			String[] serialsArray = serials.split(",");
 
@@ -84,7 +84,7 @@ public class LicenseValidationUtil {
 	public String readFile(String pathFile) {
 		String out = null;
 
-		LOG.log(Level.FINEST, "Reading license file {0}", pathFile);
+		LOG.log(Level.FINE, "Reading license file {0}", pathFile);
 		File file = new File(pathFile);
 		if (!file.exists()) {
 			throw new BSConfigurationException("File not found '" + pathFile + "'");
