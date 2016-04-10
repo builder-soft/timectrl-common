@@ -212,8 +212,8 @@ public class MachineServiceImpl2 implements MachineService2 {
 				} else {
 					Holder<Integer> lastErrorHold = new Holder<Integer>();
 					api.getLastError(lastErrorHold);
-					LOG.log(Level.SEVERE, "Problems reading fingerprint, employee {0}. LastError: {1}",
-							BSUtils.array2ObjectArray(name.value, lastErrorHold.value));
+					LOG.log(Level.SEVERE, "Problems reading fingerprint, employee {0}. LastError: {1}. Index: {2}",
+							BSUtils.array2ObjectArray(name.value, lastErrorHold.value, dwFingerIndex));
 					// writeLastErrorToLog(api, "Reading fingerprint",
 					// name.value);
 					// LOG.log(Level.SEVERE, "Last Error was {0}");
@@ -230,7 +230,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 
 			Object[] values = BSUtils.array2ObjectArray(nameTemp, fingerprintTemp);
 
-			LOG.log(Level.INFO, "Reading employee from device Name {0} and fingerprint {1}", values);
+			LOG.log(Level.INFO, "Reading employee from device Name: \"{0}\" and fingerprint \"{1}\"", values);
 		}
 		return out;
 	}

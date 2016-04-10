@@ -175,7 +175,9 @@ public class IZKEMemulatorXML implements _zkemProxy {
 	public boolean ssR_GetUserInfo(int machineNumber, Holder<String> enrollNumber, Holder<String> name, Holder<String> password,
 			Holder<Integer> privilege, Holder<Boolean> enabled) {
 
-		Element employee = (Element) this.employees.selectSingleNode("EnrollNumber='" + enrollNumber.value + "'");
+		this.employees = this.rootElement.element("Employees");
+
+		Element employee = (Element) this.employees.selectSingleNode("Employee[@EnrollNumber='" + enrollNumber.value + "']");
 		if (employee != null) {
 			// enrollNumber.value = employee.attributeValue("EnrollNumber");
 			name.value = employee.attributeValue("Name");
