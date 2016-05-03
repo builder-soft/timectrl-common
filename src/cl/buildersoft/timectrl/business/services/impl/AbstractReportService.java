@@ -227,6 +227,8 @@ public abstract class AbstractReportService {
 		out = out.replaceAll("\\x7BYear\\x7D", BSDateTimeUtil.calendar2String(calendar, "yyyy"));
 		out = out.replaceAll("\\x7BDay\\x7D", BSDateTimeUtil.calendar2String(calendar, "dd"));
 		out = out.replaceAll("\\x7BRandom\\x7D", BSWeb.randomString());
+		
+		out = out.replaceAll("\\x7BBS_PATH\\x7D", System.getenv("BS_PATH").replaceAll("\\x5C", "\\\\"));
 
 		for (String keyValue : keyValues) {
 			String newValue = null;
@@ -294,7 +296,8 @@ public abstract class AbstractReportService {
 		sql = "SELECT tEmployee.cId AS UserId, tEmployee.cKey AS cKey, tEmployee.cRut AS SSN, tEmployee.cName AS Name, tArea.cCostCenter AS DEFAULTDEPTID, tEmployee.cUsername AS cUsername, cMail ";
 		sql += "FROM tEmployee ";
 		sql += "LEFT JOIN tArea ON tEmployee.cArea = tArea.cId ";
-		sql += allEmployee ? "" : "WHERE tEmployee.cId IN (" + BSUtils.getCommas(employeeIdArray) + ") AND tEmployee.cEnabled=TRUE";
+		sql += allEmployee ? "" : "WHERE tEmployee.cId IN (" + BSUtils.getCommas(employeeIdArray)
+				+ ") AND tEmployee.cEnabled=TRUE";
 		// sql += getOrderSQL(conn);
 
 		if (!allEmployee) {

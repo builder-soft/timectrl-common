@@ -62,10 +62,12 @@ public class FileReportImpl extends AbstractReportService implements ReportServi
 
 	private void processJasper(Connection conn, List<ReportParameterBean> reportInputParameter, List<String> out) {
 		String outputPath = parsePropertes(this.outputPath, keyValues);
+		String jasperPath = parsePropertes(this.jasperPath, keyValues);
+		
 		createPathIfNotExists(outputPath);
 
 		String outputFileAndPath = fixPath(outputPath) + parsePropertes(this.outputFile, keyValues);
-		String jasperFileAndPath = fixPath(this.jasperPath) + this.jasperFile;
+		String jasperFileAndPath = fixPath(jasperPath) + this.jasperFile;
 
 		Map<String, Object> params = getReportParams(conn, reportInputParameter);
 
