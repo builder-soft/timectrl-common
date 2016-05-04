@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -227,8 +228,10 @@ public abstract class AbstractReportService {
 		out = out.replaceAll("\\x7BYear\\x7D", BSDateTimeUtil.calendar2String(calendar, "yyyy"));
 		out = out.replaceAll("\\x7BDay\\x7D", BSDateTimeUtil.calendar2String(calendar, "dd"));
 		out = out.replaceAll("\\x7BRandom\\x7D", BSWeb.randomString());
-		
-		out = out.replaceAll("\\x7BBS_PATH\\x7D", System.getenv("BS_PATH").replaceAll("\\x5C", "\\\\"));
+
+		out = replaceEnviromentValues(out);
+		// out = out.replaceAll("\\x7BBS_PATH\\x7D",
+		// System.getenv("BS_PATH").replaceAll("\\x5C", "\\\\"));
 
 		for (String keyValue : keyValues) {
 			String newValue = null;
@@ -236,6 +239,16 @@ public abstract class AbstractReportService {
 			newValue = parseCustomVariable(keyValue);
 			out = out.replaceAll("\\x7B" + keyValue + "\\x7D", newValue == null ? "" : newValue);
 
+		}
+
+		return out;
+	}
+
+	private String replaceEnviromentValues(String out) {
+		Map<String, String> env = System.getenv();
+		for (String envName : env.keySet()) {
+			out = out.replace("{" + envName + "}", env.get(envName));
+			// System.out.format("%s=%s%n", envName, env.get(envName));
 		}
 
 		return out;
