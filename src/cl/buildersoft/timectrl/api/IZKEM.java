@@ -1,16 +1,11 @@
 package cl.buildersoft.timectrl.api  ;
 
-import com4j.Com4jObject;
-import com4j.DISPID;
-import com4j.Holder;
-import com4j.IID;
-import com4j.VTID;
+import com4j.*;
 
 /**
  * IZKEM Interface
  */
 @IID("{102F4206-E43D-4FC9-BAB0-331CFFE4D25B}")
-@Deprecated
 public interface IZKEM extends Com4jObject {
   // Methods:
   /**

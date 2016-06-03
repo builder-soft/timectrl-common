@@ -298,4 +298,16 @@ public class IZKEMemulatorXML implements _zkemProxy {
 		this.cardNumber = aCardNumber.value;
 		return true;
 	}
+
+	@Override
+	public IZKEM zk() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void zk(IZKEM zk) {
+		// TODO Auto-generated method stub
+		
+	}
 }
