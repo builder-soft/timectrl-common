@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import cl.buildersoft.framework.beans.User;
-import cl.buildersoft.framework.business.services.EventLogService;
-import cl.buildersoft.framework.business.services.ServiceFactory;
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
