@@ -9,6 +9,7 @@ public class MachineListenerConsole {
 
 	public static void main(String[] args) {
 		LOG.entry(args);
+		LOG.info("INFO...");
 		MachineListenerConsole mlc = new MachineListenerConsole();
 		mlc.start();
 
