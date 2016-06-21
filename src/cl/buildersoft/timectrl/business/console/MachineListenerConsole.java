@@ -30,8 +30,13 @@ public class MachineListenerConsole {
 		BSConnectionFactory cf = new BSConnectionFactory();
 		Connection conn = cf.getConnection("enlasa");
 		Machine m = getMachine(conn);
+		
+		ZKEvent event = new ZKEvent();
 		_zkemProxy connMch = ms.connect(conn, m);
 
+		
+		
+		
 		ms.disconnect(connMch);
 		BSConsole.readString("Pause, press key to continue");
 	}

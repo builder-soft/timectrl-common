@@ -12,24 +12,19 @@ import com4j.COM4J;
 public abstract class ClassFactory {
 	
 	
-	private static final String CLS_ID = 
-			"{69B0CFE9-91D4-40AD-820E-E5658A3CB0C3}";
+	private static final String CLS_ID =
+			"{30D8D362-701E-4B20-AD89-EC6EF36E57EF}";
+//			"{69B0CFE9-91D4-40AD-820E-E5658A3CB0C3}";
 //			"{B010C527-776A-4158-B10C-EB4F31B22213}";
 	
-	/**
-	 <code>
-	 private static final String CLS_ID = "{B6DAF4E4-3FFD-41DB-925C-581239F45057}";
-	 COM4J.createInstance( cl.buildersoft.timectrl.api._zkemProxy.class, "{B010C527-776A-4158-B10C-EB4F31B22213}" );
-	 </code>*/
-
 	private ClassFactory() {
 	}
 
-
+/**<code>
 	public static cl.buildersoft.timectrl.api._zkemProxy createzkemProxy() {
 		return COM4J.createInstance(cl.buildersoft.timectrl.api._zkemProxy.class, CLS_ID);
 	}
-
+</code>*/
 	public static _zkemProxy createzkemProxy(Connection conn) {
 		BSConfig config = new BSConfig();
 		String emulateIndicator = config.getString(conn, "EMULATE");
@@ -53,9 +48,4 @@ public abstract class ClassFactory {
 		return null;
 	}
 	
-	
-	
-	
-	
-
 }
