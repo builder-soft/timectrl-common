@@ -1,4 +1,4 @@
-package cl.buildersoft.timectrl.api  ;
+package cl.buildersoft.timectrl.api.com4j  ;
 
 import com4j.*;
 

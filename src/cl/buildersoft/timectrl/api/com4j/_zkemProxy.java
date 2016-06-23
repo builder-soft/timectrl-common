@@ -1,4 +1,4 @@
-package cl.buildersoft.timectrl.api  ;
+package cl.buildersoft.timectrl.api.com4j  ;
 
 import com4j.*;
 
@@ -14,7 +14,7 @@ public interface _zkemProxy extends Com4jObject {
 
   @DISPID(1073938432) //= 0x40030000. The runtime will prefer the VTID if present
   @VTID(7)
-  cl.buildersoft.timectrl.api.IZKEM zk();
+  cl.buildersoft.timectrl.api.com4j.IZKEM zk();
 
 
   /**
@@ -27,7 +27,7 @@ public interface _zkemProxy extends Com4jObject {
   @DISPID(1073938432) //= 0x40030000. The runtime will prefer the VTID if present
   @VTID(9)
   void zk(
-    cl.buildersoft.timectrl.api.IZKEM zk);
+    cl.buildersoft.timectrl.api.com4j.IZKEM zk);
 
 
   /**

@@ -3,8 +3,8 @@ package cl.buildersoft.timectrl.business.services;
 import java.sql.Connection;
 import java.util.List;
 
-import cl.buildersoft.timectrl.api.IZKEM;
-import cl.buildersoft.timectrl.api.IZKEMException;
+import cl.buildersoft.timectrl.api.com4j.IZKEM;
+import cl.buildersoft.timectrl.api.impl.IZKEMException;
 import cl.buildersoft.timectrl.business.beans.AttendanceLog;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.Machine;

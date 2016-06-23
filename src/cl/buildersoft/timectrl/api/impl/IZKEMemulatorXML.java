@@ -1,4 +1,4 @@
-package cl.buildersoft.timectrl.api;
+package cl.buildersoft.timectrl.api.impl;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -15,6 +15,8 @@ import org.dom4j.io.XMLWriter;
 
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.util.BSConfig;
+import cl.buildersoft.timectrl.api.com4j.IZKEM;
+import cl.buildersoft.timectrl.api.com4j._zkemProxy;
 
 import com4j.Com4jObject;
 import com4j.ComThread;

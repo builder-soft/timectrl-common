@@ -1,5 +1,7 @@
-package cl.buildersoft.timectrl.api;
+package cl.buildersoft.timectrl.api.impl;
 
+import cl.buildersoft.timectrl.api.com4j.IZKEM;
+import cl.buildersoft.timectrl.api.com4j._zkemProxy;
 import com4j.Com4jObject;
 import com4j.ComThread;
 import com4j.EventCookie;

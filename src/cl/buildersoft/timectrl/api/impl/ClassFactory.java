@@ -1,8 +1,10 @@
-package cl.buildersoft.timectrl.api;
+package cl.buildersoft.timectrl.api.impl;
 
 import java.sql.Connection;
 
 import cl.buildersoft.framework.util.BSConfig;
+import cl.buildersoft.timectrl.api.com4j.IZKEM;
+import cl.buildersoft.timectrl.api.com4j._zkemProxy;
 
 import com4j.COM4J;
 
@@ -38,7 +40,7 @@ public abstract class ClassFactory {
 		if (emulate) {
 			out = new IZKEMemulatorXML();			
 		} else {
-			out = COM4J.createInstance(cl.buildersoft.timectrl.api._zkemProxy.class, CLS_ID);
+			out = COM4J.createInstance(cl.buildersoft.timectrl.api.com4j._zkemProxy.class, CLS_ID);
 		}
 		return out;
 

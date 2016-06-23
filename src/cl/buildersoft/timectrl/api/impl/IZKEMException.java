@@ -1,4 +1,4 @@
-package cl.buildersoft.timectrl.api;
+package cl.buildersoft.timectrl.api.impl;
 
 public class IZKEMException extends Exception {
 	private static final long serialVersionUID = -2826402328957654194L;

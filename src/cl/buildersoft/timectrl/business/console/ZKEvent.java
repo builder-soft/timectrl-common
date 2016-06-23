@@ -5,7 +5,7 @@ import com4j.ComThread;
 import com4j.EventCookie;
 import com4j.Holder;
 
-import cl.buildersoft.timectrl.api._IZKEMEvents;
+import cl.buildersoft.timectrl.api.com4j._IZKEMEvents;
 
 public class ZKEvent implements _IZKEMEvents {
 
