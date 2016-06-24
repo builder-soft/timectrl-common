@@ -18,7 +18,7 @@ import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.api.com4j._zkemProxy;
-import cl.buildersoft.timectrl.api.impl.ClassFactory;
+
 import cl.buildersoft.timectrl.api.impl.IZKEMException;
 import cl.buildersoft.timectrl.business.beans.AttendanceLog;
 import cl.buildersoft.timectrl.business.beans.Employee;
@@ -28,6 +28,7 @@ import cl.buildersoft.timectrl.business.beans.MarkType;
 import cl.buildersoft.timectrl.business.beans.Privilege;
 import cl.buildersoft.timectrl.business.services.MachineService2;
 import cl.buildersoft.timectrl.business.services.PrivilegeService;
+import cl.buildersoft.timectrl.util.BSFactoryTimectrl;
 import com4j.Holder;
 
 public class MachineServiceImpl2 implements MachineService2 {
@@ -57,7 +58,8 @@ public class MachineServiceImpl2 implements MachineService2 {
 	@Override
 	public _zkemProxy connect(Connection conn, Machine machine) {
 		BSBeanUtils bu = new BSBeanUtils();
-		_zkemProxy api = ClassFactory.createzkemProxy(conn);
+		BSFactoryTimectrl tcf = new BSFactoryTimectrl();
+		_zkemProxy api = tcf.createzkemProxy(conn);
 
 		Boolean connected = api.connect_Net(machine.getIp(), machine.getPort().shortValue());
 		if (connected) {

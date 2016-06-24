@@ -31,6 +31,7 @@ public abstract class AbstractProcess {
 	private Boolean validateLicense = null;
 	private Connection conn = null;
 	private String webInfPath = null;
+	private Boolean runFromConsole = false;
 
 	// private final static Logger LOGGER =
 	// Logger.getLogger(AbstractProcess.class.getName());
@@ -45,6 +46,14 @@ public abstract class AbstractProcess {
 	 */
 	abstract protected String[] getArguments();
 
+	public Boolean getRunFromConsole() {
+		return runFromConsole;
+	}
+
+	public void setRunFromConsole(Boolean runFromConsole) {
+		this.runFromConsole = runFromConsole;
+	}
+	
 	private void AbstractProcessBuilder(Connection conn) {
 		this.conn = conn;
 	}

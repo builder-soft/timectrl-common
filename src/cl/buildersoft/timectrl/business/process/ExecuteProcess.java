@@ -8,4 +8,8 @@ public interface ExecuteProcess {
 	// public void setConnection(Connection conn);
 	public void setDSName(String dsName);
 
+	public Boolean getRunFromConsole();
+
+	public void setRunFromConsole(Boolean runFromConsole);
+
 }

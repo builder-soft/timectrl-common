@@ -210,54 +210,54 @@ public class IZKEMemulatorXML implements _zkemProxy {
 
 	@Override
 	public <T> EventCookie advise(Class<T> arg0, T arg1) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public void dispose() {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
 	public ComThread getComThread() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public long getIUnknownPointer() {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
 	@Override
 	public long getPointer() {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
 	@Override
 	public int getPtr() {
-		// TODO Auto-generated method stub
+		
 		return 0;
 	}
 
 	@Override
 	public <T extends Com4jObject> boolean is(Class<T> arg0) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public <T extends Com4jObject> T queryInterface(Class<T> arg0) {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public void setName(String arg0) {
-		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
@@ -273,19 +273,19 @@ public class IZKEMemulatorXML implements _zkemProxy {
 
 	@Override
 	public boolean ssR_SetUserInfo(int machine, String enrollNumber, String name, String password, int privilege, boolean enabled) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public boolean ssR_DeleteEnrollData(int machine, String enrollNumber, int backupNumber) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
 	@Override
 	public boolean clearGLog(int machine) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
@@ -303,13 +303,12 @@ public class IZKEMemulatorXML implements _zkemProxy {
 
 	@Override
 	public IZKEM zk() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void zk(IZKEM zk) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 }

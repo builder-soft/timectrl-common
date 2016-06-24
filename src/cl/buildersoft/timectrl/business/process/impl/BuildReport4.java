@@ -29,18 +29,11 @@ import cl.buildersoft.timectrl.business.services.impl.EmployeeServiceImpl;
 public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 	private static final String NOT_FOUND = "' not found.";
 	private static final Logger LOG = Logger.getLogger(BuildReport4.class.getName());
-	private Boolean runFromConsole = false;
+	
 	// private String dsName = null;
 
 	private String[] validArguments = { "DOMAIN", "REPORT_KEY" };
 
-	public Boolean getRunFromConsole() {
-		return runFromConsole;
-	}
-
-	public void setRunFromConsole(Boolean runFromConsole) {
-		this.runFromConsole = runFromConsole;
-	}
 
 	private static void main_(String[] args) {
 		BuildReport4 br4 = new BuildReport4();
@@ -265,7 +258,7 @@ public class BuildReport4 extends AbstractProcess implements ExecuteProcess {
 	private List<String> executeReport(Connection conn, Long reportId, ReportType reportType, ReportService reportService,
 			List<ReportParameterBean> reportParameterList, List<ReportPropertyBean> reportPropertyList) {
 		List<String> responseList;
-		if (reportService.runAsDetachedThread() && !runFromConsole) {
+		if (reportService.runAsDetachedThread() && ! getRunFromConsole()) {
 			reportService.setConnectionData(getDSName());
 
 			reportService.setReportId(reportId);

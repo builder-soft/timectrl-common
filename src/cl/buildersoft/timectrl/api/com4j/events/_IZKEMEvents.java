@@ -1,12 +1,12 @@
-package cl.buildersoft.timectrl.api.com4j  ;
+package cl.buildersoft.timectrl.api.com4j.events;
 
 import com4j.*;
 
 /**
  * IZKEM Event Interface
  */
-@IID("{00020400-0000-0000-C000-000000000046}")
-public interface _IZKEMEvents extends Com4jObject {
+@IID("{CF83B580-5D32-4C65-B44E-BEDC750CDFA8}")
+public abstract class _IZKEMEvents {
   // Methods:
   /**
    * <p>
@@ -25,7 +25,7 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(1)
-  void onAttTransaction(
+  public void onAttTransaction(
     int enrollNumber,
     int isInValid,
     int attState,
@@ -35,7 +35,9 @@ public interface _IZKEMEvents extends Com4jObject {
     int day,
     int hour,
     int minute,
-    int second);
+    int second) {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -46,8 +48,10 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(2)
-  void onKeyPress(
-    int key);
+  public void onKeyPress(
+    int key) {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -61,11 +65,13 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(3)
-  void onEnrollFinger(
+  public void onEnrollFinger(
     int enrollNumber,
     int fingerIndex,
     int actionResult,
-    int templateLength);
+    int templateLength) {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -76,8 +82,10 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(4)
-  void onNewUser(
-    int enrollNumber);
+  public void onNewUser(
+    int enrollNumber) {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -90,10 +98,12 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(5)
-  void onEMData(
+  public void onEMData(
     int dataType,
     int dataLen,
-    Holder<Byte> dataBuffer);
+    Holder<Byte> dataBuffer) {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -103,7 +113,9 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(6)
-  void onConnected();
+  public void onConnected() {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -113,7 +125,9 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(7)
-  void onDisConnected();
+  public void onDisConnected() {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -123,7 +137,9 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(8)
-  void onFinger();
+  public void onFinger() {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -134,8 +150,10 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(9)
-  void onVerify(
-    int userID);
+  public void onVerify(
+    int userID) {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -146,8 +164,10 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(10)
-  void onFingerFeature(
-    int score);
+  public void onFingerFeature(
+    int score) {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -158,8 +178,10 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(11)
-  void onHIDNum(
-    int cardNumber);
+  public void onHIDNum(
+    int cardNumber) {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -170,8 +192,10 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(12)
-  void onDoor(
-    int eventType);
+  public void onDoor(
+    int eventType) {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -184,10 +208,12 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(13)
-  void onAlarm(
+  public void onAlarm(
     int alarmType,
     int enrollNumber,
-    int verified);
+    int verified) {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -200,10 +226,12 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(14)
-  void onWriteCard(
+  public void onWriteCard(
     int enrollNumber,
     int actionResult,
-    int length);
+    int length) {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -214,8 +242,10 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(15)
-  void onEmptyCard(
-    int actionResult);
+  public void onEmptyCard(
+    int actionResult) {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -227,9 +257,11 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(16)
-  void onDeleteTemplate(
+  public void onDeleteTemplate(
     int enrollNumber,
-    int fingerIndex);
+    int fingerIndex) {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -250,7 +282,7 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(17)
-  void onAttTransactionEx(
+  public void onAttTransactionEx(
     java.lang.String enrollNumber,
     int isInValid,
     int attState,
@@ -261,7 +293,9 @@ public interface _IZKEMEvents extends Com4jObject {
     int hour,
     int minute,
     int second,
-    int workCode);
+    int workCode) {
+        throw new UnsupportedOperationException();
+  }
 
 
   /**
@@ -275,11 +309,13 @@ public interface _IZKEMEvents extends Com4jObject {
    */
 
   @DISPID(18)
-  void onEnrollFingerEx(
+  public void onEnrollFingerEx(
     java.lang.String enrollNumber,
     int fingerIndex,
     int actionResult,
-    int templateLength);
+    int templateLength) {
+        throw new UnsupportedOperationException();
+  }
 
 
   // Properties:

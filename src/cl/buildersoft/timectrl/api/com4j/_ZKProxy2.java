@@ -2,32 +2,32 @@ package cl.buildersoft.timectrl.api.com4j  ;
 
 import com4j.*;
 
-@IID("{9034E6AB-DD4C-4178-A504-40AC04210F69}")
-public interface _zkemProxy extends Com4jObject {
+@IID("{5E29F564-25D7-4710-8003-2F329A803E85}")
+public interface _ZKProxy2 extends Com4jObject {
   // Methods:
   /**
    * <p>
-   * Getter method for the COM property "zk"
+   * Getter method for the COM property "CZKEM"
    * </p>
    * @return  Returns a value of type cl.buildersoft.timectrl.api.com4j.IZKEM
    */
 
   @DISPID(1073938432) //= 0x40030000. The runtime will prefer the VTID if present
   @VTID(7)
-  cl.buildersoft.timectrl.api.com4j.IZKEM zk();
+  cl.buildersoft.timectrl.api.com4j.IZKEM czkem();
 
 
   /**
    * <p>
-   * Setter method for the COM property "zk"
+   * Setter method for the COM property "CZKEM"
    * </p>
-   * @param zk Mandatory cl.buildersoft.timectrl.api.com4j.IZKEM parameter.
+   * @param czkem Mandatory cl.buildersoft.timectrl.api.com4j.IZKEM parameter.
    */
 
   @DISPID(1073938432) //= 0x40030000. The runtime will prefer the VTID if present
   @VTID(9)
-  void zk(
-    cl.buildersoft.timectrl.api.com4j.IZKEM zk);
+  void czkem(
+    cl.buildersoft.timectrl.api.com4j.IZKEM czkem);
 
 
   /**

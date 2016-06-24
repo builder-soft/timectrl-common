@@ -3,6 +3,7 @@ package cl.buildersoft.timectrl.business.services;
 import java.sql.Connection;
 import java.util.List;
 
+import cl.buildersoft.timectrl.api.com4j.__ZKProxy2;
 import cl.buildersoft.timectrl.api.com4j._zkemProxy;
 import cl.buildersoft.timectrl.api.impl.IZKEMException;
 import cl.buildersoft.timectrl.business.beans.AttendanceLog;
@@ -11,6 +12,7 @@ import cl.buildersoft.timectrl.business.services.impl.EmployeeAndFingerprint;
 
 public interface MachineService2 {
 	public _zkemProxy connect(Connection conn, Machine machine);
+//	public __ZKProxy2 connect(Connection conn, Machine machine);
 
 	public void disconnect(_zkemProxy api);
 
@@ -41,4 +43,6 @@ public interface MachineService2 {
 	public void updateEmployeeToDevice(Connection conn, PrivilegeService ps, _zkemProxy api, EmployeeAndFingerprint eaf);
 
 	public Long getDefaultGroup(Connection conn);
+	
+	
 }
