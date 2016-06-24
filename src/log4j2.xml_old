@@ -5,20 +5,23 @@
 	<Loggers> <Root level="INFO"> <AppenderRef ref="Console" /> </Root> <Logger 
 	name="cl.ripley.util.*" level="ALL"> <AppenderRef ref="Console" /> </Logger> 
 	</Loggers> </Configuration> -->
-<Configuration status="WARN">
+<Configuration status="WARN" monitorInterval="5">
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
 		</Console>
+		<File name="MyFile" fileName="${env:BS_PATH}\log\app.log">
+			<PatternLayout
+				pattern="%d{yyyy-mm-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+		</File>
 	</Appenders>
 	<Loggers>
-		<Root level="trace">
+		<Root level="error">
 			<AppenderRef ref="Console" />
 		</Root>
-		<!-- 
-		<Logger name="cl.buildersoft.timectrl.business.console.*" level="trace" additivity="false">
+		<Logger name="cl.ripley.util" level="trace" additivity="false">
 			<AppenderRef ref="Console" />
+			<AppenderRef ref="MyFile" />
 		</Logger>
-		 -->
 	</Loggers>
 </Configuration>
