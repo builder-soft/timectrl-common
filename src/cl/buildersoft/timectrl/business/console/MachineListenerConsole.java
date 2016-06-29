@@ -11,7 +11,6 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.util.BSConsole;
 import cl.buildersoft.timectrl.api.com4j._ZKProxy2;
-import cl.buildersoft.timectrl.api.com4j._zkemProxy;
 import cl.buildersoft.timectrl.api.impl.ZKProxy2Events;
 import cl.buildersoft.timectrl.business.beans.Machine;
 import cl.buildersoft.timectrl.business.process.AbstractProcess;
@@ -23,6 +22,7 @@ import cl.buildersoft.timectrl.util.BSFactoryTimectrl;
 public class MachineListenerConsole extends AbstractProcess implements ExecuteProcess {
 	static final Logger LOG = LogManager.getLogger(MachineListenerConsole.class.getName());
 	private String[] validArguments = { "DOMAIN", "REPORT_KEY" };
+	private Boolean runFromConsole = true;
 
 	public static void main(String[] args) {
 		MachineListenerConsole mlc = new MachineListenerConsole();
@@ -74,13 +74,20 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 		proxy2.connect_Net(m.getIp(), m.getPort().shortValue());
 		// _ZKProxy2 connMch = ms.connect2(conn, m);
 
-		boolean doContinue = false;
-		long start = System.currentTimeMillis();
 		BSConsole.readString("Pause, press key to continue");
 
 		proxy2.disconnect();
 		// ms.disconnect(connMch);
 
+		pauseInSeconds(10);
+
+		return out;
+
+	}
+
+	private void pauseInSeconds(Integer seconds) {
+		boolean doContinue = true;
+		long start = System.currentTimeMillis();
 		while (doContinue) {
 			// this.notify();
 			try {
@@ -91,13 +98,10 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 				e.printStackTrace();
 			}
 
-			if (System.currentTimeMillis() - start > 20000) {
+			if (System.currentTimeMillis() - start > (seconds * 1000)) {
 				doContinue = false;
 			}
 		}
-
-		return out;
-
 	}
 
 	private Machine getMachine(Connection conn, Long machineId) {
@@ -111,12 +115,12 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 
 	@Override
 	public Boolean getRunFromConsole() {
-		return null;
+		return this.runFromConsole;
 	}
 
 	@Override
 	public void setRunFromConsole(Boolean runFromConsole) {
-
+		this.runFromConsole = runFromConsole;
 	}
 
 }
