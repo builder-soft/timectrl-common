@@ -25,15 +25,15 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 	private String[] validArguments = { "DOMAIN", "REPORT_KEY" };
 
 	public static void main(String[] args) {
-		MachineListenerConsole br4 = new MachineListenerConsole();
+		MachineListenerConsole mlc = new MachineListenerConsole();
 
-		br4.setDSName(args[0]);
-		br4.setRunFromConsole(true);
+		mlc.setDSName(args[0]);
+		mlc.setRunFromConsole(true);
 
 		String[] target = new String[args.length - 1];
 		System.arraycopy(args, 1, target, 0, target.length);
 
-		br4.doExecute(target);
+		mlc.doExecute(target);
 		System.exit(0);
 	}
 
@@ -44,6 +44,7 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 
 	@Override
 	public List<String> doExecute(String[] args) {
+		Long machineId = Long.parseLong(args[0]);
 		LOG.entry(args);
 		LOG.info("INFO...");
 
@@ -60,28 +61,49 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 			throw new BSConfigurationException("License validation fail");
 		}
 
-		Machine m = getMachine(conn);
+		Machine m = getMachine(conn, machineId);
 
 		BSFactoryTimectrl ftc = new BSFactoryTimectrl();
 		_ZKProxy2 proxy2 = ftc.createZKProxy2(conn);
-		
-	ZKProxy2Events	events = new ZKProxy2Events(); 
-		
+
+		ZKProxy2Events events = new ZKProxy2Events();
+
+		// proxy2.advise(ZKProxy2Events.class, events);
 		proxy2.advise(cl.buildersoft.timectrl.api.com4j.events.__ZKProxy2.class, events);
+		System.out.println("connecting");
+		proxy2.connect_Net(m.getIp(), m.getPort().shortValue());
+		// _ZKProxy2 connMch = ms.connect2(conn, m);
 
-		_zkemProxy connMch = ms.connect(conn, m);
-
-		ms.disconnect(connMch);
+		boolean doContinue = false;
+		long start = System.currentTimeMillis();
 		BSConsole.readString("Pause, press key to continue");
+
+		proxy2.disconnect();
+		// ms.disconnect(connMch);
+
+		while (doContinue) {
+			// this.notify();
+			try {
+				Thread.sleep(10);
+				// this.wait(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			if (System.currentTimeMillis() - start > 20000) {
+				doContinue = false;
+			}
+		}
 
 		return out;
 
 	}
 
-	private Machine getMachine(Connection conn) {
+	private Machine getMachine(Connection conn, Long machineId) {
 		Machine out = new Machine();
 		BSBeanUtils bu = new BSBeanUtils();
-		out.setId(1L);
+		out.setId(machineId);
 		bu.search(conn, out);
 
 		return out;

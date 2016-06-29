@@ -17,8 +17,8 @@ import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.util.BSUtils;
+import cl.buildersoft.timectrl.api.com4j._ZKProxy2;
 import cl.buildersoft.timectrl.api.com4j._zkemProxy;
-
 import cl.buildersoft.timectrl.api.impl.IZKEMException;
 import cl.buildersoft.timectrl.business.beans.AttendanceLog;
 import cl.buildersoft.timectrl.business.beans.Employee;
@@ -29,6 +29,7 @@ import cl.buildersoft.timectrl.business.beans.Privilege;
 import cl.buildersoft.timectrl.business.services.MachineService2;
 import cl.buildersoft.timectrl.business.services.PrivilegeService;
 import cl.buildersoft.timectrl.util.BSFactoryTimectrl;
+
 import com4j.Holder;
 
 public class MachineServiceImpl2 implements MachineService2 {
@@ -71,6 +72,24 @@ public class MachineServiceImpl2 implements MachineService2 {
 					+ ":" + machine.getPort() + "]");
 		}
 
+		return api;
+	}
+
+	@Override
+	public _ZKProxy2 connect2(Connection conn, Machine machine) {
+		BSBeanUtils bu = new BSBeanUtils();
+		BSFactoryTimectrl tcf = new BSFactoryTimectrl();
+		_ZKProxy2 api = tcf.createZKProxy2(conn);
+
+		Boolean connected = api.connect_Net(machine.getIp(), machine.getPort().shortValue());
+		if (connected) {
+			machine.setLastAccess(new Timestamp(System.currentTimeMillis()));
+			machine.setSerial(readSerial(api));
+			bu.update(conn, machine);
+		} else {
+			throw new BSConfigurationException("No se pudo conectar con la maquina " + machine.getName() + "[" + machine.getIp()
+					+ ":" + machine.getPort() + "]");
+		}
 		return api;
 	}
 
@@ -317,7 +336,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 				api.getLastError(lastErrorHold);
 				LOG.log(Level.SEVERE, "Problems writing fingerprint to machine, employee {0}. LastError: {1}",
 						BSUtils.array2ObjectArray(name, lastErrorHold.value));
-				
+
 				LOG.log(Level.SEVERE,
 						"The pameters for writing fingerprint was: dwMachineNumber={0}\ndwEnrollNumber={1}\ndwFingerIndex={2}\nflag={3}\nfingerprint={4}",
 						BSUtils.array2ObjectArray(dwMachineNumber, dwEnrollNumber, dwFingerIndex, flag, fingerprint));
@@ -367,6 +386,12 @@ public class MachineServiceImpl2 implements MachineService2 {
 	@Override
 	public void disconnect(_zkemProxy api) {
 		api.disconnect();
+	}
+
+	@Override
+	public void disconnect(_ZKProxy2 api) {
+		api.disconnect();
+
 	}
 
 	@Override
@@ -505,6 +530,14 @@ public class MachineServiceImpl2 implements MachineService2 {
 	}
 
 	@Override
+	public String readSerial(_ZKProxy2 api) {
+		Integer dwMachineNumber = 1;
+		Holder<String> dwSerialNumber = new Holder<String>();
+		api.getSerialNumber(dwMachineNumber, dwSerialNumber);
+		return dwSerialNumber.value;
+	}
+
+	@Override
 	public Boolean existsAttendanceLog(Connection conn, AttendanceLog attendance) {
 		BSmySQL mysql = new BSmySQL();
 		List<Object> params = new ArrayList<Object>();
@@ -613,4 +646,5 @@ public class MachineServiceImpl2 implements MachineService2 {
 			}
 		}
 	}
+
 }
