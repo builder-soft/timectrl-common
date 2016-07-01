@@ -4275,6 +4275,22 @@ public interface IZKEM extends Com4jObject {
 
       /**
        * <p>
+       * method SetOptionCommPwd
+       * </p>
+       * @param dwMachineNumber Mandatory int parameter.
+       * @param commKey Mandatory java.lang.String parameter.
+       * @return  Returns a value of type boolean
+       */
+
+      @DISPID(245) //= 0xf5. The runtime will prefer the VTID if present
+      @VTID(241)
+      boolean setOptionCommPwd(
+        int dwMachineNumber,
+        java.lang.String commKey);
+
+
+      /**
+       * <p>
        * Method ReadSuperLogDataEx
        * </p>
        * @param dwMachineNumber Mandatory int parameter.
@@ -4295,7 +4311,7 @@ public interface IZKEM extends Com4jObject {
        */
 
       @DISPID(246) //= 0xf6. The runtime will prefer the VTID if present
-      @VTID(241)
+      @VTID(242)
       boolean readSuperLogDataEx(
         int dwMachineNumber,
         int dwYear_S,
@@ -4334,7 +4350,7 @@ public interface IZKEM extends Com4jObject {
        */
 
       @DISPID(247) //= 0xf7. The runtime will prefer the VTID if present
-      @VTID(242)
+      @VTID(243)
       boolean getSuperLogDataEx(
         int dwMachineNumber,
         Holder<java.lang.String> enrollNumber,
@@ -4363,7 +4379,7 @@ public interface IZKEM extends Com4jObject {
        */
 
       @DISPID(248) //= 0xf8. The runtime will prefer the VTID if present
-      @VTID(243)
+      @VTID(244)
       boolean getPhotoByName(
         int dwMachineNumber,
         java.lang.String photoName,
@@ -4384,7 +4400,7 @@ public interface IZKEM extends Com4jObject {
        */
 
       @DISPID(249) //= 0xf9. The runtime will prefer the VTID if present
-      @VTID(244)
+      @VTID(245)
       boolean getPhotoNamesByTime(
         int dwMachineNumber,
         int iFlag,
@@ -4405,7 +4421,7 @@ public interface IZKEM extends Com4jObject {
        */
 
       @DISPID(250) //= 0xfa. The runtime will prefer the VTID if present
-      @VTID(245)
+      @VTID(246)
       boolean clearPhotoByTime(
         int dwMachineNumber,
         int iFlag,
@@ -4424,11 +4440,91 @@ public interface IZKEM extends Com4jObject {
        */
 
       @DISPID(251) //= 0xfb. The runtime will prefer the VTID if present
-      @VTID(246)
+      @VTID(247)
       boolean getPhotoCount(
         int dwMachineNumber,
         Holder<Integer> count,
         int iFlag);
+
+
+      /**
+       * <p>
+       * Method ClearDataEx
+       * </p>
+       * @param dwMachineNumber Mandatory int parameter.
+       * @param tableName Mandatory java.lang.String parameter.
+       * @return  Returns a value of type boolean
+       */
+
+      @DISPID(252) //= 0xfc. The runtime will prefer the VTID if present
+      @VTID(248)
+      boolean clearDataEx(
+        int dwMachineNumber,
+        java.lang.String tableName);
+
+
+      /**
+       * <p>
+       * Method GetDataFileEx
+       * </p>
+       * @param dwMachineNumber Mandatory int parameter.
+       * @param sourceFileName Mandatory java.lang.String parameter.
+       * @param destFileName Mandatory java.lang.String parameter.
+       * @return  Returns a value of type boolean
+       */
+
+      @DISPID(253) //= 0xfd. The runtime will prefer the VTID if present
+      @VTID(249)
+      boolean getDataFileEx(
+        int dwMachineNumber,
+        java.lang.String sourceFileName,
+        java.lang.String destFileName);
+
+
+      /**
+       * <p>
+       * Method SSR_SetDeviceData
+       * </p>
+       * @param dwMachineNumber Mandatory int parameter.
+       * @param tableName Mandatory java.lang.String parameter.
+       * @param datas Mandatory java.lang.String parameter.
+       * @param options Mandatory java.lang.String parameter.
+       * @return  Returns a value of type boolean
+       */
+
+      @DISPID(254) //= 0xfe. The runtime will prefer the VTID if present
+      @VTID(250)
+      boolean ssR_SetDeviceData(
+        int dwMachineNumber,
+        java.lang.String tableName,
+        java.lang.String datas,
+        java.lang.String options);
+
+
+      /**
+       * <p>
+       * Method SSR_GetDeviceData
+       * </p>
+       * @param dwMachineNumber Mandatory int parameter.
+       * @param buffer Mandatory Holder<java.lang.String> parameter.
+       * @param bufferSize Mandatory int parameter.
+       * @param tableName Mandatory java.lang.String parameter.
+       * @param filedNames Mandatory java.lang.String parameter.
+       * @param filter Mandatory java.lang.String parameter.
+       * @param options Mandatory java.lang.String parameter.
+       * @return  Returns a value of type boolean
+       */
+
+      @DISPID(255) //= 0xff. The runtime will prefer the VTID if present
+      @VTID(251)
+      boolean ssR_GetDeviceData(
+        int dwMachineNumber,
+        Holder<java.lang.String> buffer,
+        int bufferSize,
+        java.lang.String tableName,
+        java.lang.String filedNames,
+        java.lang.String filter,
+        java.lang.String options);
 
 
       // Properties:

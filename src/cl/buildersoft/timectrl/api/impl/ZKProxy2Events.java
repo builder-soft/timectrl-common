@@ -3,9 +3,9 @@
  */
 package cl.buildersoft.timectrl.api.impl;
 
-import cl.buildersoft.timectrl.api.com4j.IZKEM;
 import cl.buildersoft.timectrl.api.com4j._ZKProxy2;
 import cl.buildersoft.timectrl.api.com4j.events.__ZKProxy2;
+
 import com4j.Com4jObject;
 import com4j.ComThread;
 import com4j.DISPID;
@@ -81,17 +81,7 @@ public class ZKProxy2Events extends __ZKProxy2 implements _ZKProxy2 {
 
 	}
 
-	@Override
-	public IZKEM czkem() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void czkem(IZKEM czkem) {
-		// TODO Auto-generated method stub
-
-	}
+	
 
 	@Override
 	public boolean connect_Net(String ip, short port) {
@@ -214,6 +204,12 @@ public class ZKProxy2Events extends __ZKProxy2 implements _ZKProxy2 {
 
 	@Override
 	public boolean setStrCardNumber(Holder<String> aCardNumber) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean regEvent(int machine, int eventMask) {
 		// TODO Auto-generated method stub
 		return false;
 	}

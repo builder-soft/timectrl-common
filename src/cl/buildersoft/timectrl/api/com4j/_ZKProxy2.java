@@ -2,34 +2,9 @@ package cl.buildersoft.timectrl.api.com4j  ;
 
 import com4j.*;
 
-@IID("{3C58C63D-649F-42D8-9C6F-50B78715E5B8}")
+@IID("{913943F6-9BAD-4300-81ED-099E5183D3B8}")
 public interface _ZKProxy2 extends Com4jObject {
   // Methods:
-  /**
-   * <p>
-   * Getter method for the COM property "CZKEM"
-   * </p>
-   * @return  Returns a value of type cl.buildersoft.timectrl.api.com4j.IZKEM
-   */
-
-  @DISPID(1073938432) //= 0x40030000. The runtime will prefer the VTID if present
-  @VTID(7)
-  cl.buildersoft.timectrl.api.com4j.IZKEM czkem();
-
-
-  /**
-   * <p>
-   * Setter method for the COM property "CZKEM"
-   * </p>
-   * @param czkem Mandatory cl.buildersoft.timectrl.api.com4j.IZKEM parameter.
-   */
-
-  @DISPID(1073938432) //= 0x40030000. The runtime will prefer the VTID if present
-  @VTID(9)
-  void czkem(
-    cl.buildersoft.timectrl.api.com4j.IZKEM czkem);
-
-
   /**
    * @param ip Mandatory java.lang.String parameter.
    * @param port Mandatory short parameter.
@@ -37,7 +12,7 @@ public interface _ZKProxy2 extends Com4jObject {
    */
 
   @DISPID(1610809346) //= 0x60030002. The runtime will prefer the VTID if present
-  @VTID(10)
+  @VTID(7)
   boolean connect_Net(
     java.lang.String ip,
     short port);
@@ -47,8 +22,21 @@ public interface _ZKProxy2 extends Com4jObject {
    */
 
   @DISPID(1610809347) //= 0x60030003. The runtime will prefer the VTID if present
-  @VTID(11)
+  @VTID(8)
   void disconnect();
+
+
+  /**
+   * @param machine Mandatory int parameter.
+   * @param eventMask Optional parameter. Default value is 65535
+   * @return  Returns a value of type boolean
+   */
+
+  @DISPID(1610809348) //= 0x60030004. The runtime will prefer the VTID if present
+  @VTID(9)
+  boolean regEvent(
+    int machine,
+    @Optional @DefaultValue("65535") int eventMask);
 
 
   /**
@@ -57,8 +45,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809348) //= 0x60030004. The runtime will prefer the VTID if present
-  @VTID(12)
+  @DISPID(1610809349) //= 0x60030005. The runtime will prefer the VTID if present
+  @VTID(10)
   boolean enableDevice(
     int machine,
     boolean enable);
@@ -69,8 +57,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809349) //= 0x60030005. The runtime will prefer the VTID if present
-  @VTID(13)
+  @DISPID(1610809350) //= 0x60030006. The runtime will prefer the VTID if present
+  @VTID(11)
   boolean readGeneralLogData(
     int machine);
 
@@ -90,8 +78,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809350) //= 0x60030006. The runtime will prefer the VTID if present
-  @VTID(14)
+  @DISPID(1610809351) //= 0x60030007. The runtime will prefer the VTID if present
+  @VTID(12)
   boolean ssR_GetGeneralLogData(
     int machine,
     Holder<java.lang.String> enrollNumber,
@@ -110,8 +98,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @param errorCode Mandatory Holder<Integer> parameter.
    */
 
-  @DISPID(1610809351) //= 0x60030007. The runtime will prefer the VTID if present
-  @VTID(15)
+  @DISPID(1610809352) //= 0x60030008. The runtime will prefer the VTID if present
+  @VTID(13)
   void getLastError(
     Holder<Integer> errorCode);
 
@@ -121,8 +109,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809352) //= 0x60030008. The runtime will prefer the VTID if present
-  @VTID(16)
+  @DISPID(1610809353) //= 0x60030009. The runtime will prefer the VTID if present
+  @VTID(14)
   boolean readAllUserID(
     int machine);
 
@@ -137,8 +125,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809353) //= 0x60030009. The runtime will prefer the VTID if present
-  @VTID(17)
+  @DISPID(1610809354) //= 0x6003000a. The runtime will prefer the VTID if present
+  @VTID(15)
   boolean ssR_GetUserInfo(
     int machineNumber,
     Holder<java.lang.String> enrollNumber,
@@ -158,8 +146,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809354) //= 0x6003000a. The runtime will prefer the VTID if present
-  @VTID(18)
+  @DISPID(1610809355) //= 0x6003000b. The runtime will prefer the VTID if present
+  @VTID(16)
   boolean ssR_GetAllUserInfo(
     int machineNumber,
     Holder<java.lang.String> enrollNumber,
@@ -179,8 +167,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809355) //= 0x6003000b. The runtime will prefer the VTID if present
-  @VTID(19)
+  @DISPID(1610809356) //= 0x6003000c. The runtime will prefer the VTID if present
+  @VTID(17)
   boolean getUserTmpExStr(
     int machine,
     java.lang.String enrollNumber,
@@ -196,8 +184,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809356) //= 0x6003000c. The runtime will prefer the VTID if present
-  @VTID(20)
+  @DISPID(1610809357) //= 0x6003000d. The runtime will prefer the VTID if present
+  @VTID(18)
   boolean beginBatchUpdate(
     int machine,
     int updateFlag);
@@ -208,8 +196,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809357) //= 0x6003000d. The runtime will prefer the VTID if present
-  @VTID(21)
+  @DISPID(1610809358) //= 0x6003000e. The runtime will prefer the VTID if present
+  @VTID(19)
   boolean batchUpdate(
     int machine);
 
@@ -219,8 +207,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809358) //= 0x6003000e. The runtime will prefer the VTID if present
-  @VTID(22)
+  @DISPID(1610809359) //= 0x6003000f. The runtime will prefer the VTID if present
+  @VTID(20)
   boolean refreshData(
     int machine);
 
@@ -235,8 +223,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809359) //= 0x6003000f. The runtime will prefer the VTID if present
-  @VTID(23)
+  @DISPID(1610809360) //= 0x60030010. The runtime will prefer the VTID if present
+  @VTID(21)
   boolean ssR_SetUserInfo(
     int machine,
     java.lang.String enrollNumber,
@@ -255,8 +243,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809360) //= 0x60030010. The runtime will prefer the VTID if present
-  @VTID(24)
+  @DISPID(1610809361) //= 0x60030011. The runtime will prefer the VTID if present
+  @VTID(22)
   boolean setUserTmpExStr(
     int machine,
     java.lang.String enrollNumber,
@@ -272,8 +260,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809361) //= 0x60030011. The runtime will prefer the VTID if present
-  @VTID(25)
+  @DISPID(1610809362) //= 0x60030012. The runtime will prefer the VTID if present
+  @VTID(23)
   boolean ssR_DeleteEnrollData(
     int machine,
     java.lang.String enrollNumber,
@@ -286,8 +274,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809362) //= 0x60030012. The runtime will prefer the VTID if present
-  @VTID(26)
+  @DISPID(1610809363) //= 0x60030013. The runtime will prefer the VTID if present
+  @VTID(24)
   boolean getSerialNumber(
     int machine,
     Holder<java.lang.String> serialNumber);
@@ -298,8 +286,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809363) //= 0x60030013. The runtime will prefer the VTID if present
-  @VTID(27)
+  @DISPID(1610809364) //= 0x60030014. The runtime will prefer the VTID if present
+  @VTID(25)
   boolean clearGLog(
     int machine);
 
@@ -309,8 +297,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809364) //= 0x60030014. The runtime will prefer the VTID if present
-  @VTID(28)
+  @DISPID(1610809365) //= 0x60030015. The runtime will prefer the VTID if present
+  @VTID(26)
   boolean getStrCardNumber(
     Holder<java.lang.String> aCardNumber);
 
@@ -320,8 +308,8 @@ public interface _ZKProxy2 extends Com4jObject {
    * @return  Returns a value of type boolean
    */
 
-  @DISPID(1610809365) //= 0x60030015. The runtime will prefer the VTID if present
-  @VTID(29)
+  @DISPID(1610809366) //= 0x60030016. The runtime will prefer the VTID if present
+  @VTID(27)
   boolean setStrCardNumber(
     Holder<java.lang.String> aCardNumber);
 
