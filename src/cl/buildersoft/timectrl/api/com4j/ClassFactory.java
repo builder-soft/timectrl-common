@@ -17,10 +17,10 @@ public abstract class ClassFactory {
   }
 
   public static cl.buildersoft.timectrl.api.com4j._zkemProxy createzkemProxy() {
-    return COM4J.createInstance( cl.buildersoft.timectrl.api.com4j._zkemProxy.class, "{171E36DE-C971-4450-BCBE-6185F12736AF}" );
+    return COM4J.createInstance( cl.buildersoft.timectrl.api.com4j._zkemProxy.class, "{A61034F1-0193-4EE5-AE3E-4C5A4362125D}" );
   }
 
   public static cl.buildersoft.timectrl.api.com4j._ZKProxy2 createZKProxy2() {
-    return COM4J.createInstance( cl.buildersoft.timectrl.api.com4j._ZKProxy2.class, "{9BA5352E-284E-4C8C-B316-7EDBBA641940}" );
+    return COM4J.createInstance( cl.buildersoft.timectrl.api.com4j._ZKProxy2.class, "{FAD3DAEF-3F8C-4EA2-B940-D632A641F674}" );
   }
 }

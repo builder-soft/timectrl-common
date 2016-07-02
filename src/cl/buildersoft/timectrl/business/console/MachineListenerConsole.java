@@ -34,6 +34,7 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 		System.arraycopy(args, 1, target, 0, target.length);
 
 		mlc.doExecute(target);
+
 		System.exit(0);
 	}
 
@@ -71,7 +72,10 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 		// proxy2.advise(ZKProxy2Events.class, events);
 		proxy2.advise(cl.buildersoft.timectrl.api.com4j.events.__ZKProxy2.class, events);
 		System.out.println("connecting");
-		proxy2.connect_Net(m.getIp(), m.getPort().shortValue());
+
+		proxy2.connectAndRegEvent(m.getIp(), m.getPort().shortValue(), 1);
+		// proxy2.connect_Net(m.getIp(), m.getPort().shortValue());
+		// proxy2.regEvent(1, 65535);
 		// _ZKProxy2 connMch = ms.connect2(conn, m);
 
 		BSConsole.readString("Pause, press key to continue");
@@ -79,8 +83,8 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 		proxy2.disconnect();
 		// ms.disconnect(connMch);
 
-		pauseInSeconds(10);
-
+		pauseInSeconds(2);
+		System.out.println("End");
 		return out;
 
 	}

@@ -1,11 +1,7 @@
-/**
- * 
- */
 package cl.buildersoft.timectrl.api.impl;
 
 import cl.buildersoft.timectrl.api.com4j._ZKProxy2;
 import cl.buildersoft.timectrl.api.com4j.events.__ZKProxy2;
-
 import com4j.Com4jObject;
 import com4j.ComThread;
 import com4j.DISPID;
@@ -27,6 +23,23 @@ public class ZKProxy2Events extends __ZKProxy2 implements _ZKProxy2 {
 		System.out.println("onDisConnected");
 	}
 
+	@DISPID(13)
+	public void onVerify(int userID) {
+		System.out.println("onVerify" + userID);
+	}
+
+	@DISPID(16)
+	public void onAttTransactionEx(java.lang.String enrollNumber, int isInValid, int attState, int verifyMethod, int year,
+			int month, int day, int hour, int minute, int second, int workCode) {
+		System.out.println("onAttTransactionEx");
+	}
+
+	@DISPID(8)
+	public void onFinger() {
+		System.out.println("onFinger");
+	}
+
+	/** Natives methods */
 	@Override
 	public <T> EventCookie advise(Class<T> arg0, T arg1) {
 		// TODO Auto-generated method stub
@@ -80,8 +93,6 @@ public class ZKProxy2Events extends __ZKProxy2 implements _ZKProxy2 {
 		// TODO Auto-generated method stub
 
 	}
-
-	
 
 	@Override
 	public boolean connect_Net(String ip, short port) {
@@ -210,6 +221,12 @@ public class ZKProxy2Events extends __ZKProxy2 implements _ZKProxy2 {
 
 	@Override
 	public boolean regEvent(int machine, int eventMask) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean connectAndRegEvent(String ip, short port, int machine) {
 		// TODO Auto-generated method stub
 		return false;
 	}

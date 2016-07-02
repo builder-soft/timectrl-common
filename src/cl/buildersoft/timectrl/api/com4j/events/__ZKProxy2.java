@@ -2,7 +2,7 @@ package cl.buildersoft.timectrl.api.com4j.events;
 
 import com4j.*;
 
-@IID("{48F7239D-0997-42C3-8DBC-69A332B95591}")
+@IID("{89CFED85-F9CA-4EFA-AE5F-8203064A6BC6}")
 public abstract class __ZKProxy2 {
   // Methods:
   /**
