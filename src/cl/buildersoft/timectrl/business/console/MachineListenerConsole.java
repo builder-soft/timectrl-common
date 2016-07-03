@@ -9,19 +9,19 @@ import org.apache.logging.log4j.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.exception.BSConfigurationException;
+import cl.buildersoft.framework.exception.BSUserException;
 import cl.buildersoft.framework.util.BSConsole;
 import cl.buildersoft.timectrl.api.com4j._ZKProxy2;
 import cl.buildersoft.timectrl.api.impl.ZKProxy2Events;
 import cl.buildersoft.timectrl.business.beans.Machine;
 import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.process.ExecuteProcess;
-import cl.buildersoft.timectrl.business.services.MachineService2;
-import cl.buildersoft.timectrl.business.services.impl.MachineServiceImpl2;
 import cl.buildersoft.timectrl.util.BSFactoryTimectrl;
+import com4j.Holder;
 
 public class MachineListenerConsole extends AbstractProcess implements ExecuteProcess {
-	static final Logger LOG = LogManager.getLogger(MachineListenerConsole.class.getName());
-	private String[] validArguments = { "DOMAIN", "REPORT_KEY" };
+	private static final Logger LOG = LogManager.getLogger(MachineListenerConsole.class);
+	private String[] validArguments = { "DOMAIN", "MACHINE_ID" };
 	private Boolean runFromConsole = true;
 
 	public static void main(String[] args) {
@@ -46,15 +46,13 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 	@Override
 	public List<String> doExecute(String[] args) {
 		Long machineId = Long.parseLong(args[0]);
-		LOG.entry(args);
-		LOG.info("INFO...");
+
+		validateParameters(args);
 
 		List<String> out = new ArrayList<String>(1);
 		out.add("Nothing to return");
 
 		init();
-
-		MachineService2 ms = new MachineServiceImpl2();
 
 		Connection conn = getConnection();
 
@@ -73,7 +71,13 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 		proxy2.advise(cl.buildersoft.timectrl.api.com4j.events.__ZKProxy2.class, events);
 		System.out.println("connecting");
 
-		proxy2.connectAndRegEvent(m.getIp(), m.getPort().shortValue(), 1);
+		boolean connected = proxy2.connectAndRegEvent(m.getIp(), m.getPort().shortValue(), 1);
+		if (!connected) {
+			Holder<Integer> errorCode = new Holder<Integer>();
+			proxy2.getLastError(errorCode);
+			System.out.println(errorCode.value);
+		}
+
 		// proxy2.connect_Net(m.getIp(), m.getPort().shortValue());
 		// proxy2.regEvent(1, 65535);
 		// _ZKProxy2 connMch = ms.connect2(conn, m);
@@ -86,6 +90,16 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 		pauseInSeconds(2);
 		System.out.println("End");
 		return out;
+
+	}
+
+	private void validateParameters(String[] args) {
+		validateArguments(args);
+		if (args.length != 2) {
+			String message = "Parameters are not valid. Expected is 2 parameters.";
+			LOG.fatal(message);
+			throw new BSUserException(message);
+		}
 
 	}
 

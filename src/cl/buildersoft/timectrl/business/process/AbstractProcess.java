@@ -8,8 +8,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import cl.buildersoft.framework.beans.Domain;
 import cl.buildersoft.framework.database.BSBeanUtils;
@@ -22,8 +24,8 @@ import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.util.LicenseValidationUtil;
 
 public abstract class AbstractProcess {
-	static private final Logger LOG = Logger.getLogger(AbstractProcess.class.getName());
-	static private final Level LEVEL_FOR_THIS_CLASS = Level.FINE;
+	static private final Logger LOG = LogManager.getLogger(AbstractProcess.class.getName());
+	// static private final Level LEVEL_FOR_THIS_CLASS = Level.FINE;
 
 	static private final String FILE_NAME = "license.properties";
 	// private String logPath = null;
@@ -53,7 +55,7 @@ public abstract class AbstractProcess {
 	public void setRunFromConsole(Boolean runFromConsole) {
 		this.runFromConsole = runFromConsole;
 	}
-	
+
 	private void AbstractProcessBuilder(Connection conn) {
 		this.conn = conn;
 	}
@@ -63,7 +65,7 @@ public abstract class AbstractProcess {
 		this.conn = getConnection();
 		Boolean success = licenseValidation(this.conn);
 		if (!success) {
-			LOG.log(Level.SEVERE, "License invalid");
+			LOG.fatal("License invalid");
 			throw new BSConfigurationException("Licencia no es válida");
 		}
 	}
@@ -102,7 +104,7 @@ public abstract class AbstractProcess {
 		BSConfig config = new BSConfig();
 		this.webInfPath = System.getenv("BS_PATH");
 
-		LOG.log(LEVEL_FOR_THIS_CLASS, "Value of 'BS_PATH' is {0}", this.webInfPath);
+		LOG.info("Value of 'BS_PATH' is {0}", this.webInfPath);
 
 		if (this.webInfPath == null) {
 			throw new BSConfigurationException("Undefined enviroment variable BS_PATH");
@@ -115,10 +117,10 @@ public abstract class AbstractProcess {
 
 		InputStream inputStream;
 		try {
-			LOG.log(LEVEL_FOR_THIS_CLASS, "Reading file {0}", propertyFileName);
+			LOG.info("Reading file {0}", propertyFileName);
 			inputStream = new FileInputStream(propertyFileName);
 		} catch (FileNotFoundException e) {
-			LOG.log(Level.SEVERE, "File not found '" + propertyFileName + "'", e);
+			LOG.fatal("File not found '" + propertyFileName + "'", e);
 			throw new BSConfigurationException(e);
 		}
 
@@ -133,8 +135,7 @@ public abstract class AbstractProcess {
 
 		while (propList.hasMoreElements()) {
 			Object o = propList.nextElement();
-			LOG.log(LEVEL_FOR_THIS_CLASS, "Property: {0}={1}",
-					BSUtils.array2ObjectArray(o.toString(), prop.getProperty(o.toString())));
+			LOG.info("Property: {0}={1}", BSUtils.array2ObjectArray(o.toString(), prop.getProperty(o.toString())));
 		}
 
 		// ----------------------
@@ -160,7 +161,7 @@ public abstract class AbstractProcess {
 
 	private String getLicenseFileDatPath() {
 		// BSConfig config = new BSConfig();
-		String out = this.webInfPath + "license."+dsName+".dat";
+		String out = this.webInfPath + "license." + dsName + ".dat";
 		return out;
 	}
 
@@ -176,7 +177,7 @@ public abstract class AbstractProcess {
 				String msg = "Number of arguments not valid. Received " + args.length + ", expected " + validArgumentList.length
 						+ ".";
 				BSException e = new BSConfigurationException(msg);
-				LOG.log(Level.SEVERE, msg, e);
+				LOG.fatal(msg, e);
 				throw e;
 			}
 		}
