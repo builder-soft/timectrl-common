@@ -7,17 +7,15 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import cl.buildersoft.framework.beans.Domain;
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSUserException;
+import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.framework.util.BSConsole;
-import cl.buildersoft.timectrl.api.com4j._ZKProxy2;
-import cl.buildersoft.timectrl.api.impl.ZKProxy2Events;
 import cl.buildersoft.timectrl.business.beans.Machine;
 import cl.buildersoft.timectrl.business.process.AbstractProcess;
 import cl.buildersoft.timectrl.business.process.ExecuteProcess;
-import cl.buildersoft.timectrl.util.BSFactoryTimectrl;
-import com4j.Holder;
 
 public class MachineListenerConsole extends AbstractProcess implements ExecuteProcess {
 	private static final Logger LOG = LogManager.getLogger(MachineListenerConsole.class);
@@ -43,61 +41,133 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 	@Override
 	public List<String> doExecute(String[] args) {
 		// Long machineId = Long.parseLong(args[0]);
-
+		Integer totalMachines = 0;
 		validateParameters(args);
-
-		List<String> out = new ArrayList<String>(1);
-		out.add("Nothing to return");
-		init();
-		Connection conn = getConnection();
-	
-		if (!licenseValidation(conn)) {
-			throw new BSConfigurationException("License validation fail");
-		}
-		// mlc.setDSName(args[0]);
 		this.setRunFromConsole(true);
 
-		Machine m = getMachine(conn, 6L);
+		List<String> out = new ArrayList<String>(1);
+		out.add("Nothing to return on listener");
 
-		BSFactoryTimectrl ftc = new BSFactoryTimectrl();
-		_ZKProxy2 proxy2 = ftc.createZKProxy2(conn);
+		List<Domain> domains = getDomains(args[0]);
+		BSConnectionFactory cf = new BSConnectionFactory();
+		String dsName = null;
 
-		ZKProxy2Events events = new ZKProxy2Events();
+		for (Domain domain : domains) {
+			dsName = domain.getDatabase();
+			this.setDSName(dsName);
 
-		// proxy2.advise(ZKProxy2Events.class, events);
-		proxy2.advise(cl.buildersoft.timectrl.api.com4j.events.__ZKProxy2.class, events);
-		System.out.println("connecting");
+			init();
 
-		boolean connected = proxy2.connectAndRegEvent(m.getIp(), m.getPort().shortValue(), 1);
-		if (!connected) {
-			Holder<Integer> errorCode = new Holder<Integer>();
-			proxy2.getLastError(errorCode);
-			System.out.println(errorCode.value);
+			Connection conn = cf.getConnection(dsName);
+
+			if (!licenseValidation(conn)) {
+				throw new BSConfigurationException("License validation fail");
+			}
+			// mlc.setDSName(args[0]);
+
+			List<Machine> machines = listMachines(conn, args[1]);
+
+			for (Machine machine : machines) {
+				throwThread(dsName, machine);
+				totalMachines++;
+			}
+
+			/**
+			 * <code>
+			Machine m = getMachine(conn, 6L);
+
+			BSFactoryTimectrl ftc = new BSFactoryTimectrl();
+			_ZKProxy2 proxy2 = ftc.createZKProxy2(conn);
+
+			ZKProxy2Events events = new ZKProxy2Events();
+
+			// proxy2.advise(ZKProxy2Events.class, events);
+			proxy2.advise(cl.buildersoft.timectrl.api.com4j.events.__ZKProxy2.class, events);
+			System.out.println("connecting");
+
+			boolean connected = proxy2.connectAndRegEvent(m.getIp(), m.getPort().shortValue(), 1);
+			if (!connected) {
+				Holder<Integer> errorCode = new Holder<Integer>();
+				proxy2.getLastError(errorCode);
+				System.out.println(errorCode.value);
+			}
+
+			// proxy2.connect_Net(m.getIp(), m.getPort().shortValue());
+			// proxy2.regEvent(1, 65535);
+			// _ZKProxy2 connMch = ms.connect2(conn, m);
+
+
+			proxy2.disconnect();
+			// ms.disconnect(connMch);
+			 
+</code>
+			 */
+			BSConsole.readString("Pause, press key to continue");
+			pauseInSeconds(totalMachines);
 		}
-
-		// proxy2.connect_Net(m.getIp(), m.getPort().shortValue());
-		// proxy2.regEvent(1, 65535);
-		// _ZKProxy2 connMch = ms.connect2(conn, m);
-
-		BSConsole.readString("Pause, press key to continue");
-
-		proxy2.disconnect();
-		// ms.disconnect(connMch);
-
-		pauseInSeconds(2);
-		System.out.println("End");
+		System.out.println("End Listener");
 		return out;
 
 	}
 
-	private void validateParameters(String[] args) {
-		validateArguments(args);
-		if (args.length != 2) {
-			String message = "Parameters are not valid. Expected is 2 parameters.";
-			LOG.fatal(message);
-			throw new BSUserException(message);
+	private void throwThread(String dsName, Machine machine) {
+		ListenerEventThread let = new ListenerEventThread(dsName, machine);
+		let.start();
+
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<Machine> listMachines(Connection conn, String machinesId) {
+		List<Machine> out = null;
+		BSBeanUtils bu = new BSBeanUtils();
+		if ("0".equals(machinesId)) {
+			out = (List<Machine>) bu.listAll(conn, new Machine());
+		} else {
+			String[] machineIdArray = machinesId.split(",");
+			out = new ArrayList<Machine>();
+			for (String machineId : machineIdArray) {
+				Machine machine = new Machine();
+				machine.setId(Long.parseLong(machineId));
+				bu.search(conn, machine);
+				out.add(machine);
+			}
+
 		}
 
+		return out;
+	}
+
+	private List<Domain> getDomains(String domainName) {
+		BSBeanUtils bu = new BSBeanUtils();
+		BSConnectionFactory cf = new BSConnectionFactory();
+		Connection conn = cf.getConnection();
+		List<Domain> out = null;
+
+		if ("0".equals(domainName)) {
+			out = (List<Domain>) bu.listAll(conn, new Domain());
+		} else {
+			Domain domain = new Domain();
+			bu.search(conn, domain, "cDatabase=?", domainName);
+			out = new ArrayList<Domain>();
+			out.add(domain);
+		}
+		cf.closeConnection(conn);
+		return out;
+	}
+
+	private void validateParameters(String[] args) {
+		try {
+			validateArguments(args);
+		} catch (BSConfigurationException e) {
+			LOG.fatal(e);
+		}
+		if (args.length != 2) {
+			String message = "Amount parameters are not valid. Expected 2 parameters. First parameter is domain alias. Second parameter is the Machine Id. Both can be zero for all.";
+			LOG.fatal(message);
+			throw new BSUserException(message);
+		} else {
+
+		}
 	}
 
 	private void pauseInSeconds(Integer seconds) {
@@ -109,7 +179,6 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 				Thread.sleep(10);
 				// this.wait(10);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -119,6 +188,8 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 		}
 	}
 
+	/**
+	 * <code>
 	private Machine getMachine(Connection conn, Long machineId) {
 		Machine out = new Machine();
 		BSBeanUtils bu = new BSBeanUtils();
@@ -137,5 +208,7 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 	public void setRunFromConsole(Boolean runFromConsole) {
 		this.runFromConsole = runFromConsole;
 	}
+	</code>
+	 */
 
 }

@@ -1,17 +1,15 @@
-package cl.buildersoft.timectrl.api.com4j.events;
+package cl.buildersoft.timectrl.api.com4j  ;
 
 import com4j.*;
 
-@IID("{CD2CC8E7-691E-45FE-8C06-A9670AB1C0E3}")
-public abstract class __ZKProxy2 {
+@IID("{00020400-0000-0000-C000-000000000046}")
+public interface __ZKProxy2 extends Com4jObject {
   // Methods:
   /**
    */
 
   @DISPID(2)
-  public void onConnected() {
-        throw new UnsupportedOperationException();
-  }
+  void onConnected();
 
 
   /**
@@ -20,20 +18,16 @@ public abstract class __ZKProxy2 {
    */
 
   @DISPID(3)
-  public void onDeleteTemplate(
+  void onDeleteTemplate(
     int enrollNumber,
-    int fingerIndex) {
-        throw new UnsupportedOperationException();
-  }
+    int fingerIndex);
 
 
   /**
    */
 
   @DISPID(4)
-  public void onDisConnected() {
-        throw new UnsupportedOperationException();
-  }
+  void onDisConnected();
 
 
   /**
@@ -41,10 +35,8 @@ public abstract class __ZKProxy2 {
    */
 
   @DISPID(5)
-  public void onDoor(
-    int eventType) {
-        throw new UnsupportedOperationException();
-  }
+  void onDoor(
+    int eventType);
 
 
   /**
@@ -52,10 +44,8 @@ public abstract class __ZKProxy2 {
    */
 
   @DISPID(6)
-  public void onEmptyCard(
-    int actionResult) {
-        throw new UnsupportedOperationException();
-  }
+  void onEmptyCard(
+    int actionResult);
 
 
   /**
@@ -66,13 +56,11 @@ public abstract class __ZKProxy2 {
    */
 
   @DISPID(7)
-  public void onEnrollFinger(
+  void onEnrollFinger(
     int enrollNumber,
     int fingerIndex,
     int actionResult,
-    int templateLength) {
-        throw new UnsupportedOperationException();
-  }
+    int templateLength);
 
 
   /**
@@ -83,22 +71,18 @@ public abstract class __ZKProxy2 {
    */
 
   @DISPID(8)
-  public void onEnrollFingerEx(
+  void onEnrollFingerEx(
     java.lang.String enrollNumber,
     int fingerIndex,
     int actionResult,
-    int templateLength) {
-        throw new UnsupportedOperationException();
-  }
+    int templateLength);
 
 
   /**
    */
 
   @DISPID(9)
-  public void onFinger() {
-        throw new UnsupportedOperationException();
-  }
+  void onFinger();
 
 
   /**
@@ -106,10 +90,8 @@ public abstract class __ZKProxy2 {
    */
 
   @DISPID(10)
-  public void onFingerFeature(
-    int score) {
-        throw new UnsupportedOperationException();
-  }
+  void onFingerFeature(
+    int score);
 
 
   /**
@@ -117,10 +99,8 @@ public abstract class __ZKProxy2 {
    */
 
   @DISPID(11)
-  public void onHIDNum(
-    int cardNumber) {
-        throw new UnsupportedOperationException();
-  }
+  void onHIDNum(
+    int cardNumber);
 
 
   /**
@@ -128,10 +108,8 @@ public abstract class __ZKProxy2 {
    */
 
   @DISPID(12)
-  public void onKeyPress(
-    int key) {
-        throw new UnsupportedOperationException();
-  }
+  void onKeyPress(
+    int key);
 
 
   /**
@@ -139,10 +117,8 @@ public abstract class __ZKProxy2 {
    */
 
   @DISPID(13)
-  public void onNewUser(
-    int enrollNumber) {
-        throw new UnsupportedOperationException();
-  }
+  void onNewUser(
+    int enrollNumber);
 
 
   /**
@@ -150,10 +126,8 @@ public abstract class __ZKProxy2 {
    */
 
   @DISPID(14)
-  public void onVerify(
-    int userID) {
-        throw new UnsupportedOperationException();
-  }
+  void onVerify(
+    int userID);
 
 
   /**
@@ -163,12 +137,10 @@ public abstract class __ZKProxy2 {
    */
 
   @DISPID(15)
-  public void onWriteCard(
+  void onWriteCard(
     int enrollNumber,
     int actionResult,
-    int length) {
-        throw new UnsupportedOperationException();
-  }
+    int length);
 
 
   /**
@@ -185,7 +157,7 @@ public abstract class __ZKProxy2 {
    */
 
   @DISPID(16)
-  public void onAttTransaction(
+  void onAttTransaction(
     int enrollNumber,
     int isInValid,
     int attState,
@@ -195,9 +167,7 @@ public abstract class __ZKProxy2 {
     int day,
     int hour,
     int minute,
-    int second) {
-        throw new UnsupportedOperationException();
-  }
+    int second);
 
 
   /**
@@ -215,7 +185,7 @@ public abstract class __ZKProxy2 {
    */
 
   @DISPID(17)
-  public void onAttTransactionEx(
+  void onAttTransactionEx(
     java.lang.String enrollNumber,
     int isInValid,
     int attState,
@@ -226,9 +196,7 @@ public abstract class __ZKProxy2 {
     int hour,
     int minute,
     int second,
-    int workCode) {
-        throw new UnsupportedOperationException();
-  }
+    int workCode);
 
 
   /**
@@ -238,12 +206,10 @@ public abstract class __ZKProxy2 {
    */
 
   @DISPID(1)
-  public void onAlarm(
+  void onAlarm(
     int alarmType,
     int enrollNumber,
-    int verified) {
-        throw new UnsupportedOperationException();
-  }
+    int verified);
 
 
   // Properties:

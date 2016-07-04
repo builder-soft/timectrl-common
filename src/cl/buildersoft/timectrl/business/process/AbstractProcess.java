@@ -17,9 +17,9 @@ import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSDataBaseException;
 import cl.buildersoft.framework.exception.BSException;
+import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.framework.util.BSConfig;
 import cl.buildersoft.framework.util.BSConnectionFactory;
-import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.util.LicenseValidationUtil;
 
 public abstract class AbstractProcess {
@@ -139,8 +139,14 @@ public abstract class AbstractProcess {
 
 		// ----------------------
 
-		this.validateLicense = Boolean.parseBoolean(prop.get("bsframework.license.validate." + dsName).toString());
-
+		if (dsName == null) {
+			String message = "The 'dsName' (Data Soruce Name) is required. Do you need review parameters.";
+			LOG.fatal(message);
+			throw new BSProgrammerException(message);
+//			this.validateLicense = false;
+		} else {
+			this.validateLicense = Boolean.parseBoolean(prop.get("bsframework.license.validate." + dsName).toString());
+		}
 		// try {
 		// Thread.sleep(100);
 		// } catch (InterruptedException e) {
@@ -151,7 +157,7 @@ public abstract class AbstractProcess {
 	protected Boolean licenseValidation(Connection conn) {
 		Boolean out = true;
 
-		if (this.validateLicense) {
+		if (this.validateLicense != null && this.validateLicense) {
 			LicenseValidationUtil lv = new LicenseValidationUtil();
 			out = lv.licenseValidation(conn, lv.readFile(getLicenseFileDatPath()));
 		}

@@ -8,6 +8,7 @@ import cl.buildersoft.timectrl.api.com4j.ClassFactory;
 import cl.buildersoft.timectrl.api.com4j.IZKEM;
 import cl.buildersoft.timectrl.api.com4j._ZKProxy2;
 import cl.buildersoft.timectrl.api.com4j._zkemProxy;
+import cl.buildersoft.timectrl.api.impl.IZKEMemulatorProxy2XML;
 import cl.buildersoft.timectrl.api.impl.IZKEMemulatorXML;
 
 /**
@@ -43,7 +44,7 @@ public class BSFactoryTimectrl {
 		_ZKProxy2 out = null;
 
 		if (emulate) {
-			out = null;
+			out = new IZKEMemulatorProxy2XML();
 		} else {
 			out = ClassFactory.createZKProxy2();
 		}

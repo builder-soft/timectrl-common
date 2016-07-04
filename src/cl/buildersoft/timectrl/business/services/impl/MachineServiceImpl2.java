@@ -540,7 +540,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 	@Override
 	public Boolean existsAttendanceLog(Connection conn, AttendanceLog attendance) {
 		BSmySQL mysql = new BSmySQL();
-		List<Object> params = new ArrayList<Object>();
+		List<Object> params = new ArrayList<Object>(9);
 
 		setParameters(attendance, params);
 
@@ -566,7 +566,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 	@Override
 	public void saveAttendanceLog(Connection conn, AttendanceLog attendance) {
 		BSmySQL mysql = new BSmySQL();
-		List<Object> params = new ArrayList<Object>();
+		List<Object> params = new ArrayList<Object>(9);
 
 		setParameters(attendance, params);
 

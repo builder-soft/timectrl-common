@@ -2,7 +2,7 @@ package cl.buildersoft.timectrl.api.com4j  ;
 
 import com4j.*;
 
-@IID("{936E538E-1A4C-4D5C-B112-A5E83A7D5850}")
+@IID("{544BA358-BD54-47B7-B58D-AFDE53D19E34}")
 public interface _ZKProxy2 extends Com4jObject {
   // Methods:
   /**
