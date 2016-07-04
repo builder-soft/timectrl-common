@@ -57,4 +57,14 @@ public class ZKProxy2EventsTest {
 		return out;
 	}
 
+	@Test
+	public void testOnAlarm1() {
+		Machine machine = getMachine(OSSA, 6L);
+		ZKProxy2Events let = new ZKProxy2Events(OSSA, machine);
+
+		let.onAlarm(1, 100, 1);
+
+		assertTrue(true);
+	}
+	
 }
