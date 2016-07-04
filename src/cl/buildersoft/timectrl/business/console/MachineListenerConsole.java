@@ -27,13 +27,10 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 	public static void main(String[] args) {
 		MachineListenerConsole mlc = new MachineListenerConsole();
 
-		mlc.setDSName(args[0]);
-		mlc.setRunFromConsole(true);
+		// String[] target = new String[args.length - 1];
+		// System.arraycopy(args, 1, target, 0, target.length);
 
-		String[] target = new String[args.length - 1];
-		System.arraycopy(args, 1, target, 0, target.length);
-
-		mlc.doExecute(target);
+		mlc.doExecute(args);
 
 		System.exit(0);
 	}
@@ -45,22 +42,22 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 
 	@Override
 	public List<String> doExecute(String[] args) {
-		Long machineId = Long.parseLong(args[0]);
+		// Long machineId = Long.parseLong(args[0]);
 
 		validateParameters(args);
 
 		List<String> out = new ArrayList<String>(1);
 		out.add("Nothing to return");
-
 		init();
-
 		Connection conn = getConnection();
-
+	
 		if (!licenseValidation(conn)) {
 			throw new BSConfigurationException("License validation fail");
 		}
+		// mlc.setDSName(args[0]);
+		this.setRunFromConsole(true);
 
-		Machine m = getMachine(conn, machineId);
+		Machine m = getMachine(conn, 6L);
 
 		BSFactoryTimectrl ftc = new BSFactoryTimectrl();
 		_ZKProxy2 proxy2 = ftc.createZKProxy2(conn);

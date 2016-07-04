@@ -9,7 +9,6 @@ import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.Properties;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -104,7 +103,7 @@ public abstract class AbstractProcess {
 		BSConfig config = new BSConfig();
 		this.webInfPath = System.getenv("BS_PATH");
 
-		LOG.info("Value of 'BS_PATH' is {0}", this.webInfPath);
+		LOG.info(String.format("Value of 'BS_PATH' is %s", this.webInfPath));
 
 		if (this.webInfPath == null) {
 			throw new BSConfigurationException("Undefined enviroment variable BS_PATH");
@@ -117,10 +116,10 @@ public abstract class AbstractProcess {
 
 		InputStream inputStream;
 		try {
-			LOG.info("Reading file {0}", propertyFileName);
+			LOG.info(String.format("Reading file %s", propertyFileName));
 			inputStream = new FileInputStream(propertyFileName);
 		} catch (FileNotFoundException e) {
-			LOG.fatal("File not found '" + propertyFileName + "'", e);
+			LOG.fatal(String.format("File not found '%s', %s ", propertyFileName, e.getMessage()));
 			throw new BSConfigurationException(e);
 		}
 
@@ -135,7 +134,7 @@ public abstract class AbstractProcess {
 
 		while (propList.hasMoreElements()) {
 			Object o = propList.nextElement();
-			LOG.info("Property: {0}={1}", BSUtils.array2ObjectArray(o.toString(), prop.getProperty(o.toString())));
+			LOG.info(String.format("Property: %s=%s ", o.toString(), prop.getProperty(o.toString())));
 		}
 
 		// ----------------------
@@ -196,7 +195,15 @@ public abstract class AbstractProcess {
 				}
 
 			}
+			if ("MACHINE_ID".equalsIgnoreCase(argumentName)) {
+				try {
+					Boolean.parseBoolean(args[index]);
+				} catch (Exception e) {
+					valid = false;
+				}
 
+			}
+			index++;
 			if (!valid) {
 				throw new BSConfigurationException("Argument '" + argumentName + "' is'n valid");
 			}
