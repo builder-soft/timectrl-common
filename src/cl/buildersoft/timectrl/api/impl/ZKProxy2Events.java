@@ -131,47 +131,51 @@ public class ZKProxy2Events extends __ZKProxy2 implements _ZKProxy2 {
 		Connection conn = cf.getConnection(this.dsName);
 		BSConfig cfg = new BSConfig();
 
-		String host = cfg.getString(conn, "MAIL_mail.smtp.host");
-		String port = cfg.getString(conn, "MAIL_mail.smtp.port");
-		String starttls = cfg.getString(conn, "MAIL_mail.smtp.starttls");
-		String auth = cfg.getString(conn, "MAIL_mail.smtp.auth");
-		String user = cfg.getString(conn, "MAIL_mail.smtp.user");
-		String password = cfg.getString(conn, "MAIL_mail.smtp.password");
-		String destiny = cfg.getString(conn, "MAIL_mail.destiny");
+		String host = cfg.getString(conn, "mail.smtp.host");
+		String port = cfg.getString(conn, "mail.smtp.port");
+		String starttls = cfg.getString(conn, "mail.smtp.starttls.enable");
+		String auth = cfg.getString(conn, "mail.smtp.auth");
+		String user = cfg.getString(conn, "mail.smtp.user");
+		String password = cfg.getString(conn, "mail.smtp.password");
+		String destiny = cfg.getString(conn, "mail.destiny");
 		String subject = String.format("Alarm on %s:%d", machine.getIp(), machine.getPort());
 		String messageText = String.format("Alarm on %s:%d\n AlarmType=%d, EnrollNumber=%d, Verified=%d", machine.getIp(),
 				machine.getPort(), alarmType, enrollNumber, verified);
 
-		Properties props = System.getProperties();
-		props.put("mail.smtp.port", port);
-		props.put("mail.smtp.starttls.enable", starttls);
-		props.put("mail.smtp.host", host);
-		props.put("mail.smtp.auth", auth);
+		if (isNullOrEmpty(port) || isNullOrEmpty(starttls) || isNullOrEmpty(host) || isNullOrEmpty(auth) || isNullOrEmpty(user)
+				|| isNullOrEmpty(password)) {
+			LOG.fatal("Parameters of mail configuration are empty or null " + messageText);
+		} else {
+			Properties props = System.getProperties();
+			props.put("mail.smtp.port", port);
+			props.put("mail.smtp.starttls.enable", starttls);
+			props.put("mail.smtp.host", host);
+			props.put("mail.smtp.auth", auth);
 
-		Session session = Session.getDefaultInstance(props);
-		MimeMessage message = new MimeMessage(session);
-		Transport transport = null;
+			Session session = Session.getDefaultInstance(props);
+			MimeMessage message = new MimeMessage(session);
+			Transport transport = null;
 
-		/***************************/
-		try {
-			message.setFrom(new InternetAddress(user));
-			String[] toArray = stringToArray(destiny);
-			InternetAddress[] toAddress = new InternetAddress[toArray.length];
+			/***************************/
+			try {
+				message.setFrom(new InternetAddress(user));
+				String[] toArray = stringToArray(destiny);
+				InternetAddress[] toAddress = new InternetAddress[toArray.length];
 
-			for (int i = 0; i < toArray.length; i++) {
-				toAddress[i] = new InternetAddress(toArray[i]);
-			}
+				for (int i = 0; i < toArray.length; i++) {
+					toAddress[i] = new InternetAddress(toArray[i]);
+				}
 
-			for (int i = 0; i < toAddress.length; i++) {
-				message.addRecipient(Message.RecipientType.TO, toAddress[i]);
-			}
+				for (int i = 0; i < toAddress.length; i++) {
+					message.addRecipient(Message.RecipientType.TO, toAddress[i]);
+				}
 
-			message.setSubject(subject);
-			MimeBodyPart messageBodyPart = new MimeBodyPart();
-			messageBodyPart.setContent(messageText, "text/html");
+				message.setSubject(subject);
+				MimeBodyPart messageBodyPart = new MimeBodyPart();
+				messageBodyPart.setContent(messageText, "text/html");
 
-			/**
-			 * <code>
+				/**
+				 * <code>
 		Multipart multipart = new MimeMultipart();
 		multipart.addBodyPart(messageBodyPart);
 		
@@ -192,27 +196,31 @@ public class ZKProxy2Events extends __ZKProxy2 implements _ZKProxy2 {
 			message.setContent(multipart);
 		}
 	</code>
-			 */
-			transport = session.getTransport("smtp");
-			transport.connect(host, user, password);
-			transport.sendMessage(message, message.getAllRecipients());
-			/***************************/
+				 */
+				transport = session.getTransport("smtp");
+				transport.connect(host, user, password);
+				transport.sendMessage(message, message.getAllRecipients());
+				/***************************/
 
-		} catch (AddressException e) {
-			LOG.fatal(e);
-		} catch (MessagingException e) {
-			LOG.fatal(e);
-		} finally {
-			if (transport != null) {
-				try {
-					transport.close();
-				} catch (MessagingException e) {
-					LOG.fatal(e);
+			} catch (AddressException e) {
+				LOG.fatal(e);
+			} catch (MessagingException e) {
+				LOG.fatal(e);
+			} finally {
+				if (transport != null) {
+					try {
+						transport.close();
+					} catch (MessagingException e) {
+						LOG.fatal(e);
+					}
 				}
 			}
 		}
-
 		LOG.exit();
+	}
+
+	private boolean isNullOrEmpty(String value) {
+		return value == null || value.trim().length() == 0;
 	}
 
 	private String[] stringToArray(String to) {
