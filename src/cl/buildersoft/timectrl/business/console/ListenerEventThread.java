@@ -18,6 +18,7 @@ public class ListenerEventThread extends Thread {
 	private static final Logger LOG = LogManager.getLogger(ListenerEventThread.class);
 	private String dsName = null;
 	private Machine machine = null;
+	private Boolean continueRunning = true;
 
 	public ListenerEventThread(String dsName, Machine machine) {
 		this.dsName = dsName;
@@ -25,7 +26,7 @@ public class ListenerEventThread extends Thread {
 	}
 
 	public void run() {
-		LOG.trace(String.format("Domain:%s - Machine %s:%d", dsName, machine.getIp(), machine.getPort()));
+		LOG.trace(String.format("Connecting for Domain:%s - Machine %s:%d", dsName, machine.getIp(), machine.getPort()));
 		BSConnectionFactory cf = new BSConnectionFactory();
 		BSFactoryTimectrl ftc = new BSFactoryTimectrl();
 
@@ -33,7 +34,8 @@ public class ListenerEventThread extends Thread {
 
 		_ZKProxy2 proxy2 = ftc.createZKProxy2(conn);
 		ZKProxy2Events events = new ZKProxy2Events(dsName, machine);
-
+		
+		sleepSecond(1);
 		proxy2.advise(cl.buildersoft.timectrl.api.com4j.events.__ZKProxy2.class, events);
 		boolean connected = proxy2.connectAndRegEvent(machine.getIp(), machine.getPort().shortValue(), 1);
 		if (!connected) {
@@ -45,10 +47,16 @@ public class ListenerEventThread extends Thread {
 				LOG.fatal(machine.toString() + String.format(" Error code is '%d'", errorCode.value), e);
 			}
 		} else {
-			while (true) {
+			Integer loopCounter = 0;
+			while (getContinueRunning()) {
 				sleepSecond(1);
-				LOG.trace(String.format("Waiting for %s:%d events", machine.getIp(), machine.getPort()));
+				if (loopCounter % 60 == 0 || loopCounter == 0) {
+					LOG.trace(String.format("(loop:%d) Waiting for %s:%d events", loopCounter, machine.getIp(), machine.getPort()));
+				}
+				loopCounter++;
 			}
+			LOG.trace(String.format("Disconecting %s:%d", machine.getIp(), machine.getPort()));
+			proxy2.disconnect();
 		}
 	}
 
@@ -58,5 +66,13 @@ public class ListenerEventThread extends Thread {
 		} catch (InterruptedException e) {
 			LOG.fatal(e);
 		}
+	}
+
+	public Boolean getContinueRunning() {
+		return continueRunning;
+	}
+
+	public void setContinueRunning(Boolean continueRunning) {
+		this.continueRunning = continueRunning;
 	}
 }

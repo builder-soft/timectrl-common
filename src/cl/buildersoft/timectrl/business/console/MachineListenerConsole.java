@@ -20,7 +20,18 @@ import cl.buildersoft.timectrl.business.process.ExecuteProcess;
 public class MachineListenerConsole extends AbstractProcess implements ExecuteProcess {
 	private static final Logger LOG = LogManager.getLogger(MachineListenerConsole.class);
 	private String[] validArguments = { "DOMAIN", "MACHINE_ID" };
-	private Boolean runFromConsole = true;
+	// private Boolean runFromConsole = true;
+	private List<ListenerEventThread> listenerList = new ArrayList<ListenerEventThread>();
+
+	@SuppressWarnings("static-access")
+	private void startThread(String dsName, Machine machine) {
+		LOG.trace(String.format("Starting thread for %s:%d", machine.getIp(), machine.getPort()));
+		ListenerEventThread let = new ListenerEventThread(dsName, machine);
+		let.setName(String.format("Thread-%d for %s:%d", let.activeCount(), machine.getIp(), machine.getPort()));
+		listenerList.add(let);
+		let.start();
+
+	}
 
 	public static void main(String[] args) {
 		MachineListenerConsole mlc = new MachineListenerConsole();
@@ -52,6 +63,13 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 		BSConnectionFactory cf = new BSConnectionFactory();
 		String dsName = null;
 
+		Integer secondsForStart = 5;
+		BSConsole.println("+------------------------------------------------+");
+		BSConsole.println("| To finish this process, press any key anytime. |");
+		BSConsole.println(String.format("| (Now we are wainting %d seconds to start)       |", secondsForStart));
+		BSConsole.println("+------------------------------------------------+");
+		sleepSecond(secondsForStart);
+
 		for (Domain domain : domains) {
 			dsName = domain.getDatabase();
 			this.setDSName(dsName);
@@ -68,8 +86,9 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 			List<Machine> machines = listMachines(conn, args[1]);
 
 			for (Machine machine : machines) {
-				throwThread(dsName, machine);
-				totalMachines++;
+				startThread(dsName, machine);
+								totalMachines++;
+								sleepSecond(1);
 			}
 
 			/**
@@ -102,18 +121,21 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 			 
 </code>
 			 */
-			BSConsole.readString("Pause, press key to continue");
-			pauseInSeconds(totalMachines);
 		}
-		System.out.println("End Listener");
+		BSConsole.readString();
+		LOG.info(String.format("Stoping threads, and waiting %d seconds", totalMachines + 5));
+		stopThreads();
+		sleepSecond(totalMachines + 5);
+		LOG.info("End Listener");
 		return out;
 
 	}
 
-	private void throwThread(String dsName, Machine machine) {
-		ListenerEventThread let = new ListenerEventThread(dsName, machine);
-		let.start();
-
+	private void stopThreads() {
+		// List<ListenerEventThread> listenerList
+		for (ListenerEventThread listener : listenerList) {
+			listener.setContinueRunning(false);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -137,6 +159,7 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 		return out;
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<Domain> getDomains(String domainName) {
 		BSBeanUtils bu = new BSBeanUtils();
 		BSConnectionFactory cf = new BSConnectionFactory();
@@ -170,7 +193,7 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 		}
 	}
 
-	private void pauseInSeconds(Integer seconds) {
+	private void sleepSecond(Integer seconds) {
 		boolean doContinue = true;
 		long start = System.currentTimeMillis();
 		while (doContinue) {
@@ -198,17 +221,11 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 
 		return out;
 	}
-
-	@Override
-	public Boolean getRunFromConsole() {
-		return this.runFromConsole;
-	}
-
-	@Override
-	public void setRunFromConsole(Boolean runFromConsole) {
-		this.runFromConsole = runFromConsole;
-	}
-	</code>
+	 * 
+	 * @Override public Boolean getRunFromConsole() { return
+	 *           this.runFromConsole; }
+	 * @Override public void setRunFromConsole(Boolean runFromConsole) {
+	 *           this.runFromConsole = runFromConsole; } </code>
 	 */
 
 }
