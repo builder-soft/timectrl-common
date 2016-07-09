@@ -37,8 +37,24 @@ public class ZKProxy2EventsTest {
 
 		Calendar now = Calendar.getInstance();
 
-		let.onAttTransactionEx(EMPLOYEE_KEY, 0, 1, 1, now.get(Calendar.YEAR), now.get(Calendar.MONTH)+1, now.get(Calendar.DAY_OF_MONTH),
-				now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE), now.get(Calendar.SECOND), 1);
+		let.onAttTransactionEx(EMPLOYEE_KEY, 0, 1, 1, now.get(Calendar.YEAR), now.get(Calendar.MONTH) + 1,
+				now.get(Calendar.DAY_OF_MONTH), now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE),
+				now.get(Calendar.SECOND), 1);
+
+		assertTrue(true);
+	}
+
+	@Test
+	public void testOnAttTransactionEx3() {
+		/** Prueba con datos reales */
+		Machine machine = getMachine(OSSA, 6L);
+		ZKProxy2Events let = new ZKProxy2Events(OSSA, machine);
+
+//		Calendar now = Calendar.getInstance();
+
+		let.onAttTransactionEx("12870", 0, 0, 5, 2016, 3, 5, 17, 9, 28, 0);
+
+		// 12870, 0, 0, 5, 2016, 3, 5, 17, 9, 28, 0
 
 		assertTrue(true);
 	}
@@ -66,5 +82,5 @@ public class ZKProxy2EventsTest {
 
 		assertTrue(true);
 	}
-	
+
 }

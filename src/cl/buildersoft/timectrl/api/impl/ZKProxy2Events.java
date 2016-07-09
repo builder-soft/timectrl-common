@@ -15,15 +15,16 @@ import javax.mail.internet.MimeMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.util.BSConfig;
 import cl.buildersoft.framework.util.BSConnectionFactory;
 import cl.buildersoft.timectrl.api.com4j._ZKProxy2;
 import cl.buildersoft.timectrl.api.com4j.events.__ZKProxy2;
 import cl.buildersoft.timectrl.business.beans.AttendanceLog;
 import cl.buildersoft.timectrl.business.beans.Machine;
+import cl.buildersoft.timectrl.business.beans.MarkType;
 import cl.buildersoft.timectrl.business.services.MachineService2;
 import cl.buildersoft.timectrl.business.services.impl.MachineServiceImpl2;
-
 import com4j.Com4jObject;
 import com4j.ComThread;
 import com4j.DISPID;
@@ -67,10 +68,10 @@ public class ZKProxy2Events extends __ZKProxy2 implements _ZKProxy2 {
 
 		if (isInValid == 0) {
 			MachineService2 ms2 = new MachineServiceImpl2();
-			AttendanceLog al = getAttendanceLog(enrollNumber, isInValid, attState, verifyMethod, year, month, day, hour, minute,
-					second, workCode);
 			BSConnectionFactory cf = new BSConnectionFactory();
 			Connection conn = cf.getConnection(this.dsName);
+			AttendanceLog al = getAttendanceLog(enrollNumber, isInValid, resolveMarkType(conn, attState), verifyMethod, year,
+					month, day, hour, minute, second, workCode);
 			if (!ms2.existsAttendanceLog(conn, al)) {
 				ms2.saveAttendanceLog(conn, al);
 			}
@@ -80,6 +81,15 @@ public class ZKProxy2Events extends __ZKProxy2 implements _ZKProxy2 {
 					verifyMethod, year, month, day, hour, minute, second, workCode));
 		}
 		LOG.exit();
+	}
+
+	private Integer resolveMarkType(Connection conn, int attState) {
+		BSBeanUtils bu = new BSBeanUtils();
+		MarkType markType = new MarkType();
+		bu.search(conn, markType, "cKey=?", attState);
+
+		return markType.getId().intValue();
+
 	}
 
 	private String getStringForLog() {

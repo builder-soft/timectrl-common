@@ -87,8 +87,8 @@ public class MachineListenerConsole extends AbstractProcess implements ExecutePr
 
 			for (Machine machine : machines) {
 				startThread(dsName, machine);
-								totalMachines++;
-								sleepSecond(1);
+				totalMachines++;
+				sleepSecond(1);
 			}
 
 			/**
