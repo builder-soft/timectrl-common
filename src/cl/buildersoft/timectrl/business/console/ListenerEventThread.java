@@ -44,7 +44,7 @@ public class ListenerEventThread extends Thread {
 			try {
 				throw new IZKEMException(errorCode.value);
 			} catch (IZKEMException e) {
-				LOG.fatal(machine.toString() + String.format(" Error code is '%d'", errorCode.value), e);
+				LOG.fatal(machine.toString() + String.format("Error code is %d, message='%s'", errorCode.value, e.getMessage()), e);
 			}
 		} else {
 			Integer loopCounter = 0;
