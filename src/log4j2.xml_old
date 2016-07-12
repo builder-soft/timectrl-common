@@ -6,24 +6,47 @@
 	name="cl.ripley.util.*" level="ALL"> <AppenderRef ref="Console" /> </Logger> 
 	</Loggers> </Configuration> -->
 <Configuration status="WARN" monitorInterval="5">
+    <Properties>
+<!--
+        <Property name="LOG_DIR">${sys:web.root}/logs</Property>
+        <Property name="ARCHIVE">${LOG_DIR}/archive</Property>
+-->
+        <Property name="PATTERN">%d{HH:mm:ss.SSS} [%t] %-5level %logger{36}.%method(%line) - %msg%n</Property>
+    </Properties>
+	
 	<Appenders>
 		<Console name="Console" target="SYSTEM_OUT">
-			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36}.%method(%line) - %msg%n" />
+			<PatternLayout pattern="${PATTERN}" />
 		</Console>
 		<File name="FileAppender" fileName="${env:CATALINA_HOME}/logs/buildersoft.log">
-			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36}.%method(%line) - %msg%n"/>
+			<PatternLayout pattern="${PATTERN}"/>
 		</File>
+		
+		<RollingFile name="RollingFile" fileName="${env:CATALINA_HOME}/logs/buildersoft-RF.log" filePattern="${env:CATALINA_HOME}/logs/buildersoft-RF-%d{yyyyMMdd}-%i.log" >
+			<PatternLayout pattern="${PATTERN}"/>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="1024 KB" />
+			</Policies>
+			<DefaultRolloverStrategy max="100"/>
+		</RollingFile>
+		<RollingFile name="RollingFile-F" fileName="${env:CATALINA_HOME}/logs/buildersoft-F.log" filePattern="${env:CATALINA_HOME}/logs/buildersoft-F-%d{yyyyMMdd}-%i.log" >
+			<PatternLayout pattern="${PATTERN}"/>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="1024 KB" />
+			</Policies>
+			<DefaultRolloverStrategy max="100"/>
+		</RollingFile>
 	</Appenders>
-
+	
 	<Loggers>
 		<Root level="trace">
 			<AppenderRef ref="Console" />
 			<AppenderRef ref="FileAppender" />
+			<AppenderRef ref="RollingFile" />
 		</Root>
-		<!-- 
-		<Logger name="cl.buildersoft.timectrl.business.console.*" level="trace" additivity="false">
-			<AppenderRef ref="Console" />
+		<Logger name="cl.buildersoft.framework.web.filter" level="trace" additivity="false">
+			<AppenderRef ref="RollingFile-F" />
 		</Logger>
-		 -->
+
 	</Loggers>
 </Configuration>
