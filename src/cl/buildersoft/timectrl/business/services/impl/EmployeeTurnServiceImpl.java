@@ -72,7 +72,6 @@ public class EmployeeTurnServiceImpl implements EmployeeTurnService {
 
 	@Override
 	public void delete(Connection conn, Long employeeTurn) {
-		// TODO Auto-generated method stub
 
 	}
 

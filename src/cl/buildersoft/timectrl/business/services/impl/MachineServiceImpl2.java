@@ -9,14 +9,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.database.BSmySQL;
 import cl.buildersoft.framework.exception.BSConfigurationException;
 import cl.buildersoft.framework.exception.BSDataBaseException;
-import cl.buildersoft.framework.util.BSUtils;
 import cl.buildersoft.timectrl.api.com4j._ZKProxy2;
 import cl.buildersoft.timectrl.api.com4j._zkemProxy;
 import cl.buildersoft.timectrl.api.impl.IZKEMException;
@@ -33,7 +33,7 @@ import cl.buildersoft.timectrl.util.BSFactoryTimectrl;
 import com4j.Holder;
 
 public class MachineServiceImpl2 implements MachineService2 {
-	private static final Logger LOG = Logger.getLogger(MachineServiceImpl2.class.getName());
+	private static final Logger LOG = LogManager.getLogger(MachineServiceImpl2.class);
 	private final Map<Long, MarkType> markTypeMap = new HashMap<Long, MarkType>();
 
 	private long readMarkType(Connection conn, Holder<Integer> dwInOutMode) {
@@ -117,8 +117,6 @@ public class MachineServiceImpl2 implements MachineService2 {
 					dwDay, dwHour, dwMinute, dwSecond, dwWorkCode)) {
 				attendance = new AttendanceLog();
 
-				LOG.log(Level.FINE, "Year: {0}", dwYear.value.toString());
-
 				attendance.setYear(dwYear.value);
 				attendance.setMonth(dwMonth.value);
 				attendance.setDay(dwDay.value);
@@ -148,7 +146,10 @@ public class MachineServiceImpl2 implements MachineService2 {
 	}
 
 	private void writeToConsole(AttendanceLog attendance, Boolean found) {
-		LOG.log(Level.INFO, (found ? "Found: {0}" : "Not Found: {0}"), attendance.toString());
+		LOG.info(String.format("%sFound %s", (found ? "" : "Not "), attendance.toString()));
+
+		// LOG.log(Level.INFO, (found ? "Found: {0}" : "Not Found: {0}"),
+		// attendance.toString());
 	}
 
 	private boolean readRecordFromMachine(Connection conn, _zkemProxy api, int dwMachineNumber, Holder<String> dwEnrollNumber,
@@ -233,8 +234,8 @@ public class MachineServiceImpl2 implements MachineService2 {
 				} else {
 					Holder<Integer> lastErrorHold = new Holder<Integer>();
 					api.getLastError(lastErrorHold);
-					LOG.log(Level.SEVERE, "Problems reading fingerprint, employee {0}. LastError: {1}. Index: {2}",
-							BSUtils.array2ObjectArray(name.value, lastErrorHold.value, dwFingerIndex));
+					LOG.error(String.format("Problems reading fingerprint, employee %s. LastError: %d. Index: %d", name.value,
+							lastErrorHold.value, dwFingerIndex));
 					// writeLastErrorToLog(api, "Reading fingerprint",
 					// name.value);
 					// LOG.log(Level.SEVERE, "Last Error was {0}");
@@ -249,9 +250,8 @@ public class MachineServiceImpl2 implements MachineService2 {
 			String nameTemp = out.getEmployee() != null ? out.getEmployee().getName() : "null";
 			String fingerprintTemp = out.getFingerprint() != null ? out.getFingerprint().getFingerprint() : "null";
 
-			Object[] values = BSUtils.array2ObjectArray(nameTemp, fingerprintTemp);
-
-			LOG.log(Level.INFO, "Reading employee from device Name: \"{0}\" and fingerprint \"{1}\"", values);
+			LOG.debug(String
+					.format("Reading employee from device Name: \"%s\" and fingerprint \"%s\"", nameTemp, fingerprintTemp));
 		}
 		return out;
 	}
@@ -334,18 +334,17 @@ public class MachineServiceImpl2 implements MachineService2 {
 			if (!api.setUserTmpExStr(dwMachineNumber, dwEnrollNumber, dwFingerIndex, flag, fingerprint)) {
 				Holder<Integer> lastErrorHold = new Holder<Integer>();
 				api.getLastError(lastErrorHold);
-				LOG.log(Level.SEVERE, "Problems writing fingerprint to machine, employee {0}. LastError: {1}",
-						BSUtils.array2ObjectArray(name, lastErrorHold.value));
-
-				LOG.log(Level.SEVERE,
-						"The pameters for writing fingerprint was: dwMachineNumber={0}\ndwEnrollNumber={1}\ndwFingerIndex={2}\nflag={3}\nfingerprint={4}",
-						BSUtils.array2ObjectArray(dwMachineNumber, dwEnrollNumber, dwFingerIndex, flag, fingerprint));
+				LOG.error(String.format("Problems writing fingerprint to machine, employee %s. LastError: %s", name,
+						lastErrorHold.value));
+				LOG.error(String
+						.format("The pameters for writing fingerprint was: dwMachineNumber=%d dwEnrollNumber=%s dwFingerIndex=%d flag=%d fingerprint=%s",
+								dwMachineNumber, dwEnrollNumber, dwFingerIndex, flag, fingerprint));
 			}
 		} else {
 			Holder<Integer> lastErrorHold = new Holder<Integer>();
 			api.getLastError(lastErrorHold);
-			LOG.log(Level.SEVERE, "Problems saving employee info to machine, employee {0}. LastError: {1}",
-					BSUtils.array2ObjectArray(name, lastErrorHold.value));
+			LOG.error(String.format("Problems saving employee info to machine, employee %s. LastError: %d", name,
+					lastErrorHold.value));
 			// writeLastErrorToLog(api, "Saving employee info to machine",
 			// name);
 		}
@@ -379,7 +378,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 
 	private void deleteEnrollData(_zkemProxy api, String key, Integer dwMachineNumber) {
 		if (!api.ssR_DeleteEnrollData(dwMachineNumber, key, 12)) {
-			LOG.log(Level.INFO, "It could not be deleted employee with key {0} at machine {1}", key);
+			LOG.error(String.format("It could not be deleted employee with key %s at machine %d", key, dwMachineNumber));
 		}
 	}
 
@@ -576,13 +575,12 @@ public class MachineServiceImpl2 implements MachineService2 {
 			if (rs.next())
 				attendance.setId(rs.getLong(1));
 		} catch (Exception e) {
-			LOG.log(Level.SEVERE, "Error at executing SP pSaveAttendanceLog", e);
+			LOG.error("Error at executing SP pSaveAttendanceLog", e);
 		} finally {
 			mysql.closeSQL(rs);
 			mysql.closeSQL();
 			params.clear();
 		}
-
 	}
 
 	private void setParameters(AttendanceLog attendance, List<Object> params) {
@@ -629,7 +627,7 @@ public class MachineServiceImpl2 implements MachineService2 {
 			stmt.executeBatch();
 			conn.commit();
 		} catch (SQLException e) {
-			LOG.log(Level.SEVERE, e.getMessage(), e);
+			LOG.error(e.getMessage(), e);
 			try {
 				conn.rollback();
 			} catch (SQLException e1) {

@@ -212,10 +212,6 @@ FROM userinfo LEFT JOIN tArea ON DEFAULTDEPTID = cKey
 ORDER BY SSN
 </code>
 		 */
-		/**
-		 * TODO: aqui falta incorporar el username para la generacion del
-		 * archivo
-		 */
 
 		/**
 		 * SELECT UserId, SSN, Name, tArea.cCostCenter AS DEFAULTDEPTID,

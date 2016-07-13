@@ -307,7 +307,6 @@ public class IZKEMemulatorProxy2XML implements _ZKProxy2 {
 
 	@Override
 	public boolean regEvent(int machine, int eventMask) {
-		// TODO Auto-generated method stub
 		return true;
 	}
 }
