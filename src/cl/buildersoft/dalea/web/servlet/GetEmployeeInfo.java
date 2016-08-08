@@ -43,13 +43,13 @@ public class GetEmployeeInfo extends BSHttpServlet_ {
 		
 		w.println("<div class=\"row well\">");
 		w.println("  <div class=\"row\">");
-		w.println("   <div class=\"col-sm-4\"><label>Lleve: </label>" + key+"</div>");
-		w.println("   <div class=\"col-sm-4\"><label>RUT: </label>" + rut+"</div>");
-		w.println("   <div class=\"col-sm-4\"><label>Nombre: </label>" + name+"</div>");
+		w.println("   <div class=\"col-sm-4\"><label>Lleve:&nbsp;&nbsp; </label>" + key+"</div>");
+		w.println("   <div class=\"col-sm-4\"><label>RUT:&nbsp;&nbsp; </label>" + rut+"</div>");
+		w.println("   <div class=\"col-sm-4\"><label>Nombre:&nbsp;&nbsp; </label>" + name+"</div>");
 		w.println("  </div>");
 		w.println("  <div class=\"row\">");
-		w.println("   <div class=\"col-sm-4\"><label>Cargo: </label>" + postName+"</div>");
-		w.println("   <div class=\"col-sm-4\"><label>Área: </label>" + areaName+"</div>");
+		w.println("   <div class=\"col-sm-4\"><label>Cargo:&nbsp;&nbsp; </label>" + postName+"</div>");
+		w.println("   <div class=\"col-sm-4\"><label>Área:&nbsp;&nbsp; </label>" + areaName+"</div>");
 		w.println("   <div class=\"col-sm-offset-4\"></div>");
 		w.println("  </div>");
 		w.println("</div>");
