@@ -70,8 +70,8 @@ public class Machine extends BSBean {
 
 	@Override
 	public String toString() {
-		return "Machine [name=" + name + ", ip=" + ip + ", port=" + port + ", lastAccess=" + lastAccess + ", serial=" + serial
-				+ ", group=" + group + ", getId()=" + getId() + "]";
+		return "Machine [Id=" + getId() + ", IP=" + ip + ", port=" + port + ", name=" + name + ", lastAccess=" + lastAccess
+				+ ", serial=" + serial + ", group=" + group + "]";
 	}
 
 }

@@ -311,74 +311,76 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
  http://www.codejava.net/java-ee/javamail/send-e-mail-with-attachment-in-java
  </code>
 		 */
-		Properties props = System.getProperties();
-
 		List<String> out = new ArrayList<String>();
-		String fileName = null;
+		if (to != null) {
+			Properties props = System.getProperties();
 
-		props.put("mail.smtp.port", this.port);
-		props.put("mail.smtp.starttls.enable", this.enableTLS);
-		props.put("mail.smtp.host", this.server);
+			String fileName = null;
 
-		props.put("mail.smtp.auth", this.smtpAuth);
+			props.put("mail.smtp.port", this.port);
+			props.put("mail.smtp.starttls.enable", this.enableTLS);
+			props.put("mail.smtp.host", this.server);
 
-		Session session = Session.getDefaultInstance(props);
-		// session.setDebug(true);
-		MimeMessage message = new MimeMessage(session);
+			props.put("mail.smtp.auth", this.smtpAuth);
 
-		Transport transport = null;
-		try {
-			message.setFrom(new InternetAddress(this.usernameMail));
-			String[] toArray = stringToArray(to);
-			InternetAddress[] toAddress = new InternetAddress[toArray.length];
+			Session session = Session.getDefaultInstance(props);
+			// session.setDebug(true);
+			MimeMessage message = new MimeMessage(session);
 
-			// To get the array of addresses
-			for (int i = 0; i < toArray.length; i++) {
-				toAddress[i] = new InternetAddress(toArray[i]);
-			}
+			Transport transport = null;
+			try {
+				message.setFrom(new InternetAddress(this.usernameMail));
+				String[] toArray = stringToArray(to);
+				InternetAddress[] toAddress = new InternetAddress[toArray.length];
 
-			for (int i = 0; i < toAddress.length; i++) {
-				message.addRecipient(Message.RecipientType.TO, toAddress[i]);
-			}
-
-			message.setSubject(this.subject);
-			// message.setText(this.messageText);
-
-			MimeBodyPart messageBodyPart = new MimeBodyPart();
-			messageBodyPart.setContent(this.messageText, "text/html");
-
-			Multipart multipart = new MimeMultipart();
-			multipart.addBodyPart(messageBodyPart);
-			if (pathAndFileNameList != null && pathAndFileNameList.size() > 0) {
-				for (String filePath : pathAndFileNameList) {
-					MimeBodyPart attachPart = new MimeBodyPart();
-					try {
-						attachPart.attachFile(filePath);
-					} catch (IOException ex) {
-						LOG.log(Level.SEVERE, ex.getMessage(), ex);
-					}
-					multipart.addBodyPart(attachPart);
-
-					fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
-					out.add("Archivo '" + fileName + "' enviado a " + to);
+				// To get the array of addresses
+				for (int i = 0; i < toArray.length; i++) {
+					toAddress[i] = new InternetAddress(toArray[i]);
 				}
-				message.setContent(multipart);
-			}
-			transport = session.getTransport("smtp");
-			transport.connect(this.server, this.usernameMail, this.passwordMail);
-			transport.sendMessage(message, message.getAllRecipients());
-		} catch (AddressException e) {
-			LOG.log(Level.SEVERE, "File " + pathAndFileNameList.toString() + " can't sended to " + to + "", e);
-			// throw new BSConfigurationException(e);
-		} catch (MessagingException e) {
-			LOG.log(Level.SEVERE, "File " + pathAndFileNameList.toString() + " can't sended to " + to + "", e);
-			// throw new BSConfigurationException(e);
-		} finally {
-			if (transport != null) {
-				try {
-					transport.close();
-				} catch (MessagingException e) {
-					LOG.log(Level.SEVERE, e.getMessage(), e);
+
+				for (int i = 0; i < toAddress.length; i++) {
+					message.addRecipient(Message.RecipientType.TO, toAddress[i]);
+				}
+
+				message.setSubject(this.subject);
+				// message.setText(this.messageText);
+
+				MimeBodyPart messageBodyPart = new MimeBodyPart();
+				messageBodyPart.setContent(this.messageText, "text/html");
+
+				Multipart multipart = new MimeMultipart();
+				multipart.addBodyPart(messageBodyPart);
+				if (pathAndFileNameList != null && pathAndFileNameList.size() > 0) {
+					for (String filePath : pathAndFileNameList) {
+						MimeBodyPart attachPart = new MimeBodyPart();
+						try {
+							attachPart.attachFile(filePath);
+						} catch (IOException ex) {
+							LOG.log(Level.SEVERE, ex.getMessage(), ex);
+						}
+						multipart.addBodyPart(attachPart);
+
+						fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
+						out.add("Archivo '" + fileName + "' enviado a " + to);
+					}
+					message.setContent(multipart);
+				}
+				transport = session.getTransport("smtp");
+				transport.connect(this.server, this.usernameMail, this.passwordMail);
+				transport.sendMessage(message, message.getAllRecipients());
+			} catch (AddressException e) {
+				LOG.log(Level.SEVERE, "File " + pathAndFileNameList.toString() + " can't sended to " + to + "", e);
+				// throw new BSConfigurationException(e);
+			} catch (MessagingException e) {
+				LOG.log(Level.SEVERE, "File " + pathAndFileNameList.toString() + " can't sended to " + to + "", e);
+				// throw new BSConfigurationException(e);
+			} finally {
+				if (transport != null) {
+					try {
+						transport.close();
+					} catch (MessagingException e) {
+						LOG.log(Level.SEVERE, e.getMessage(), e);
+					}
 				}
 			}
 		}
@@ -386,7 +388,7 @@ public class SendReportByMailImpl extends AbstractReportService implements Repor
 	}
 
 	private String[] stringToArray(String to) {
-		LOG.log(Level.FINE, "Mail to {0}", to);
+		LOG.log(Level.CONFIG, "Mail to {0}", to);
 		to = to.replaceAll(",", ";");
 		String[] out = to.split(";");
 		return out;

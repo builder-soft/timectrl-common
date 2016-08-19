@@ -359,7 +359,7 @@ public class LoadCrewTable extends AbstractProcess implements ExecuteProcess {
 		sql = "SELECT DISTINCT c.cId FROM tAttendanceLog AS a LEFT JOIN tCrewLog AS b ON a.cId = b.cAttendanceLog AND b.cid IS NULL LEFT JOIN tEmployee AS c ON a.cEmployeeKey = c.cKey AND NOT c.cId IS NULL WHERE DATE(cDate) = ?  AND c.cId IS NOT NULL ORDER BY c.cId;";
 		sql = "SELECT cId FROM tEmployee WHERE cEnabled=TRUE ORDER BY cKey;";
 
-		LOG.log(Level.FINEST, "SQL for get Employees by Date is: {0}", sql);
+		LOG.log(Level.FINE, "SQL for get Employees by Date is: {0}", sql);
 
 		BSmySQL mysql = new BSmySQL();
 

@@ -32,7 +32,7 @@ public class TurnDayServiceImpl implements TurnDayService {
 	public TurnDay markAndUserToTurnDayId(Connection conn, Calendar markTime, Long employeeId, Integer tolerance, Boolean flexible) {
 		BSmySQL mysql = new BSmySQL();
 		TurnDay out = null;
-		LOG.log(Level.FINEST, "markAndUserToTurnDayId: {0}", BSDateTimeUtil.calendar2String(markTime, "yyyy-MM-dd HH:mm:ss.S"));
+		LOG.log(Level.FINE, "markAndUserToTurnDayId: {0}", BSDateTimeUtil.calendar2String(markTime, "yyyy-MM-dd HH:mm:ss.S"));
 
 		List<Object> params = BSUtils.array2List(markTime, employeeId, tolerance, flexible);
 

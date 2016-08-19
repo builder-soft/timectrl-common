@@ -154,7 +154,6 @@ public class ListToExcelImpl extends AbstractReportService implements ReportServ
 
 	@Override
 	protected String parseCustomVariable(String key) {
-
 		return null;
 	}
 

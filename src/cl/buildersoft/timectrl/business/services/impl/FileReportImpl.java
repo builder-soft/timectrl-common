@@ -25,7 +25,8 @@ import cl.buildersoft.timectrl.business.beans.ReportType;
 import cl.buildersoft.timectrl.business.services.ReportService;
 
 public class FileReportImpl extends AbstractReportService implements ReportService {
-	private final static Logger LOG = Logger.getLogger(FileReportImpl.class.getName());	private String jasperPath = null;
+	private final static Logger LOG = Logger.getLogger(FileReportImpl.class.getName());
+	private String jasperPath = null;
 	private String jasperFile = null;
 	private String outputPath = null;
 	private String outputFile = null;
@@ -62,12 +63,21 @@ public class FileReportImpl extends AbstractReportService implements ReportServi
 
 	private void processJasper(Connection conn, List<ReportParameterBean> reportInputParameter, List<String> out) {
 		String outputPath = parsePropertes(this.outputPath, keyValues);
+		String jasperPath = parsePropertes(this.jasperPath, keyValues);
+
 		createPathIfNotExists(outputPath);
 
 		String outputFileAndPath = fixPath(outputPath) + parsePropertes(this.outputFile, keyValues);
-		String jasperFileAndPath = fixPath(this.jasperPath) + this.jasperFile;
+		String jasperFileAndPath = fixPath(jasperPath) + this.jasperFile;
 
 		Map<String, Object> params = getReportParams(conn, reportInputParameter);
+
+		LOG.log(Level.INFO, String.format("Processing '%s' file", jasperFileAndPath));
+
+		for (Map.Entry<String, Object> entry : params.entrySet()) {
+			LOG.log(Level.INFO, String.format("%s=%s", entry.getKey(), entry.getValue()));
+			// System.out.println(entry.getKey() + "/" + entry.getValue());
+		}
 
 		try {
 			JasperReport jasperReport = (JasperReport) JRLoader.loadObject(new File(jasperFileAndPath));
@@ -79,6 +89,9 @@ public class FileReportImpl extends AbstractReportService implements ReportServi
 			out.add(outputFileAndPath);
 		} catch (JRException e) {
 			e.printStackTrace();
+			throw new BSProgrammerException(e);
+		} catch (Exception e) {
+			LOG.log(Level.SEVERE, e.getMessage(), e);
 			throw new BSProgrammerException(e);
 		}
 	}
@@ -173,7 +186,7 @@ public class FileReportImpl extends AbstractReportService implements ReportServi
 	@Override
 	public void waitBeforeRun(Integer seconds) {
 		LOG.log(Level.SEVERE, "This class dont run as single thread {0}", FileReportImpl.class.getName());
-		
+
 	}
 
 }

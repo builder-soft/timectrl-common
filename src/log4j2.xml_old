@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <Configuration status="WARN" monitorInterval="5"> <Appenders> <Console 
+	name="Console" target="SYSTEM_OUT"> <PatternLayout pattern="%d{yyyy-MM-dd 
+	HH:mm:ss.SSSS} [%t] %-5level %logger{36} - %msg%n" /> </Console> </Appenders> 
+	<Loggers> <Root level="INFO"> <AppenderRef ref="Console" /> </Root> <Logger 
+	name="cl.ripley.util.*" level="ALL"> <AppenderRef ref="Console" /> </Logger> 
+	</Loggers> </Configuration> -->
+<Configuration status="WARN" monitorInterval="5">
+    <Properties>
+<!--
+        <Property name="LOG_DIR">${sys:web.root}/logs</Property>
+        <Property name="ARCHIVE">${LOG_DIR}/archive</Property>
+-->
+        <Property name="PATTERN">%d{yyyy-MM-dd_HH:mm:ss.SSS} [%t] %-5level %logger{36}.%method(%line) - %msg%n</Property>
+    </Properties>
+	
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="${PATTERN}" />
+		</Console>
+		<File name="FileAppender" fileName="${env:CATALINA_HOME}/logs/BS/buildersoft-full.log">
+			<PatternLayout pattern="${PATTERN}"/>
+		</File>
+		
+		<RollingFile name="RollingFile" fileName="${env:CATALINA_HOME}/logs/BS/buildersoft-RF.log" filePattern="${env:CATALINA_HOME}/logs/BS/buildersoft-RF-%d{yyyyMMdd}-%i.log" >
+			<PatternLayout pattern="${PATTERN}"/>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="1024 KB" />
+			</Policies>
+			<DefaultRolloverStrategy max="100"/>
+		</RollingFile>
+		<RollingFile name="RollingFile-F" fileName="${env:CATALINA_HOME}/logs/BS/buildersoft-Filter.log" filePattern="${env:CATALINA_HOME}/logs/BS/buildersoft-Filter-%d{yyyyMMdd}-%i.log" >
+			<PatternLayout pattern="${PATTERN}"/>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="1024 KB" />
+			</Policies>
+			<DefaultRolloverStrategy max="100"/>
+		</RollingFile>
+		<RollingFile name="RollingFile-READMARKS" fileName="${env:CATALINA_HOME}/logs/BS/buildersoft-ReadMarks.log" filePattern="${env:CATALINA_HOME}/logs/BS/buildersoft-ReadMarks-%d{yyyyMMdd}-%i.log" >
+			<PatternLayout pattern="${PATTERN}"/>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="1024 KB" />
+			</Policies>
+			<DefaultRolloverStrategy max="100"/>
+		</RollingFile>
+	</Appenders>
+	
+	<Loggers>
+		<Root level="trace">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="FileAppender" />
+			<AppenderRef ref="RollingFile" />
+		</Root>
+		<Logger name="cl.buildersoft.framework.web.filter" level="trace" additivity="false">
+			<AppenderRef ref="RollingFile-F" />
+		</Logger>
+		<Logger name="cl.buildersoft.timectrl.business.services.impl.MachineServiceImpl2" level="info" additivity="true">
+			<AppenderRef ref="RollingFile-READMARKS" />
+		</Logger>
+
+	</Loggers>
+</Configuration>

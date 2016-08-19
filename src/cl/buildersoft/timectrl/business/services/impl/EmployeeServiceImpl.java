@@ -13,14 +13,14 @@ import javax.servlet.http.HttpServletRequest;
 import cl.buildersoft.framework.database.BSBeanUtils;
 import cl.buildersoft.framework.exception.BSProgrammerException;
 import cl.buildersoft.framework.util.BSConnectionFactory;
-import cl.buildersoft.framework.util.BSHttpServlet;
+import cl.buildersoft.framework.web.servlet.BSHttpServlet_;
 import cl.buildersoft.timectrl.business.beans.Area;
 import cl.buildersoft.timectrl.business.beans.Employee;
 import cl.buildersoft.timectrl.business.beans.Fingerprint;
 import cl.buildersoft.timectrl.business.beans.Post;
 import cl.buildersoft.timectrl.business.services.EmployeeService;
 
-public class EmployeeServiceImpl extends BSHttpServlet implements EmployeeService {
+public class EmployeeServiceImpl extends BSHttpServlet_ implements EmployeeService {
 	private static final Logger LOG = Logger.getLogger(EmployeeServiceImpl.class.getName());
 	private static final String IS_BOSS = "cId IN (SELECT DISTINCT(cBoss) FROM tEmployee WHERE NOT cBoss IS NULL AND cEnabled=TRUE)";
 	private static final long serialVersionUID = 9126047546816667626L;

@@ -1,1 +1,1 @@
-call BuildReports4.cmd rsa PLAIN_EXCEL 01-01-2015 02-01-2015
+call %bs_path%\cmd\BuildReports4.cmd rsa PLAIN_EXCEL 01-01-2015 02-01-2015

@@ -1,1 +1,1 @@
-call BuildReports4.cmd rsa ABSENCE 2014-11-15
+call %bs_path%\cmd\BuildReports4.cmd rsa ABSENCE 2014-11-15
